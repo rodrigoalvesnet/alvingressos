@@ -1,0 +1,41 @@
+<?php return array(
+    'root' => array(
+        'name' => 'wdev/pix',
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => '630add7136d23b5af85a8d37ae2754b0332b8b55',
+        'type' => 'library',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => true,
+    ),
+    'versions' => array(
+        'mpdf/qrcode' => array(
+            'pretty_version' => 'v1.0.0',
+            'version' => '1.0.0.0',
+            'reference' => '62817403c88758aee3f13eb53f313f64ecc5f478',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../mpdf/qrcode',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'paragonie/random_compat' => array(
+            'pretty_version' => 'v9.99.99',
+            'version' => '9.99.99.0',
+            'reference' => '84b4dfb120c6f9b4ff7b3685f9b8f1aa365a0c95',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../paragonie/random_compat',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'wdev/pix' => array(
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => '630add7136d23b5af85a8d37ae2754b0332b8b55',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+    ),
+);

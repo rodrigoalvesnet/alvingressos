@@ -1,0 +1,1 @@
+<div id="<?php echo $key; ?>Message" class="alert alert-<?php echo !empty($params['class']) ? $params['class'] : 'danger'; ?>"><?php echo $message; ?></div>
