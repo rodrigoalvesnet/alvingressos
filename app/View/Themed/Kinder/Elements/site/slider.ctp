@@ -25,8 +25,8 @@
                                     <a href="<?php echo $banner['Banner']['button_link']; ?>">
                                     <?php } ?>
                                 <?php } ?>
-                                <img class="d-none d-md-block" src="<?php echo $imgBanner; ?>" alt="<?php echo $banner['Banner']['title']; ?>" title="<?php echo $banner['Banner']['title']; ?>">
-                                <img class="d-block d-md-none" src="<?php echo $imgBannerMobile; ?>" alt="<?php echo $banner['Banner']['title']; ?>" title="<?php echo $banner['Banner']['title']; ?>">
+                                <img class="d-none d-md-block img-fluid w-100" src="<?php echo $imgBanner; ?>" alt="<?php echo $banner['Banner']['title']; ?>" title="<?php echo $banner['Banner']['title']; ?>">
+                                <img class="d-block d-md-none img-fluid w-100" src="<?php echo $imgBannerMobile; ?>" alt="<?php echo $banner['Banner']['title']; ?>" title="<?php echo $banner['Banner']['title']; ?>">
                                 <?php if ($banner['Banner']['showtitle']) { ?>
                                     <div class="carousel-caption text-<?php echo $banner['Banner']['position']; ?>">
                                         <?php if (!empty($banner['Banner']['title'])) { ?>
