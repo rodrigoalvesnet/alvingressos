@@ -10,7 +10,7 @@
                 echo $this->Form->create(
                     'User',
                     array(
-                        'class' => 'form'
+                        'class' => 'form-loading'
                     )
                 );
 
@@ -106,7 +106,7 @@
                     'Cadastrar',
                     array(
                         'type'    => 'submit',
-                        'class' => 'btn btn-primary btn-lg btn-block',
+                        'class' => 'btn btn-primary btn-lg btn-block btn-loading',
                         'div'    => array('class' => 'form-group'),
                         'label' => false
                     )

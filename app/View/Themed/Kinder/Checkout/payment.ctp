@@ -15,8 +15,17 @@
                             'controller' => 'Users',
                             'action' => 'login'
                         ), array('return'));
+                ?>
+                        <hr class="my-3" />
+                    <?php
                     }
-                    echo $this->Form->create('Checkout');
+
+                    echo $this->Form->create(
+                        'Checkout',
+                        [
+                            'class' => 'form-loading'
+                        ]
+                    );
 
                     $resumo = [];
                     foreach ($ingressos['eventos'] as $eventId => $evento) {
@@ -26,7 +35,7 @@
                             'valor' => 0
                         ];
                         $resumo[$eventId]['evento'] = $evento['title'];
-                ?>
+                    ?>
                         <h2 class="mb-4"><?php echo $evento['title']; ?></h2>
                         <?php
                         foreach ($evento['ingressos'] as $date => $pessoas) {
@@ -305,7 +314,7 @@
                             'Confirmar o Pagamento',
                             array(
                                 'type'    => 'submit',
-                                'class' => 'btn btn-success btn-block',
+                                'class' => 'btn btn-success btn-block btn-loading',
                                 'div'    => false,
                                 'label' => false
                             )

@@ -58,6 +58,8 @@
     echo $this->fetch('meta');
     echo $this->fetch('css');
     echo $this->fetch('script');
+    //Incluídos na configuração do site
+    echo  $siteConfig['Site']['script_header']; 
     ?>
 </head>
 
@@ -117,6 +119,8 @@
 
 
     echo $this->fetch('scriptBottom');
+     //Incluídos na configuração do site
+    echo  $siteConfig['Site']['script_bottom']; 
     echo $this->Js->writeBuffer(); // Write cached scripts
     echo $this->element('sql_dump')
     ?>

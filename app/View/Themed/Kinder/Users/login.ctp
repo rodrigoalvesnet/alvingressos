@@ -20,7 +20,9 @@ if (!$isAjax) {
         <div class="row justify-content-center">
             <div class="<?php echo $largura; ?>">
                 <?php
-                echo $this->Form->create('User');
+                echo $this->Form->create('User', [
+                    'class' => 'form-loading'
+                ]);
                 echo $this->Form->hidden('isAjax', array(
                     'value' => 1
                 ));
@@ -51,7 +53,7 @@ if (!$isAjax) {
                     'Entrar',
                     array(
                         'type'    => 'submit',
-                        'class' => 'btn btn-primary btn-lg btn-block',
+                        'class' => 'btn btn-primary btn-lg btn-block btn-loading',
                         'div'    => array('class' => 'form-group'),
                         'label' => false
                     )

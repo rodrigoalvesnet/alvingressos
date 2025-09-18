@@ -16,6 +16,7 @@ class CheckoutController extends AppController
 
     public function payment()
     {
+        
         $this->theme = Configure::read('Site.tema');
         $this->layout = 'site';
         //Quando posta
@@ -45,6 +46,8 @@ class CheckoutController extends AppController
             $this->Session->setFlash('Seu carrinho expirou. Adicione os itens novamente.');
             return $this->redirect('/');
         }
+
+        $this->Session->write('Cart.url_referer', '/checkout/payment');
 
         $this->loadModel('Event');
         $this->loadModel('Lot');

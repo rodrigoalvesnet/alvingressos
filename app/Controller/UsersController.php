@@ -15,6 +15,7 @@ class UsersController extends AppController
     {
         $this->theme = Configure::read('Site.tema');
         $this->layout = 'site';
+
         if ($this->request->is('post')) {
             $this->User->create();
             //tratar os dados
@@ -46,12 +47,15 @@ class UsersController extends AppController
                 // Faz login automaticamente
                 if ($this->Auth->login($user['User'])) {
                     $this->Session->setFlash(__('Bem-vindo, seu cadastro foi realizado com sucesso!'), 'default', array(), 'success');
+                    if ($this->Session->check('Cart.url_referer')) {
+                        $urlReferer = $this->Session->read('Cart.url_referer');
+                        return $this->redirect($urlReferer);
+                    }
                     return $this->redirect('/');
                 } else {
                     $this->Session->setFlash(__('Não foi possível logar automaticamente. Faça login manualmente.'));
                     return $this->redirect(array('action' => 'login'));
                 }
-
             } else {
                 $this->Flash->error('Não foi possível salvar o registro');
             }
@@ -62,13 +66,15 @@ class UsersController extends AppController
     {
         $this->theme = Configure::read('Site.tema');
         $this->layout = 'site';
+
         //se foi enviado o form
         if (!empty($this->request->data)) {
             if ($this->Auth->login()) {
-                // $this->redirect($this->Auth->redirect());
-                if($this->data['User']['isAjax']){
-                    return $this->redirect('/checkout/payment');
+                if ($this->Session->check('Cart.url_referer')) {
+                    $urlReferer = $this->Session->read('Cart.url_referer');
+                    return $this->redirect($urlReferer);
                 }
+
                 return $this->redirect('/');
             } else {
                 $this->Flash->error('E-mail ou senha inválidos');
@@ -362,6 +368,7 @@ class UsersController extends AppController
     {
         $this->theme = Configure::read('Site.tema');
         $this->layout = 'site';
+
         //se foi enviada a solicitação de login:
         if ($this->request->data) {
             //procura o email

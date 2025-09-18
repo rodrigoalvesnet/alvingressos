@@ -344,7 +344,7 @@ class EventsController extends AppController
                 )
             );
         }
-        $this->Session->delete('Cart');
+        // $this->Session->delete('Cart');
 
         $this->Cart->checkCart();
 

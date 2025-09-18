@@ -36,12 +36,15 @@
                 <hr class="my-3" />
                 <?php
                 $eventId = $event['Event']['id'];
-                echo $this->Form->create('Cart');
+                echo $this->Form->create(
+                    'Cart', [
+                        'class' => 'form-loading'
+                    ]);
                 ?>
                 <input type="hidden" value="cart[<?php echo $eventId; ?>][event_id]">
                 <h5>Selecione a data do ingresso</h5>
                 <input type="hidden" id="dataIngresso" readonly>
-                <button type="button" id="abrirCalendario" class="btn btn-secondary"><i class="bi bi-calendar"></i> Abrir calendário</button>
+                <button type="button" id="abrirCalendario" class="btn btn-secondary btn-loading"><i class="bi bi-calendar"></i> Abrir calendário</button>
 
                 <div id="listaIngressos">
                     <?php
@@ -125,7 +128,8 @@
                     'Ir para o pagamento',
                     array(
                         'type'    => 'submit',
-                        'class' => 'btn btn-primary btn-lg btn-block',
+                        'class' => 'btn btn-primary btn-lg btn-block btn-loading',
+                        'id' => 'btnSubmit',
                         'div'    => array('class' => 'form-group'),
                         'label' => false
                     )
