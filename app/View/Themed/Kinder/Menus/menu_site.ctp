@@ -6,14 +6,14 @@
 <div class="collapse navbar-collapse" id="navbarCollapse">
     <ul class="navbar-nav mr-auto w-100 justify-content-end">
         <?php foreach ($menus as $menu): ?>
-            <?php 
-                $hasChildren = !empty($menu['ChildMenu']); 
+            <?php
+            $hasChildren = !empty($menu['ChildMenu']);
             ?>
             <li class="nav-item <?php echo $hasChildren ? 'dropdown' : ''; ?>">
                 <?php if ($hasChildren): ?>
-                    <a class="nav-link dropdown-toggle" href="<?php echo $menu['Menu']['link'] ?: '#'; ?>" 
-                       id="menu<?php echo $menu['Menu']['id']; ?>" data-toggle="dropdown" 
-                       aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="<?php echo $menu['Menu']['link'] ?: '#'; ?>"
+                        id="menu<?php echo $menu['Menu']['id']; ?>" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
                         <?php echo h($menu['Menu']['title']); ?>
                     </a>
                     <div class="dropdown-menu" aria-labelledby="menu<?php echo $menu['Menu']['id']; ?>">
@@ -41,7 +41,7 @@
                 <div class="dropdown-menu" aria-labelledby="accountMenu">
                     <a class="dropdown-item" href="/users/account"><i class="bi bi-person"></i> Minha Conta</a>
                     <a class="dropdown-item" href="/orders/my_tickets"><i class="bi bi-ticket"></i> Meus Pedidos</a>
-                    <?php if (AuthComponent::user('role_id') == 1 || AuthComponent::user('role_id') == 2): ?>
+                    <?php if (AuthComponent::user('role_id') <> 3): ?>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="/admin/dash"><i class="bi bi-gear"></i> Administração</a>
                     <?php endif; ?>
