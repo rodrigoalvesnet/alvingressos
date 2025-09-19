@@ -12,12 +12,22 @@ class MenusController extends AppController
 
     public function admin_index()
     {
+        //se o this->data não está vazio, prepara o filtro
+        $arrayConditions = [];
+        if (!empty($this->request->data)) {
+            if (isset($this->request->data['Filtro']['title']) && !empty($this->request->data['Filtro']['title'])) {
+                $arrayConditions['Menu.title LIKE '] = '%' . $this->request->data['Filtro']['title'] . '%';
+            }
+            if (isset($this->request->data['Filtro']['status']) && !empty($this->request->data['Filtro']['status'])) {
+                $arrayConditions['Menu.status'] = $this->request->data['Filtro']['status'];
+            }
+        }
+
         $menus = $this->Menu->find('all', array(
-            // 'conditions' => array('Menu.parent_id' => null),
+            'conditions' => $arrayConditions,
             'order' => array('Menu.position ASC'),
             'recursive' => 1
         ));
-        // pr($menus);exit();
         $this->set('registros', $menus);
     }
 

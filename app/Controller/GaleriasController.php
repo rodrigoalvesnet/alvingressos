@@ -17,9 +17,24 @@ class GaleriasController extends AppController
     // Lista todas as galerias
     public function admin_index()
     {
-        $galerias = $this->Galeria->find('all', array(
-            'order' => array('Galeria.created' => 'DESC')
-        ));
+        //se o this->data não está vazio, prepara o filtro
+        $arrayConditions = [];
+        if (!empty($this->request->data)) {
+            if (isset($this->request->data['Filtro']['title']) && !empty($this->request->data['Filtro']['title'])) {
+                $arrayConditions['Galeria.title LIKE '] = '%' . $this->request->data['Filtro']['title'] . '%';
+            }
+            if (isset($this->request->data['Filtro']['status']) && !empty($this->request->data['Filtro']['status'])) {
+                $arrayConditions['Galeria.status'] = $this->request->data['Filtro']['status'];
+            }
+        }
+
+        $galerias = $this->Galeria->find(
+            'all', 
+            array(
+                'conditions' => $arrayConditions,
+                'order' => array('Galeria.created' => 'DESC')
+            )
+        );
         $this->set('registros', $galerias);
     }
 

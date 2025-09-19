@@ -1,4 +1,4 @@
-<?php echo $this->Html->link('Adicionar Novo', ['action' => 'add'], ['class' => 'btn btn-primary mb-2']); ?>
+<?php echo $this->Html->link('<i class="fas fa-plus"></i> Adicionar Novo', ['action' => 'add'], ['class' => 'btn btn-primary mb-2', 'escape' => false]); ?>
 
 <div class="card">
     <?php
@@ -70,19 +70,24 @@
                 <thead>
                     <tr>
                         <th scope="col">#</th>
+                        <th scope="col">Imagem</th>
                         <th scope="col">Nome</th>
-                        <th scope="col">Estrelas</th>
-                        <th scope="col">Ações</th>
+                        <th class="text-center" scope="col">Estrelas</th>
+                        <th class="text-center" scope="col">Situação</th>
+                        <th class="text-center" scope="col">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($registros as $registro) { ?>
                         <tr>
-                            <th scope="row"><?php echo $registro['Depoimento']['id']; ?></th>
+                            <td width="10" scope="row"><?php echo $registro['Depoimento']['id']; ?></td>
+                            <td width="50">
+                                <img src="/uploads/depoimentos/<?php echo $registro['Depoimento']['foto']; ?>" class="img-thumbnail" width="50" />
+                            </td>
                             <td><?php echo $registro['Depoimento']['nome']; ?></td>
-                            <td><?php echo $registro['Depoimento']['estrelas']; ?></td>
-                            <td><span class="badge rounded-pill bg-<?php echo $registro['Depoimento']['active'] ? 'success' : 'danger' ?>"><?php echo $registro['Depoimento']['active'] ? 'Ativo' : 'Inativo' ?></span></td>
-                            <td>
+                            <td class="text-center"><?php echo $registro['Depoimento']['estrelas']; ?></td>
+                            <td class="text-center"><span class="badge rounded-pill bg-<?php echo $registro['Depoimento']['active'] ? 'success' : 'danger' ?>"><?php echo $registro['Depoimento']['active'] ? 'Ativo' : 'Inativo' ?></span></td>
+                            <td class="text-center">
                                 <?php
                                 echo $this->Html->link(
                                     '<i class="fas fa-edit"></i>',

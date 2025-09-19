@@ -24,13 +24,7 @@
             if ($this->action == 'admin_edit') {
             ?>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="event-talkers" data-bs-toggle="tab" data-bs-target="#talkers" type="button" role="tab" aria-controls="talkers" aria-selected="false"><i class="fas fa-users"></i> Convidados</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="event-schedules" data-bs-toggle="tab" data-bs-target="#schedules" type="button" role="tab" aria-controls="schedules" aria-selected="false"><i class="fas fa-calendar-alt"></i> Agenda</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="event-lots" data-bs-toggle="tab" data-bs-target="#lots" type="button" role="tab" aria-controls="lots" aria-selected="false"><i class="fas fa-tag"></i> Lotes</button>
+                    <button class="nav-link" id="event-lots" data-bs-toggle="tab" data-bs-target="#lots" type="button" role="tab" aria-controls="lots" aria-selected="false"><i class="fas fa-tag"></i> Modalidades/Lotes</button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="event-coupons" data-bs-toggle="tab" data-bs-target="#coupons" type="button" role="tab" aria-controls="coupons" aria-selected="false"><i class="fas fa-percent"></i> Cupons</button>
@@ -162,7 +156,7 @@
                         echo $this->Form->input(
                             'unidade_id',
                             array(
-                                'label' => 'Igreja Organizadora (Sera utilizada os dados dela para a cobrança)',
+                                'label' => 'Unidade Organizadora (Sera utilizada os dados dela para a cobrança)',
                                 'options' => $unidades,
                                 'class' => 'form-control select2',
                                 'div' => 'form-group',
@@ -256,178 +250,6 @@
             //Se está editando
             if ($this->action == 'admin_edit') {
             ?>
-                <!-- PRELETORES DO EVENTO -->
-                <div class="tab-pane fade" id="talkers" role="tabpanel" aria-labelledby="event-talkers">
-                    <div class="d-flex flex-row-reverse">
-                        <?php
-                        echo $this->Html->link(
-                            '<i class="fas fa-plus"></i> Cadastrar Novo',
-                            array(
-                                'controller' => 'Talkers',
-                                'action' => 'add',
-                                $this->data['Event']['id']
-                            ),
-                            array(
-                                'class' => 'btn btn-sm btn-secondary mb-2',
-                                'escape' => false
-                            )
-                        );
-                        ?>
-                    </div>
-
-                    <?php
-                    //Se tem preletores
-                    if (!empty($this->data['Talker'])) { ?>
-                        <table class="table sortable table-striped">
-                            <thead>
-                                <tr>
-                                    <th scope="col" style="width: 50px" class="sorter-false"> Foto</th>
-                                    <th scope="col" class="sorter-text">Nome</th>
-                                    <th scope="col" class="sorter-text">Descrição</th>
-                                    <th scope="col" class="sorter-false">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($this->data['Talker'] as $talker) { ?>
-                                    <tr>
-                                        <th>
-                                            <?php
-                                            $imgSrc = 'no-photo.png';
-                                            //Se tem imagem para exibir
-                                            if (isset($talker['photo']) && !empty($talker['photo'])) {
-                                                $imgSrc = '/uploads/small/' . $talker['photo'];
-                                            }
-                                            echo $this->Html->image(
-                                                $imgSrc,
-                                                array(
-                                                    'class' => 'rounded-circle',
-                                                    'style' => 'width:50px; height:50px;'
-                                                )
-                                            );
-                                            ?>
-                                        </th>
-                                        <td><?php echo $talker['name']; ?></td>
-                                        <td><?php echo $talker['description']; ?></td>
-                                        <td>
-                                            <?php
-                                            echo $this->Html->link(
-                                                '<i class="fas fa-edit"></i>',
-                                                array(
-                                                    'controller' => 'Talkers',
-                                                    'action' => 'edit',
-                                                    $this->data['Event']['id'],
-                                                    $talker['id']
-                                                ),
-                                                array(
-                                                    'class' => 'btn btn-action mx-1',
-                                                    'title' => 'Editar',
-                                                    'escape' => false
-                                                )
-                                            );
-                                            echo $this->Html->link(
-                                                '<i class="fas fa-trash"></i>',
-                                                array(
-                                                    'controller' => 'Talkers',
-                                                    'action' => 'delete',
-                                                    $talker['id']
-                                                ),
-                                                array(
-                                                    'confirm' => 'Tem certeza que deseja excluir este Preletor?',
-                                                    'title' => 'EXCLUIR',
-                                                    'class' => 'btn btn-action text-danger mx-1',
-                                                    'escape' => false
-                                                )
-                                            );
-                                            ?>
-                                        </td>
-                                    </tr>
-                                <?php } ?>
-                            </tbody>
-                        </table>
-                    <?php } else { ?>
-                        <div class="alert alert-info" role="alert">Nenhum registro encontrado</div>
-                    <?php } ?>
-                </div>
-                <!-- AGENDA DO EVENTO -->
-                <div class="tab-pane fade" id="schedules" role="tabpanel" aria-labelledby="event-schedules">
-                    <div class="d-flex flex-row-reverse">
-                        <?php
-                        echo $this->Html->link(
-                            '<i class="fas fa-plus"></i> Cadastrar Novo',
-                            array(
-                                'controller' => 'Schedules',
-                                'action' => 'add',
-                                $this->data['Event']['id']
-                            ),
-                            array(
-                                'class' => 'btn btn-sm btn-secondary mb-2',
-                                'escape' => false
-                            )
-                        );
-                        ?>
-                    </div>
-                    <?php
-                    //Se tem registros
-                    if (!empty($this->data['Schedule'])) { ?>
-                        <table class="table sortable table-striped">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Nome</th>
-                                    <th scope="col">Descrição</th>
-                                    <th scope="col">Data</th>
-                                    <th scope="col">Início</th>
-                                    <th scope="col">Fim</th>
-                                    <th scope="col" class="sorter-false">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($this->data['Schedule'] as $schedule) { ?>
-                                    <tr>
-                                        <td><?php echo $schedule['title']; ?></td>
-                                        <td><?php echo $schedule['description']; ?></td>
-                                        <td><?php echo $this->Alv->tratarData($schedule['date'], 'pt'); ?></td>
-                                        <td><?php echo date('H:i', strtotime($schedule['start'])); ?></td>
-                                        <td><?php echo date('H:i', strtotime($schedule['end'])); ?></td>
-                                        <td>
-                                            <?php
-                                            echo $this->Html->link(
-                                                '<i class="fas fa-edit"></i>',
-                                                array(
-                                                    'controller' => 'Schedules',
-                                                    'action' => 'edit',
-                                                    $this->data['Event']['id'],
-                                                    $schedule['id']
-                                                ),
-                                                array(
-                                                    'class' => 'btn btn-action mx-1',
-                                                    'title' => 'Editar',
-                                                    'escape' => false
-                                                )
-                                            );
-                                            echo $this->Html->link(
-                                                '<i class="fas fa-trash"></i>',
-                                                array(
-                                                    'controller' => 'Schedules',
-                                                    'action' => 'delete',
-                                                    $schedule['id']
-                                                ),
-                                                array(
-                                                    'confirm' => 'Tem certeza que deseja excluir este Preletor?',
-                                                    'title' => 'EXCLUIR',
-                                                    'class' => 'btn btn-action text-danger mx-1',
-                                                    'escape' => false
-                                                )
-                                            );
-                                            ?>
-                                        </td>
-                                    </tr>
-                                <?php } ?>
-                            </tbody>
-                        </table>
-                    <?php } else { ?>
-                        <div class="alert alert-info" role="alert">Nenhum registro encontrado</div>
-                    <?php } ?>
-                </div>
                 <!-- LOTE -->
                 <div class="tab-pane fade" id="lots" role="tabpanel" aria-labelledby="event-lots">
                     <div class="d-flex flex-row-reverse">

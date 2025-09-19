@@ -250,8 +250,6 @@ class PagesController extends AppController
                 //remove os filtros do cache
                 $this->Session->delete('Filtros.Pages');
             }
-            //atualiza a pagina
-            $this->redirect($this->action);
         }
 
         //condição padrão

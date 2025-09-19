@@ -75,20 +75,28 @@ class OrdersController extends AppController
                 'EventsAdmin.user_id' => AuthComponent::user('id')
             );
         }
+        // pr($this->data);exit();
         //se o this->data não está vazio, prepara o filtro
         if (!empty($this->request->data)) {
             if (isset($this->request->data['Filtro']['customer']) && !empty($this->request->data['Filtro']['customer'])) {
                 $arrayConditions['Order.name LIKE '] = '%' . $this->request->data['Filtro']['customer'] . '%';
             }
-            if (isset($this->request->data['Filtro']['event_id']) && !empty($this->request->data['Filtro']['event_id'])) {
-                $arrayConditions['Order.event_id'] = $this->request->data['Filtro']['event_id'];
+            if (isset($this->request->data['Filtro']['unidade_id']) && !empty($this->request->data['Filtro']['unidade_id'])) {
+                $arrayConditions['Order.unidade_id'] = $this->request->data['Filtro']['unidade_id'];
             }
-            if (isset($this->request->data['Filtro']['status']) && !empty($this->request->data['Filtro']['status'])) {
-                $arrayConditions['Order.status'] = $this->request->data['Filtro']['status'];
+            if (isset($this->request->data['Filtro']['start_date']) && !empty($this->request->data['Filtro']['start_date'])) {
+                $arrayConditions['DATE(Order.created) >='] = $this->request->data['Filtro']['start_date'];
+            }
+            if (isset($this->request->data['Filtro']['end_date']) && !empty($this->request->data['Filtro']['end_date'])) {
+                $arrayConditions['DATE(Order.created) <='] = $this->request->data['Filtro']['end_date'];
             }
             if (isset($this->request->data['Filtro']['payment_type']) && !empty($this->request->data['Filtro']['payment_type'])) {
                 $arrayConditions['Order.payment_type'] = $this->request->data['Filtro']['payment_type'];
             }
+            if (isset($this->request->data['Filtro']['status']) && !empty($this->request->data['Filtro']['status'])) {
+                $arrayConditions['Order.status'] = $this->request->data['Filtro']['status'];
+            }
+            
             //salva as condições na session            
             $this->Session->write('Filtros.Orders', $arrayConditions);
             $this->Session->write('Filtros.ThisData', $this->request->data);
@@ -139,6 +147,7 @@ class OrdersController extends AppController
                 'DISTINCT id',
                 'created',
                 'name',
+                'value',
                 'payment_type',
                 'status'
             ),
@@ -155,21 +164,21 @@ class OrdersController extends AppController
         $this->set('payments', $payments);
 
         //Pega os dados do Event
-        $this->loadModel('Event');
-        $events = $this->Event->find(
+        $this->loadModel('Unidade');
+        $unidades = $this->Unidade->find(
             'list',
             array(
                 'recursive' => -1,
                 'fields' => array(
                     'id',
-                    'title'
+                    'name'
                 ),
                 'order' => array(
-                    'start_date' => 'DESC'
+                    'name' => 'ASC'
                 )
             )
         );
-        $this->set('events', $events);
+        $this->set('unidades', $unidades);
     }
 
 

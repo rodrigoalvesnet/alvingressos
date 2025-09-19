@@ -1,4 +1,4 @@
-<?php echo $this->Html->link('Adicionar Novo', ['action' => 'add'], ['class' => 'btn btn-primary mb-2']); ?>
+<?php echo $this->Html->link('<i class="fas fa-plus"></i> Adicionar Novo', ['action' => 'add'], ['class' => 'btn btn-primary mb-2', 'escape' => false]); ?>
 <div class="card">
     <?php
     echo $this->Form->create('Filtro');
@@ -82,10 +82,22 @@
                         <td><span class="badge rounded-pill bg-<?php echo $menu['Menu']['show_footer'] ? 'success' : 'danger' ?>"><?php echo $menu['Menu']['show_footer'] ? 'Sim' : 'Não' ?></span></td>
                         <td><span class="badge rounded-pill bg-<?php echo $menu['Menu']['active'] ? 'success' : 'danger' ?>"><?php echo $menu['Menu']['active'] ? 'Ativo' : 'Inativo' ?></span></td>
                         <td>
-                            <?php echo $this->Html->link('Editar', array('action' => 'edit', $menu['Menu']['id'], 'admin' => true)); ?> |
-                            <?php echo $this->Html->link('Excluir', array('action' => 'delete', $menu['Menu']['id'], 'admin' => true), null, 'Tem certeza?'); ?> |
-                            <?php echo $this->Html->link('↑', array('action' => 'up', $menu['Menu']['id'], 'admin' => true)); ?> |
-                            <?php echo $this->Html->link('↓', array('action' => 'down', $menu['Menu']['id'], 'admin' => true)); ?>
+                            <?php echo $this->Html->link('<i class="fas fa-edit"></i>', array('action' => 'edit', $menu['Menu']['id'], 'admin' => true), ['class' => 'btn btn-sm btn-link text-primary', 'escape' => false]); ?>
+                            <?php echo $this->Html->link(
+                                '<i class="fas fa-trash"></i>',
+                                array(
+                                    'action' => 'delete',
+                                    $menu['Menu']['id'],
+                                    'admin' => true
+                                ),
+                                [
+                                    'class' => 'btn btn-sm btn-link text-danger',
+                                    'escape' => false,
+                                    'confirm' => 'Tem certeza?'
+                                ]
+                            ) ?>
+                            <?php echo $this->Html->link('<i class="fas fa-arrow-up"></i>', array('action' => 'up', $menu['Menu']['id'], 'admin' => true), ['class' => 'btn btn-sm btn-link text-primary', 'escape' => false]); ?>
+                            <?php echo $this->Html->link('<i class="fas fa-arrow-down"></i>', array('action' => 'down', $menu['Menu']['id'], 'admin' => true), ['class' => 'btn btn-sm btn-link text-primary', 'escape' => false]); ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>

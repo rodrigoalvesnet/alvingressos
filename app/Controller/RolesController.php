@@ -68,7 +68,7 @@ class RolesController extends AppController
             }
         }
         $this->set('bcLinks', array(
-            'Grupos' => '/roles'
+            'Grupos' => '/admin/roles'
         ));
         $this->set('title_for_layout', 'Adicionar Grupo');
     }
@@ -90,7 +90,7 @@ class RolesController extends AppController
             $this->request->data = $this->Role->findById($id);
         }
         $this->set('bcLinks', array(
-            'Grupos' => '/roles'
+            'Grupos' => '/admin/roles'
         ));
         $this->set('title_for_layout', 'Editar Grupo');
         $this->render('admin_add');

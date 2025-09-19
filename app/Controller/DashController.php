@@ -56,8 +56,20 @@ class DashController extends AppController
                 )
             )
         );
-        // pr($ticketsToday);exit();
         $this->set('ticketsToday', $ticketsToday);
+
+        $this->loadModel('Checkin');
+        $checkinsToday = $this->Checkin->find(
+            'count',
+            array(
+                'conditions' => array(
+                    'DATE(created)' => date('Y-m-d')
+                ),
+                'recursive' => -1
+            )
+        );
+        // pr($checkinsToday);exit();
+        $this->set('checkinsToday', $checkinsToday);
 
         $this->set('nobc', true);
         $this->set('notitle', true);

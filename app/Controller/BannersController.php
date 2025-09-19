@@ -20,8 +20,6 @@ class BannersController extends AppController
                 //remove os filtros do cache
                 $this->Session->delete('Filtros.Banners');
             }
-            //atualiza a pagina
-            $this->redirect($this->action);
         }
 
         //condição padrão

@@ -1,3 +1,5 @@
+<?php echo $this->Html->link('<i class="fas fa-plus"></i> Adicionar Novo', ['action' => 'add'], ['class' => 'btn btn-primary mb-2', 'escape' => false]); ?>
+
 <div class="card">
     <?php
     echo $this->Form->create('Filtro');
@@ -22,7 +24,7 @@
                     array(
                         'label' => 'Unidade',
                         'options' => $unidades,
-                        'class' => 'form-control select2',
+                        'class' => 'form-control',
                         'div' => 'form-group',
                         'required' => false,
                         'empty' => ''
@@ -37,7 +39,7 @@
                     array(
                         'label' => 'Situação',
                         'options' => $status,
-                        'class' => 'form-control select2',
+                        'class' => 'form-control',
                         'empty' => 'Qualquer',
                         // 'default' => 'scheduled'
                     )
@@ -77,7 +79,7 @@
 <?php
 if (!empty($registros)) { ?>
     <div class="card">
-        <div class="table-responsive">
+        <div class="table-responsive" style="min-height: 300px;">
             <table class="table sortable table-striped">
                 <thead>
                     <tr>
@@ -145,16 +147,6 @@ if (!empty($registros)) { ?>
                                             }
                                         }
                                         if ($isAdmin) {
-                                            echo $this->Html->link(
-                                                '<i class="fas fa-eye"></i> Ver',
-                                                '/event/' . $registro['Event']['slug'],
-                                                array(
-                                                    'title' => 'Ver',
-                                                    'class' => 'dropdown-item',
-                                                    'target' => '_blank',
-                                                    'escape' => false
-                                                )
-                                            );
 
                                             echo $this->Html->link(
                                                 '<i class="fas fa-edit"></i> Editar',

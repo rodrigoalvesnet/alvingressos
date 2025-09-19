@@ -134,7 +134,9 @@ class UsersController extends AppController
         }
 
         //condição padrão
-        $arrayConditions = array();
+        $arrayConditions = array(
+            'User.role_id <>' => 1
+        );
         //se o this->data não está vazio, prepara o filtro
         if (!empty($this->request->data)) {
             if ($this->request->data['Filtro']['name']) {
@@ -276,7 +278,7 @@ class UsersController extends AppController
         $this->set('roles', $roles);
 
         $this->set('bcLinks', array(
-            'Usuários' => '/Users'
+            'Usuários' => '/admin/Users'
         ));
         $this->loadModel('Unidade');
         $unidades = $this->Unidade->find(
@@ -346,7 +348,7 @@ class UsersController extends AppController
         $this->set('roles', $roles);
 
         $this->set('bcLinks', array(
-            'Usuários' => '/Users'
+            'Usuários' => '/admin/Users'
         ));
 
         $this->loadModel('Unidade');
