@@ -24,7 +24,7 @@ class CheckinsController extends AppController
         $event = $this->Event->find(
             'first',
             array(
-                'conditions' => array(
+                'conditions' => array(                    
                     'id' => $eventId
                 ),
                 'fields' => array(
@@ -146,6 +146,7 @@ class CheckinsController extends AppController
             'all',
             array(
                 'conditions' => array(
+                    'DATE(Checkin.created)' => date('Y-m-d'),
                     'Checkin.event_id' => $eventId
                 ),
                 'contain' => array(
