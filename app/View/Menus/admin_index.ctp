@@ -70,6 +70,8 @@
                     <th>Título</th>
                     <th>Link</th>
                     <th>Pai</th>
+                    <th>Rodapé</th>
+                    <th>Situação</th>
                     <th>Ações</th>
                 </tr>
                 <?php foreach ($registros as $menu): ?>
@@ -77,6 +79,8 @@
                         <td><?php echo h($menu['Menu']['title']); ?></td>
                         <td><?php echo h($menu['Menu']['link']); ?></td>
                         <td><?php echo h($menu['ParentMenu']['title']); ?></td>
+                        <td><span class="badge rounded-pill bg-<?php echo $menu['Menu']['show_footer'] ? 'success' : 'danger' ?>"><?php echo $menu['Menu']['show_footer'] ? 'Sim' : 'Não' ?></span></td>
+                        <td><span class="badge rounded-pill bg-<?php echo $menu['Menu']['active'] ? 'success' : 'danger' ?>"><?php echo $menu['Menu']['active'] ? 'Ativo' : 'Inativo' ?></span></td>
                         <td>
                             <?php echo $this->Html->link('Editar', array('action' => 'edit', $menu['Menu']['id'], 'admin' => true)); ?> |
                             <?php echo $this->Html->link('Excluir', array('action' => 'delete', $menu['Menu']['id'], 'admin' => true), null, 'Tem certeza?'); ?> |

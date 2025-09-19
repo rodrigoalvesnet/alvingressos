@@ -7,7 +7,7 @@ class MenusController extends AppController
     public function beforeFilter()
     {
         parent::beforeFilter();
-        $this->Auth->allow(array('menuSite'));
+        $this->Auth->allow(array('menuSite', 'menuRodape'));
     }
 
     public function admin_index()
@@ -79,6 +79,8 @@ class MenusController extends AppController
             'order' => 'Menu.title ASC'
         ));
         $this->set('parents', $parents);
+
+        $this->render('admin_add');
     }
 
     public function admin_delete($id = null)
@@ -154,6 +156,30 @@ class MenusController extends AppController
             $menus = $this->Menu->find('all', array(
                 'conditions' => array(
                     'Menu.parent_id' => null,
+                    'Menu.active' => 1
+                ),
+                'order' => array('Menu.position ASC'),
+                'recursive' => 1
+            ));
+
+            Cache::write('menus', $menus, 'menus');
+        }
+
+        $this->set('menus', $menus);
+    }
+
+    public function menuRodape()
+    {
+        $this->theme = Configure::read('Site.tema');
+        $this->layout = 'ajax';
+
+        $menus = Cache::read('menus', 'menus');
+
+        if ($menus === false) {
+            $menus = $this->Menu->find('all', array(
+                'conditions' => array(
+                    'Menu.parent_id' => null,
+                    'Menu.show_footer' => 1,
                     'Menu.active' => 1
                 ),
                 'order' => array('Menu.position ASC'),

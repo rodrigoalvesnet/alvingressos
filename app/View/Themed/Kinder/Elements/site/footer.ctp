@@ -16,13 +16,13 @@
                 <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 col-mb-12">
                     <div class="widget">
                         <h3 class="block-title">Links</h3>
-                        <ul class="menu">
-                            <li><a href="/quem-somos">Quem Soms</a></li>
-                            <li><a href="/promocoes">Promoções</a></li>
-                            <li><a href="/parque">O Parque</a></li>
-                            <li><a href="/festas">Festas</a></li>
-                            <li><a href="/area-baby">/area-baby</a></li>
-                        </ul>
+                        <?php
+                        echo $this->requestAction(array(
+                            'admin' => false,
+                            'controller' => 'menus',
+                            'action' => 'menuRodape'
+                        ), array('return'));
+                        ?>                        
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 col-mb-12">
@@ -30,13 +30,13 @@
                         <h3 class="block-title">Contato</h3>
                         <ul class="contact-footer">
                             <li>
-                                <strong>Endereço :</strong> <span><?php echo $siteConfig['Site']['endereco']?> – <?php echo $siteConfig['Site']['bairro']?> - <?php echo $siteConfig['Site']['cidade']?> – <?php echo $siteConfig['Site']['uf']?>, <?php echo $siteConfig['Site']['cep']?></span>
+                                <strong>Endereço :</strong> <span><?php echo $siteConfig['Site']['endereco'] ?> – <?php echo $siteConfig['Site']['bairro'] ?> - <?php echo $siteConfig['Site']['cidade'] ?> – <?php echo $siteConfig['Site']['uf'] ?>, <?php echo $siteConfig['Site']['cep'] ?></span>
                             </li>
                             <li>
-                                <strong>Telefone :</strong> <span><?php echo $siteConfig['Site']['telefone']?></span>
+                                <strong>Telefone :</strong> <span><?php echo $siteConfig['Site']['telefone'] ?></span>
                             </li>
                             <li>
-                                <strong>E-mail :</strong> <span><a href="#"><?php echo $siteConfig['Site']['email']?></a></span>
+                                <strong>E-mail :</strong> <span><a href="#"><?php echo $siteConfig['Site']['email'] ?></a></span>
                             </li>
                         </ul>
                     </div>
@@ -65,7 +65,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="site-info float-left">
-                        <p>Desenvolvido por <a href="https://alvworks.com.br" >AlvWorks</a></p>
+                        <p>Desenvolvido por <a href="https://alvworks.com.br">AlvWorks</a></p>
                     </div>
                     <div class="float-right">
                         Todos os direitos reservados a <?php echo Configure::read('Site.title'); ?>

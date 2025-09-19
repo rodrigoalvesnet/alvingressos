@@ -75,6 +75,24 @@
             <div class="col-lg-3">
                 <?php
                 echo $this->Form->input(
+                    'show_footer',
+                    array(
+                        'label' => 'Edxibir no Rodapé',
+                        'options' => array(
+                            '1' => 'Sim',
+                            '0' => 'Não'
+                        ),
+                        'class' => 'form-control',
+                        'required' => true,
+                        'div' => 'form-group',
+                        'empty' => false
+                    )
+                );
+                ?>
+            </div>
+            <div class="col-lg-3">
+                <?php
+                echo $this->Form->input(
                     'active',
                     array(
                         'label' => 'Ativo',
