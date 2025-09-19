@@ -10,9 +10,7 @@ class CheckinsController extends AppController
         parent::beforeFilter();
     }
 
-    public function admin_index()
-    {
-    }
+    public function admin_index() {}
 
     public function admin_add($eventId)
     {
@@ -38,7 +36,7 @@ class CheckinsController extends AppController
         $this->set('event', $event);
         $this->set('title_for_layout', 'Check-in: ' . $event['Event']['title']);
         $isSecure = $this->Alv->isSecure();
-        $this->set('isSecure', $isSecure);        
+        $this->set('isSecure', $isSecure);
     }
 
     public function admin_checkin()
@@ -48,6 +46,7 @@ class CheckinsController extends AppController
             'success' => false,
             'message' => 'Não foi possível encontrar a inscrição.',
         );
+        $this->log($this->data);
         if (!empty($this->data)) {
             if ($this->Checkin->save($this->data)) {
                 $arrayReturn['success'] = true;
@@ -97,31 +96,28 @@ class CheckinsController extends AppController
         return json_encode($arrayReturn);
     }
 
-    public function admin_check($orderId)
+    public function admin_check($ticketId)
     {
 
         $this->layout = 'ajax';
 
         //Busca os dados do pedido
         $this->loadModel('Order');
-        $this->data = $this->Order->find(
+        $this->loadModel('Ticket');
+        $this->data = $this->Ticket->find(
             'first',
             array(
                 'conditions' => array(
-                    'Order.id' => $orderId
+                    'Ticket.id' => $ticketId
                 ),
                 'contain' => array(
-                    'Unidade' => array(
+                    'Order' => array(
                         'id',
-                        'name'
-                    ),
-                    'Response' => array(
-                        'response',
-                        'Field' => array(
-                            'question'
-                        )
+                        'status',
+                        'event_id'
                     ),
                     'Event' => array(
+                        'id',
                         'title',
                         'status'
                     ),
@@ -131,24 +127,55 @@ class CheckinsController extends AppController
                             'name'
                         )
                     )
-                ),
-                'fields' => array(
-                    'id',
-                    'event_id',
-                    'name',
-                    'cpf',
-                    'email',
-                    'birthday',
-                    'payment_type',
-                    'value',
-                    'status',
-                    'reason'
                 )
             )
         );
+        // pr($this->data);
+        // $this->data = $this->Order->find(
+        //     'first',
+        //     array(
+        //         'conditions' => array(
+        //             'Order.id' => $orderId
+        //         ),
+        //         'contain' => array(
+        //             'Unidade' => array(
+        //                 'id',
+        //                 'name'
+        //             ),
+        //             'Response' => array(
+        //                 'response',
+        //                 'Field' => array(
+        //                     'question'
+        //                 )
+        //             ),
+        //             'Event' => array(
+        //                 'title',
+        //                 'status'
+        //             ),
+        //             'Checkin' => array(
+        //                 'created',
+        //                 'User' => array(
+        //                     'name'
+        //                 )
+        //             )
+        //         ),
+        //         'fields' => array(
+        //             'id',
+        //             'event_id',
+        //             'name',
+        //             'cpf',
+        //             'email',
+        //             'birthday',
+        //             'payment_type',
+        //             'value',
+        //             'status',
+        //             'reason'
+        //         )
+        //     )
+        // );
         $checkinExists = false;
         //Verifica se o checkin já foi feito
-        if ($this->Checkin->checkinExists($orderId)) {
+        if ($this->Checkin->checkinExists($ticketId)) {
             $checkinExists = true;
         }
         $this->set('checkinExists', $checkinExists);

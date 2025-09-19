@@ -8,9 +8,11 @@ echo $this->Form->create(
         )
     )
 );
+// pr($this->data);
 echo $this->Form->hidden('Checkin.user_id', array('value' => AuthComponent::user('id')));
 echo $this->Form->hidden('Checkin.event_id', array('value' => $this->data['Order']['event_id']));
 echo $this->Form->hidden('Checkin.order_id', array('value' => $this->data['Order']['id']));
+echo $this->Form->hidden('Checkin.ticket_id', array('value' => $this->data['Ticket']['id']));
 ?>
 <div class="modal-body checkin">
     <div class="row">
@@ -49,9 +51,11 @@ echo $this->Form->hidden('Checkin.order_id', array('value' => $this->data['Order
                 <div class="checkin-title"><?php echo $title; ?></div>
                 <div class="checkin-reason"><?php echo $reason; ?></div>
                 <hr />
-                <div class="checkin-name"><?php echo $this->data['Order']['name']; ?></div>
-                <div class="checkin-cpf"><?php echo $this->data['Order']['cpf']; ?></div>
-                <div class="checkin-church"><?php echo $this->data['Church']['name']; ?></div>
+                <div class="checkin-name"><?php echo $this->data['Ticket']['nome']; ?></div>
+                <div class="checkin-cpf"><?php echo $this->data['Ticket']['cpf']; ?></div>
+                <div class="checkin-church"><?php echo $this->data['Ticket']['modalidade_nome']; ?></div>
+                <div class="checkin-church">Número: <?php echo $this->data['Ticket']['id']; ?></div>
+                <div class="checkin-church">Data: <?php echo $this->Alv->tratarData($this->data['Ticket']['modalidade_data'], 'pt'); ?></div>
                 <?php
                 if (!empty($this->data['Response'])) {
                     echo '<hr />';

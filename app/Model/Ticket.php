@@ -5,4 +5,8 @@ class Ticket extends AppModel
         'Order',
         'Event'
     );
+
+    public $hasOne = array(
+        'Checkin'
+    );
 }

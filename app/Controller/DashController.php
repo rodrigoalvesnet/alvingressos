@@ -39,25 +39,25 @@ class DashController extends AppController
         $this->set('ordersTotalToday', $ordersTotalToday[0][0]['total']);
 
         $this->loadModel('Ticket');
-        // $ticketsToday = $this->Ticket->find(
-        //     'count',
-        //     array(
-        //         'conditions' => array(
-        //             'Order.status' => 'approved',
-        //             'DATE(Ticket.modalidade_data)' => date('Y-m-d')
-        //         ),
-        //         'contain' => array(
-        //             'Ticket' => [
-        //                 'fields' => [
-        //                     'id',
-        //                     'modalidade_data'
-        //                 ]
-        //             ]
-        //         )
-        //     )
-        // );
+        $ticketsToday = $this->Ticket->find(
+            'count',
+            array(
+                'conditions' => array(
+                    'Order.status' => 'approved',
+                    'DATE(Ticket.modalidade_data)' => date('Y-m-d')
+                ),
+                'contain' => array(
+                    'Order' => [
+                        'fields' => [
+                            'id',
+                            'status'
+                        ]
+                    ]
+                )
+            )
+        );
         // pr($ticketsToday);exit();
-        // $this->set('ticketsToday', $ticketsToday[0][0]['total']);
+        $this->set('ticketsToday', $ticketsToday);
 
         $this->set('nobc', true);
         $this->set('notitle', true);
