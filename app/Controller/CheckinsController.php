@@ -130,49 +130,7 @@ class CheckinsController extends AppController
                 )
             )
         );
-        // pr($this->data);
-        // $this->data = $this->Order->find(
-        //     'first',
-        //     array(
-        //         'conditions' => array(
-        //             'Order.id' => $orderId
-        //         ),
-        //         'contain' => array(
-        //             'Unidade' => array(
-        //                 'id',
-        //                 'name'
-        //             ),
-        //             'Response' => array(
-        //                 'response',
-        //                 'Field' => array(
-        //                     'question'
-        //                 )
-        //             ),
-        //             'Event' => array(
-        //                 'title',
-        //                 'status'
-        //             ),
-        //             'Checkin' => array(
-        //                 'created',
-        //                 'User' => array(
-        //                     'name'
-        //                 )
-        //             )
-        //         ),
-        //         'fields' => array(
-        //             'id',
-        //             'event_id',
-        //             'name',
-        //             'cpf',
-        //             'email',
-        //             'birthday',
-        //             'payment_type',
-        //             'value',
-        //             'status',
-        //             'reason'
-        //         )
-        //     )
-        // );
+ 
         $checkinExists = false;
         //Verifica se o checkin já foi feito
         if ($this->Checkin->checkinExists($ticketId)) {
@@ -191,19 +149,17 @@ class CheckinsController extends AppController
                     'Checkin.event_id' => $eventId
                 ),
                 'contain' => array(
-                    'Order' => array(
+                    'Ticket' => [
+                        'id',
                         'event_id',
-                        'name',
+                        'nome',
                         'cpf',
-                        'phone',
-                        'Unidade' => array(
-                            'name'
-                        )
-                    )
+                        'telefone',
+                        'modalidade_nome'
+                    ]
                 ),
                 'fields' => array(
                     'id',
-                    'order_id',
                     'created'
                 ),
                 'order' => array(
@@ -211,6 +167,7 @@ class CheckinsController extends AppController
                 )
             )
         );
+        // pr($presentes);exit();
         $this->set('presentes', $presentes);
     }
 

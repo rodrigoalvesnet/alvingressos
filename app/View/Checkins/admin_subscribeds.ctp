@@ -21,7 +21,7 @@
                             <th scope="row"><?php echo $subscribed['Order']['name']; ?></th>
                             <th scope="row"><?php echo $subscribed['Order']['cpf']; ?></th>
                             <th scope="row"><?php echo $subscribed['Order']['phone']; ?></th>
-                            <th scope="row"><?php echo $subscribed['Order']['Church']['name']; ?></th>
+                            <th scope="row"><?php echo $subscribed['Order']['Unidade']['name']; ?></th>
                             <th scope="row"><?php echo date('d/m/Y H:i', strtotime($subscribed['Checkin']['created'])); ?></th>
                             <td>
                                 <?php

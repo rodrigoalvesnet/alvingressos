@@ -17,11 +17,11 @@
             <table class="table table-filter">
                 <thead>
                     <tr>
-                        <th scope="col">Pedido</th>
+                        <th scope="col">Ticket</th>
                         <th scope="col">Nome</th>
                         <th scope="col">CPF</th>
                         <th scope="col">Telefone</th>
-                        <th scope="col">Igreja</th>
+                        <th scope="col">Modalidade</th>
                         <th scope="col">Check-In</th>
                         <th scope="col">Ações</th>
                     </tr>
@@ -30,18 +30,18 @@
                     <?php
                     foreach ($presentes as $presente) { ?>
                         <tr>
-                            <td scope="row"><?php echo $presente['Order']['id']; ?></td>
-                            <td scope="row"><?php echo $presente['Order']['name']; ?></td>
-                            <td scope="row"><?php echo $presente['Order']['cpf']; ?></td>
-                            <td scope="row"><?php echo $presente['Order']['phone']; ?></td>
-                            <td scope="row"><?php echo $presente['Order']['Church']['name']; ?></td>
+                            <td scope="row"><?php echo $presente['Ticket']['id']; ?></td>
+                            <td scope="row"><?php echo $presente['Ticket']['nome']; ?></td>
+                            <td scope="row"><?php echo $presente['Ticket']['cpf']; ?></td>
+                            <td scope="row"><?php echo $presente['Ticket']['telefone']; ?></td>
+                            <td scope="row"><?php echo $presente['Ticket']['modalidade_nome']; ?></td>
                             <td scope="row"><?php echo date('d/m/Y H:i', strtotime($presente['Checkin']['created'])); ?></td>
                             <td>
                                 <?php
                                 echo $this->Form->button(
                                     '<i class="fas fa-check"></i>',
                                     array(
-                                        'onclick' => 'deleteCheckin(' . $presente['Checkin']['id'] . ', ' . $presente['Order']['event_id'] . ')',
+                                        'onclick' => 'deleteCheckin(' . $presente['Checkin']['id'] . ', ' . $presente['Ticket']['event_id'] . ')',
                                         'type'    => 'button',
                                         'class' => 'btn btn-danger',
                                         'title' => 'EXCLUIR CHECKIN',
