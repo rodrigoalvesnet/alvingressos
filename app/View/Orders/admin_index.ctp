@@ -170,7 +170,7 @@
                                         echo $this->Html->link(
                                             '<i class="fas fa-paper-plane"></i> Enviar E-mail',
                                             array(
-                                                'admin' => false,
+                                                'admin' => true,
                                                 'controller' => 'Orders',
                                                 'action' => 'send_mail',
                                                 $registro['Order']['id']

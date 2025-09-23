@@ -41,7 +41,8 @@ class AsaasController extends AppController
                     'Order.invoice_id' => $data->payment->id
                 ),
                 'fields' => array(
-                    'id', 'invoice_id'
+                    'id',
+                    'invoice_id'
                 )
             )
         );
@@ -58,10 +59,22 @@ class AsaasController extends AppController
                     'Order.invoice_id' => $data->payment->id
                 )
             );
+
+            //Tenta enviar o voucher, mas sem quebrar o webhook
+            try {
+                $this->Order->sendVoucher($order['Order']['id']);
+            } catch (Exception $e) {
+                //Registra log para investigar depois
+                CakeLog::write('error', 'Falha ao enviar voucher do pedido ' . $order['Order']['id'] . ': ' . $e->getMessage());
+            }
         }
+        //Retorna 200 para o provedor saber que processamos
+        $this->response->statusCode(200);
+        return $this->response;
     }
 
-    private function payment_overdue($data){
+    private function payment_overdue($data)
+    {
         $this->autoRender = false;
     }
 }

@@ -21,19 +21,16 @@ class CheckoutController extends AppController
         $this->layout = 'site';
         //Quando posta
         if ($this->request->is('post')) {
-            // pr($this->data);exit();
             $resultPayment = $this->_sendPayment($this->data);
-            // pr($resultPayment);exit();
             //Se salvar corretamente
             if ($resultPayment['success']) {
+                $this->Session->delete('Cart');
                 $this->Flash->success('Compra efetuada com sucesso!');
                 $this->redirect(array(
                     'controller' => 'Orders',
                     'action' => 'view',
                     $resultPayment['order_id']
                 ));
-
-                $this->Session->delete('Cart');
             } else {
                 $this->Flash->error($resultPayment['message']);
                 return $this->redirect($this->referer());

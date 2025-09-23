@@ -66,7 +66,7 @@ class Order extends AppModel
         }
 
         $orderSave['event_id'] = $dados['Order']['event_id'];
-        
+
         //Se foi informado o aniversário nos campos adicionais
         if (isset($orderSave['birthday']) && !empty($orderSave['birthday'])) {
             // $orderSave['birthday'] = $this->Alv->tratarData($dados['birthday']);
@@ -438,30 +438,16 @@ class Order extends AppModel
                 'nome' => Configure::read('Sistema.title')
             );
 
-            // pr($order);
-            // exit();
             $status = $order['Order']['status'];
             $arrayAttachments = array();
             //Trata de acordo com cada situação
             switch ($status) {
                 case 'pending':
-                    $linkInvoice = 'https://ingresso.templodasaguias.com.br/Orders/view/' . $order['Order']['id'];
+                    $linkInvoice = 'https://kinderpark.com.br/Orders/view/' . $order['Order']['id'];
                     //Se a cobrança é pelo Asaas
                     if (!empty($order['Order']['invoice_url'])) {
                         $linkInvoice = $order['Order']['invoice_url'];
                     }
-                    //Se tem arquivo do boleto
-                    if (!empty($order['Order']['invoice_boleto'])) {
-                        // $boletoName = 'boleto-' . $order['Order']['id'] . '.pdf';
-                        // $arrayAttachments = array(
-                        //     $boletoName => array(
-                        //         'file' => $order['Order']['invoice_boleto'],
-                        //         'mimetype' => 'application/pdf',
-                        //         'contentId' => $order['Order']['id']
-                        //     )
-                        // );
-                    }
-
                     $arrayDadosEmail['assunto'] =  Configure::read('Orders.mail_pending_subject');
                     $arrayDadosEmail['mensagem'] =  str_replace(
                         array(
@@ -480,6 +466,20 @@ class Order extends AppModel
                     );
                     break;
                 case 'approved':
+                    $enviarAnexo = Configure::read('Orders.sendAttachments');
+                    if ($enviarAnexo) {
+                        // Gera o PDF em memória
+                        $pdfBytes = $this->gerarPdf($orderId);
+
+                        // Configura os anexos
+                        $arrayAttachments = [
+                            'ticket-' . $order['Order']['id'] . '.pdf' => [
+                                'data' => $pdfBytes,
+                                'mimetype' => 'application/pdf'
+                            ]
+                        ];
+                    }
+
                     $arrayDadosEmail['assunto'] =  Configure::read('Orders.mail_approved_subject');
                     $tagImgQrcode = $this->getImgQrCodeCheckin($order['Order']['id']);
                     $arrayDadosEmail['mensagem'] =  str_replace(
@@ -548,6 +548,33 @@ class Order extends AppModel
             }
         }
         return false;
+    }
+
+    public function gerarPdf($orderId)
+    {
+        $order = $this->findById($orderId);
+        if (!$order) {
+            throw new NotFoundException(__('Pedido não encontrado'));
+        }
+
+        // Renderiza o HTML da view "ticket" usando o layout pdf_email
+        App::uses('View', 'View');
+        $View = new View(null);
+        $View->viewPath = 'Orders';
+        $View->set(compact('order'));
+        $html = $View->render('ticket', 'pdf_email');
+
+        // Gera o PDF com dompdf
+        App::import('Vendor', 'Dompdf', ['file' => 'dompdf/vendor/autoload.php']);
+        $options = new \Dompdf\Options();
+        $options->set('isRemoteEnabled', true);
+
+        $dompdf = new \Dompdf\Dompdf($options);
+        $dompdf->loadHtml(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        return $dompdf->output(); // retorna os bytes do PDF
     }
 
     function getImgQrCodeCheckin($orderId)
