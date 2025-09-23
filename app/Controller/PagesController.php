@@ -217,24 +217,28 @@ class PagesController extends AppController
     function contact()
     {
         $this->autoRender = false;
-        if (!empty($this->data)) {
-            $this->loadModel('Site');
-            $siteConfig = $this->Site->find('first');
-            $emailDestino = $siteConfig['Site']['email'];
-            // $emailDestino = 'rodrigoalvesnet@gmail.com';
-            $arrayDados = array();
-            $arrayDados['nome'] = $this->data['Page']['name'];
-            $arrayDados['assunto'] =  'Contato do Site - ' . $this->data['Page']['subject'];
-            $arrayDados['mensagem'] = '<strong>Nome:</strong> ' . $this->data['Page']['name'] . '<br />
+        if ($this->Alv->checkRecaptcha($this->data)) {
+            if (!empty($this->data)) {
+                $this->loadModel('Site');
+                $siteConfig = $this->Site->find('first');
+                $emailDestino = $siteConfig['Site']['email'];
+                // $emailDestino = 'rodrigoalvesnet@gmail.com';
+                $arrayDados = array();
+                $arrayDados['nome'] = $this->data['Page']['name'];
+                $arrayDados['assunto'] =  'Contato do Site - ' . $this->data['Page']['subject'];
+                $arrayDados['mensagem'] = '<strong>Nome:</strong> ' . $this->data['Page']['name'] . '<br />
             <strong>E-mail: </strong>' . $this->data['Page']['email'] . '<br />
             <strong>Assunto: </strong>' . $this->data['Page']['subject'] . '<br/>
             <strong>Mensagem: </strong>' . $this->data['Page']['message'];
-            //envia o email                
-            if ($this->Alv->enviarEmail($arrayDados, $emailDestino)) {
-                $this->Flash->success('Seu e-mail foi enviado com sucesso! Em breve retornaremos!');
-            } else {
-                $this->Flash->error('Não foi possível enviar o email');
+                //envia o email                
+                if ($this->Alv->enviarEmail($arrayDados, $emailDestino)) {
+                    $this->Flash->success('Seu e-mail foi enviado com sucesso! Em breve retornaremos!');
+                } else {
+                    $this->Flash->error('Não foi possível enviar o email');
+                }
             }
+        } else {
+            $this->Flash->error('Erro na verificação do re-Captcha');
         }
         $this->redirect($this->referer());
     }
@@ -281,14 +285,13 @@ class PagesController extends AppController
 
         //envia os dados para a view
         $this->set('registros', $this->paginate('Page'));
-        
     }
 
     // Cria página
     public function admin_add()
     {
         $this->layout = 'default';
-        
+
         if ($this->request->is('post')) {
             $this->Page->create();
             if ($this->Page->save($this->request->data)) {

@@ -62,7 +62,7 @@ class AlvComponent extends Component
 		}
 		$email->to($destinario);
 		$email->subject($dados['assunto']);
-		if(!empty($arrayAttachments)){
+		if (!empty($arrayAttachments)) {
 			$email->attachments($arrayAttachments);
 		}
 		$email->emailFormat('html');
@@ -94,5 +94,42 @@ class AlvComponent extends Component
 	function isSecure()
 	{
 		return (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https');
+	}
+
+	function checkRecaptcha($data)
+	{
+		$recaptchaActive = Configure::read('Google.recaptcha.active');
+		if ($recaptchaActive) {
+			$recaptchaResponse = $data['g-recaptcha-response'];
+			$secretKey = Configure::read('Google.recaptcha.secretkey');
+
+			// Verifica via API do Google
+			$url = 'https://www.google.com/recaptcha/api/siteverify';
+			$data = [
+				'secret' => $secretKey,
+				'response' => $recaptchaResponse,
+				'remoteip' => $this->request->clientIp()
+			];
+
+			$options = [
+				'http' => [
+					'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+					'method'  => 'POST',
+					'content' => http_build_query($data),
+				],
+			];
+
+			$context  = stream_context_create($options);
+			$result = file_get_contents($url, false, $context);
+			$resultJson = json_decode($result);
+
+			if ($resultJson->success) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return true;
+		}
 	}
 }
