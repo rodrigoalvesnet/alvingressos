@@ -2,6 +2,15 @@
 class AlvComponent extends Component
 {
 
+	// Referência do controller que está usando o componente
+	protected $controller;
+
+	// Inicializa o componente e guarda o controller
+	public function initialize(Controller $controller)
+	{
+		$this->controller = $controller;
+	}
+
 	function tratarData($valor, $tipo = 'us')
 	{
 		if ($tipo == 'us') {
@@ -103,12 +112,14 @@ class AlvComponent extends Component
 			$recaptchaResponse = $data['g-recaptcha-response'];
 			$secretKey = Configure::read('Google.recaptcha.secretkey');
 
+			$remoteIp = $this->controller->request->clientIp();
+
 			// Verifica via API do Google
 			$url = 'https://www.google.com/recaptcha/api/siteverify';
 			$data = [
 				'secret' => $secretKey,
 				'response' => $recaptchaResponse,
-				'remoteip' => $this->request->clientIp()
+				'remoteip' => $remoteIp
 			];
 
 			$options = [
