@@ -91,6 +91,12 @@
                                     ?>
                                     <div class="help-block with-errors"></div>
                                 </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <?php echo $this->element('site/recaptcha'); ?>
+                                    </div>
+                                </div>
+
                                 <div class="submit-button">
                                     <?php
                                     echo $this->Form->submit(
@@ -117,17 +123,17 @@
                         <div class="contact-info_area">
                             <div class="contact-info">
                                 <h5><i class="bi bi-map"></i> Endereço</h5>
-                                <p><?php echo $siteConfig['Site']['endereco']?> – <?php echo $siteConfig['Site']['bairro']?> - <?php echo $siteConfig['Site']['cidade']?> – <?php echo $siteConfig['Site']['uf']?>, <?php echo $siteConfig['Site']['cep']?></p>
+                                <p><?php echo $siteConfig['Site']['endereco'] ?> – <?php echo $siteConfig['Site']['bairro'] ?> - <?php echo $siteConfig['Site']['cidade'] ?> – <?php echo $siteConfig['Site']['uf'] ?>, <?php echo $siteConfig['Site']['cep'] ?></p>
                             </div>
                             <!-- Content Info -->
                             <div class="contact-info">
                                 <h5><i class="bi bi-envelope"></i> E-mail</h5>
-                                <p><?php echo $siteConfig['Site']['email']?></p>
+                                <p><?php echo $siteConfig['Site']['email'] ?></p>
                             </div>
                             <!-- Content Info -->
                             <div class="contact-info">
                                 <h5><i class="bi bi-phone"></i> Telefone</h5>
-                                <p>+55 <?php echo $siteConfig['Site']['telefone']?></p>
+                                <p>+55 <?php echo $siteConfig['Site']['telefone'] ?></p>
                             </div>
                             <!-- Icon -->
                             <ul class="footer-social">
