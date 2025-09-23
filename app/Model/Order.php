@@ -32,10 +32,6 @@ class Order extends AppModel
 
     public function afterSave($created, $options = array())
     {
-        //Se está criando
-        // if($created){
-        //     $this->sendVoucher($this->data['Order']['id']);
-        // }
         //limpa o cache
         Cache::clear(false, 'Orders');
     }
@@ -210,7 +206,13 @@ class Order extends AppModel
         );
         //Alterar o status
         if ($this->save($arraySave)) {
-            $this->sendVoucher($orderId);
+            //Tenta enviar o voucher, mas sem quebrar o webhook
+            try {
+                $this->sendVoucher($orderId);
+            } catch (Exception $e) {
+                //Registra log para investigar depois
+                CakeLog::write('error', 'Falha ao enviar voucher do pedido ' . $orderId . ': ' . $e->getMessage());
+            }            
             return true;
         } else {
             $this->log('Erro ao alterar o status da ordem ' . $orderId);
@@ -552,7 +554,42 @@ class Order extends AppModel
 
     public function gerarPdf($orderId)
     {
-        $order = $this->findById($orderId);
+        $order = $this->find(
+            'first',
+            array(
+                'conditions' => array(
+                    'Order.id' => $orderId
+                ),
+                'contain' => array(
+                    'Ticket',
+                    'Response',
+                    'Unidade' => array(
+                        'name'
+                    ),
+                    'Event' => array(
+                        'Field' => array(
+                            'id',
+                            'question'
+                        ),
+                        'Unidade' => array(
+                            'name',
+                            'cnpj',
+                            'street',
+                            'number',
+                            'state',
+                            'city',
+                            'zipcode',
+                            'email',
+                            'phone',
+                            'district'
+                        ),
+                        'fields' => array(
+                            'title'
+                        )
+                    )
+                )
+            )
+        );
         if (!$order) {
             throw new NotFoundException(__('Pedido não encontrado'));
         }

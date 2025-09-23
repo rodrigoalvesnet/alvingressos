@@ -96,7 +96,7 @@ class OrdersController extends AppController
             if (isset($this->request->data['Filtro']['status']) && !empty($this->request->data['Filtro']['status'])) {
                 $arrayConditions['Order.status'] = $this->request->data['Filtro']['status'];
             }
-            
+
             //salva as condições na session            
             $this->Session->write('Filtros.Orders', $arrayConditions);
             $this->Session->write('Filtros.ThisData', $this->request->data);
@@ -349,11 +349,19 @@ class OrdersController extends AppController
     function admin_send_mail($orderId)
     {
         $this->autoRender = false;
-        if ($this->Order->sendVoucher($orderId)) {
-            $this->Flash->success('Email enviado com sucesso');
-        } else {
-            $this->Flash->error('Não foi possível enviar o email');
+        //Tenta enviar o voucher, mas sem quebrar o webhook
+        try {
+            if ($this->Order->sendVoucher($orderId)) {
+                $this->Flash->success('Email enviado com sucesso');
+            } else {
+                $this->Flash->error('Não foi possível enviar o email (0)');
+            }
+        } catch (Exception $e) {
+            $this->Flash->error('Não foi possível enviar o email (1)');
+            //Registra log para investigar depois
+            CakeLog::write('error', 'Falha ao enviar voucher do pedido ' . $orderId . ': ' . $e->getMessage());
         }
+
         //Volta para a página que estava
         $this->redirect($this->referer());
     }
@@ -375,8 +383,13 @@ class OrdersController extends AppController
                         'action' => 'view',
                         $orderId
                     ));
-                    //Envia o email com o QRCode
-                    $this->Order->sendVoucher($orderId);
+                    try {
+                        //Envia o email com o QRCode
+                        $this->Order->sendVoucher($orderId);
+                    } catch (Exception $e) {
+                        //Registra log para investigar depois
+                        CakeLog::write('error', 'Falha ao enviar voucher do pedido ' . $orderId . ': ' . $e->getMessage());
+                    }
                 }
                 //Se a forma de pagamento é do método antigo ainda
                 if ($this->request->data['Order']['payment_type'] == 'pix_old') {
@@ -520,7 +533,7 @@ class OrdersController extends AppController
                 )
             )
         );
-        
+
         // pr($order);exit();
         $this->set('order', $order);
         $tipoEvento = Configure::read('Sistema.evento');
