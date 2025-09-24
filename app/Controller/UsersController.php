@@ -410,13 +410,13 @@ class UsersController extends AppController
                 )) {
                     $arrayDados = array();
                     $arrayDados['nome'] = Configure::read('Sistema.title');
-                    $arrayDados['email'] = 'contato@templodasaguias.com.br';
+                    $arrayDados['email'] = 'contato@kinderpark.com.br';
                     $arrayDados['assunto'] =  'Recuperação de Senha';
                     $arrayDados['mensagem'] = '
                         Prezado usuário, <br /><br /> Foi solicitado uma nova senha para acessar <strong>' . Configure::read('Sistema.title') . '</strong>,
                         utilize <b>' . $this->data['User']['email'] . '</b> com a nova senha: <b>' . $nova_senha . '</b><br /><br />
                         <br /><br />
-                        <a href="https://ingresso.templodasaguias.com.br/" target="_blank">Clique aqui para acessar o site de ingressos</a>
+                        <a href="https://kinderpark.com.br/" target="_blank">Clique aqui para acessar o site de ingressos</a>
                         <br /><br />
                         Antenciosamente<br /><br />
                         Templo das Águias';

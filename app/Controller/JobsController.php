@@ -76,7 +76,7 @@ class JobsController extends AppController
             $mailBody = 'Prezado(a), <strong>' . trim($order['Order']['name']) . '</strong>, <br /><br />
                 O seu pedido número <strong>' . $orderId . '</strong> do <strong>' . $eventTitle . '</strong> precisa ser impresso ou apresentado no momento da entrada do evento!
                 <br /><br />
-                <a href="https://ingresso.templodasaguias.com.br/Orders/ticket/' . $orderId . '" target="_blank">Clique aqui para acessar o seu pedido.</a>
+                <a href="https://kinderpark.com.br/Orders/ticket/' . $orderId . '" target="_blank">Clique aqui para acessar o seu pedido.</a>
                 <br /><br />
                 <strong>Ou, exiba o QRCode abaixo no momento do Check-In do Evento!</strong><br /><br />
                ' . $tagImgQrcode . '
