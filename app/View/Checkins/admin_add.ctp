@@ -27,7 +27,7 @@
 //Verifica se tem HTTP ou está no Localhost
 $localhost = strpos(FULL_BASE_URL, 'localhost');
 if (!$isSecure && !$localhost) {
-    echo '<div class="alert alert-danger" role="alert">A câmera não pode ser usada sem o protocolo HTTPS! <a href="https://ingresso.templodasaguias.com.br' . $this->here . '">Clique Aqui</a></div>';
+    echo '<div class="alert alert-danger" role="alert">A câmera não pode ser usada sem o protocolo HTTPS! <a href="https://kinderpark.com.br' . $this->here . '">Clique Aqui</a></div>';
 }
 ?>
 <div class="card">
