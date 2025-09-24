@@ -8,6 +8,7 @@ class TicketsController extends AppController
     public function beforeFilter()
     {
         parent::beforeFilter();
+        $this->set('title_for_layout', 'Passaportes');
     }
 
     public function admin_index()

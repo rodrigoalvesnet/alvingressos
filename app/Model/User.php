@@ -51,17 +51,17 @@ class User extends AppModel
                 'message' => 'Já existe um registro com este email'
             ),
         ),
-        'cpf' => array(
-            'required' => array(
-                'rule' => array('notBlank'),
-                'message' => 'O campo nome é obrigatório'
-            ),
-            'unique' => array(
-                'rule' => 'isUnique',
-                'on' => 'create',
-                'message' => 'Já existe um registro com este CPF'
-            ),
-        ),
+        // 'cpf' => array(
+        //     'required' => array(
+        //         'rule' => array('notBlank'),
+        //         'message' => 'O campo nome é obrigatório'
+        //     ),
+        //     'unique' => array(
+        //         'rule' => 'isUnique',
+        //         'on' => 'create',
+        //         'message' => 'Já existe um registro com este CPF'
+        //     ),
+        // ),
         'password' => array(
             'rule' => array('confirmPassword'),
             'message' => 'A confirmação da senha está errada!'

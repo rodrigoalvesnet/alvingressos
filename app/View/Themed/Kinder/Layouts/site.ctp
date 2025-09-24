@@ -43,7 +43,8 @@
         'owl.carousel',
         'magnific-popup',
         'animate',
-        'menu_sideslide'
+        'menu_sideslide',
+        '/vendors/whatsapp-floatbox/css/wafloatbox-0.2'
     ));
 
     echo $this->Html->css(array(
@@ -59,7 +60,7 @@
     echo $this->fetch('css');
     echo $this->fetch('script');
     //Incluídos na configuração do site
-    echo  $siteConfig['Site']['script_header']; 
+    echo  $siteConfig['Site']['script_header'];
     ?>
 </head>
 
@@ -71,6 +72,7 @@
     <?php echo $this->element('site/contact'); ?>
     <?php echo $this->element('site/mapa'); ?>
     <?php echo $this->element('site/footer'); ?>
+    <?php echo $this->element('site/whatsapp'); ?>
 
     <!-- Go To Top Link -->
     <a href="#" class="back-to-top">
@@ -114,16 +116,18 @@
         'contact-form-script',
         'main',
         'admin/jquery.maskedinput.min',
+        '/vendors/whatsapp-floatbox/js/wafloatbox-0.2.js',
         '/theme/Kinder/js/site.js'
     ));
 
 
     echo $this->fetch('scriptBottom');
-     //Incluídos na configuração do site
-    echo  $siteConfig['Site']['script_bottom']; 
+    //Incluídos na configuração do site
+    echo  $siteConfig['Site']['script_bottom'];
     echo $this->Js->writeBuffer(); // Write cached scripts
     echo $this->element('sql_dump')
     ?>
+
 </body>
 
 </html>

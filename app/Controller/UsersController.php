@@ -74,7 +74,12 @@ class UsersController extends AppController
                     $urlReferer = $this->Session->read('Cart.url_referer');
                     return $this->redirect($urlReferer);
                 }
-
+                //Pega o grupo de quem está logado
+                $roleId = $this->Session->read('Auth.User.role_id');
+                //Se não for comprador
+                if ($roleId <> 3) {
+                    return $this->redirect('/admin/dash');
+                }
                 return $this->redirect('/');
             } else {
                 $this->Flash->error('E-mail ou senha inválidos');

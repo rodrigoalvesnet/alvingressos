@@ -128,7 +128,7 @@
                                             array(
                                                 'admin' => false,
                                                 'controller' => 'Orders',
-                                                'action' => 'edit',
+                                                'action' => 'view',
                                                 $registro['Ticket']['order_id']
                                             ),
                                             array(

@@ -10,7 +10,7 @@
                 echo $this->Form->input(
                     'name',
                     array(
-                        'label' => 'Título',
+                        'label' => 'Nome Completo',
                         'class' => 'form-control',
                         'div' => 'form-group',
                         'required' => true,
@@ -41,7 +41,7 @@
                         'label' => 'CPF',
                         'class' => 'form-control cpf',
                         'div' => 'form-group',
-                        'required' => true,
+                        'required' => false,
                     )
                 );
                 ?>
@@ -55,7 +55,7 @@
                         'label' => 'Data de nascimento',
                         'class' => 'form-control datepicker',
                         'div' => 'form-group',
-                        'required' => true,
+                        'required' => false,
                     )
                 );
                 ?>
@@ -69,7 +69,7 @@
                         'label' => 'Telefone',
                         'class' => 'form-control fone',
                         'div' => 'form-group',
-                        'required' => true,
+                        'required' => false,
                     )
                 );
                 ?>
