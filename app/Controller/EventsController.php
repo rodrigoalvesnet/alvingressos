@@ -363,7 +363,7 @@ class EventsController extends AppController
             }
             //Guarda a sessão
             $this->Cart->saveCart($this->request->data);
-            $this->Flash->succes('Produto adicionado ao carrinho!');
+            $this->Flash->success('Produto adicionado ao carrinho!');
             $this->redirect(
                 array(
                     'controller' => 'Checkout',
