@@ -307,10 +307,16 @@ $(document).ready(function () {
         beforeShowDay: function (date) {
             var day = date.getDay();
             var dataFormatada = $.datepicker.formatDate("dd/mm/yy", date);
+            var hoje = $.datepicker.formatDate("dd/mm/yy", new Date());
 
             // Bloqueia segunda-feira
             if (day === 1) {
                 // return [false, "", "Segunda-feira bloqueada"];
+            }
+
+            // Bloqueia o dia atual
+            if (dataFormatada === hoje) {
+                return [false, "", "Hoje não disponível"];
             }
 
             // Bloqueia datas específicas vindas do CakePHP
@@ -332,6 +338,7 @@ $(document).ready(function () {
     });
 });
 </script>
+
 
 <?php
 echo $this->Html->script('buy', array('block' => 'scriptBottom'));
