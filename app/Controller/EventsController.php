@@ -203,9 +203,11 @@ class EventsController extends AppController
             throw new NotFoundException(__('Registro Inválido'));
         }
         if ($this->request->is('post') || $this->request->is('put')) {
+            // pr($this->data);exit();
             //trata os dados
             $this->request->data['Event']['start_date'] = $this->Alv->tratarData($this->request->data['Event']['start_date']);
             $this->request->data['Event']['end_date'] = $this->Alv->tratarData($this->request->data['Event']['end_date']);
+            // $this->request->data['Event']['dates'] = serialize($this->request->data['Event']['dates']);
             if (!empty($this->request->data['Event']['display_date'])) {
                 $this->request->data['Event']['display_date'] = $this->Alv->tratarData($this->request->data['Event']['display_date']);
             }
@@ -235,6 +237,8 @@ class EventsController extends AppController
 
             // pr($this->request->data);exit();
             if ($this->Event->saveAll($this->request->data)) {
+                //Salva as datas bloqueadas
+                $this->_saveBlockedDates($this->request->data);
                 $anexoDir = '/uploads/event-' . $id;
                 //se foi informado a foto
                 if (!empty($this->data['Event']['new_banner_desktop']['tmp_name'])) {
@@ -281,7 +285,8 @@ class EventsController extends AppController
                     )
                 )
             );
-
+            $blockedDates = $this->Event->getBlockedDates($id, false);
+            $this->set('blockedDates', $blockedDates);
             //trata os dados
             $this->request->data['Event']['start_date'] = $this->Alv->tratarData($this->request->data['Event']['start_date'], 'pt');
             $this->request->data['Event']['end_date'] = $this->Alv->tratarData($this->request->data['Event']['end_date'], 'pt');
@@ -309,6 +314,28 @@ class EventsController extends AppController
         $this->set('title_for_layout', 'Editar Evento');
         $this->set('status', Configure::read('Events.status'));
         $this->render('admin_add');
+    }
+
+    function _saveBlockedDates($thisData)
+    {
+
+        if (!empty($thisData['datasBloqueadas'])) {
+
+            $this->loadModel('EventsDate');
+            //Deleta os antigos
+            $this->EventsDate->deleteAll([
+                'event_id' => $thisData['Event']['id']
+            ]);
+            //Salva os novos
+            $datasBloqueadas = json_decode($thisData['datasBloqueadas'], true);
+            foreach ($datasBloqueadas as $date) {
+                $this->EventsDate->save([
+                    'id' => null,
+                    'event_id' => $thisData['Event']['id'],
+                    'date' => $date
+                ]);
+            }
+        }
     }
 
     function _salvarImagem($registroId, $urlFoto, $field, $resize = true, $anexoDir)
@@ -386,6 +413,14 @@ class EventsController extends AppController
         }
         $this->set('modalidades', $modalidades);
         $this->set('regras', $regras);
+
+        $blockedDates = $this->Event->getBlockedDates($eventId, true, false);
+
+        $dates = [];
+        foreach ($blockedDates as $date) {
+            $dates[] = date('d/m/Y', strtotime($date));
+        }
+        $this->set('blockedDates', json_encode($dates));
 
         $this->theme = Configure::read('Site.tema');
         $this->layout = 'site';

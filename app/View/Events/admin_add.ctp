@@ -1,4 +1,7 @@
 <?php echo $this->Html->link('Adicionar Novo', ['action' => 'add'], ['class' => 'btn btn-primary mb-2']); ?>
+<style>
+
+</style>
 <div class="card">
     <style>
         .cke_notification_warning {
@@ -28,6 +31,9 @@
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="event-coupons" data-bs-toggle="tab" data-bs-target="#coupons" type="button" role="tab" aria-controls="coupons" aria-selected="false"><i class="fas fa-percent"></i> Cupons</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="event-dates" data-bs-toggle="tab" data-bs-target="#dates" type="button" role="tab" aria-controls="dates" aria-selected="false"><i class="fas fa-calendar"></i> Datas Disponíveis</button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="event-fields" data-bs-toggle="tab" data-bs-target="#fields" type="button" role="tab" aria-controls="fields" aria-selected="false"><i class="fas fa-question"></i> Perguntas</button>
@@ -182,7 +188,6 @@
                         ?>
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col-lg-6">
                         <?php
@@ -363,7 +368,7 @@
                     </div>
 
                     <?php
-                    //Se tem preletores
+                    //Se tem cupons
                     if (!empty($this->data['Coupon'])) { ?>
                         <table class="table sortable table-striped">
                             <thead>
@@ -434,6 +439,11 @@
                         <div class="alert alert-info" role="alert">Nenhum registro encontrado</div>
                     <?php } ?>
                 </div>
+                <!-- DATAS DISPONÍVEIS -->
+                <div class="tab-pane fade" id="dates" role="tabpanel" aria-labelledby="event-dates">
+                    <div id="calendar"></div>
+                    <input type="hidden" id="datasBloqueadas" name="datasBloqueadas" value='<?php echo !empty($blockedDates) ? $blockedDates : json_encode([]); ?>'>
+                </div>
                 <!-- PERGUNTAS DO EVENTO -->
                 <div class="tab-pane fade" id="fields" role="tabpanel" aria-labelledby="event-fields">
                     <div class="d-flex flex-row-reverse">
@@ -494,104 +504,6 @@
                                                 ),
                                                 array(
                                                     'confirm' => 'Tem certeza que deseja excluir esta pergunta?',
-                                                    'title' => 'EXCLUIR',
-                                                    'class' => 'btn btn-action text-danger mx-1',
-                                                    'escape' => false
-                                                )
-                                            );
-                                            ?>
-                                        </td>
-                                    </tr>
-                                <?php } ?>
-                            </tbody>
-                        </table>
-                    <?php } else { ?>
-                        <div class="alert alert-info" role="alert">Nenhum registro encontrado</div>
-                    <?php } ?>
-                </div>
-                <!-- PRODUTOS DO EVENTO -->
-                <div class="tab-pane fade" id="products" role="tabpanel" aria-labelledby="event-products">
-                    <div class="d-flex flex-row-reverse">
-                        <?php
-                        echo $this->Html->link(
-                            '<i class="fas fa-plus"></i> Cadastrar Novo',
-                            array(
-                                'controller' => 'Products',
-                                'action' => 'add',
-                                $this->data['Event']['id']
-                            ),
-                            array(
-                                'class' => 'btn btn-sm btn-secondary mb-2',
-                                'escape' => false
-                            )
-                        );
-                        ?>
-                    </div>
-                    <?php
-                    //Se tem registros
-                    if (!empty($this->data['Product'])) { ?>
-                        <table class="table sortable table-striped">
-                            <thead>
-                                <tr>
-                                    <th scope="col" style="width: 50px" class="sorter-false"> Foto</th>
-                                    <th scope="col" class="sorter-text">Nome</th>
-                                    <th scope="col" class="sorter-text">Descrição</th>
-                                    <th scope="col" class="sorter-text">Preço</th>
-                                    <th scope="col" class="sorter-text">Estoque</th>
-                                    <th scope="col" class="sorter-text">Situação</th>
-                                    <th scope="col" class="sorter-false">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                foreach ($this->data['Product'] as $product) { ?>
-                                    <tr>
-                                        <th>
-                                            <?php
-                                            $imgSrc = 'no-photo.png';
-                                            //Se tem imagem para exibir
-                                            if (isset($product['ProductsImage']) && !empty($product['ProductsImage'])) {
-                                                $imgSrc = '/uploads/small/' . $product['ProductsImage'][0]['filename'];
-                                            }
-                                            echo $this->Html->image(
-                                                $imgSrc,
-                                                array(
-                                                    'class' => 'rounded-circle',
-                                                    'style' => 'width:50px; height:50px;'
-                                                )
-                                            );
-                                            ?>
-                                        </th>
-                                        <td><?php echo $product['name']; ?></td>
-                                        <td><?php echo $product['description']; ?></td>
-                                        <td><?php echo $this->Alv->tratarValor($product['price'], 'pt'); ?></td>
-                                        <td><?php echo $product['stock']; ?></td>
-                                        <td><?php echo $product['active'] ? 'Disponível' : 'Indisponível'; ?></td>
-                                        <td>
-                                            <?php
-                                            echo $this->Html->link(
-                                                '<i class="fas fa-edit"></i>',
-                                                array(
-                                                    'controller' => 'Products',
-                                                    'action' => 'edit',
-                                                    $this->data['Event']['id'],
-                                                    $product['id']
-                                                ),
-                                                array(
-                                                    'class' => 'btn btn-action mx-1',
-                                                    'title' => 'Editar',
-                                                    'escape' => false
-                                                )
-                                            );
-                                            echo $this->Html->link(
-                                                '<i class="fas fa-trash"></i>',
-                                                array(
-                                                    'controller' => 'Products',
-                                                    'action' => 'delete',
-                                                    $product['id']
-                                                ),
-                                                array(
-                                                    'confirm' => 'Tem certeza que deseja EXCLUIR este Produto?',
                                                     'title' => 'EXCLUIR',
                                                     'class' => 'btn btn-action text-danger mx-1',
                                                     'escape' => false
@@ -765,3 +677,6 @@
     </div>
     <?php echo $this->Form->end(); ?>
 </div>
+
+<?php
+echo $this->Html->script('events', array('block' => 'scriptBottom'));

@@ -15,6 +15,10 @@
 	?>
 	<title><?php echo Configure::read('Sistema.title') . ' | ' . $this->fetch('title'); ?></title>
 
+	<!-- FullCalendar -->
+	<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.css" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js"></script>
+
 	<?php
 	echo $this->Html->meta('icon');
 
@@ -27,7 +31,7 @@
 		'admin'
 	));
 
-	
+
 	echo $this->Html->script(array(
 		'tagify/tagify',
 		'tagify/tagify.polyfills.min'

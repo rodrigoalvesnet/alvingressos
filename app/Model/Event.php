@@ -23,7 +23,8 @@ class Event extends AppModel
         'Field',
         'Order',
         'Coupon',
-        'Product'
+        'Product',
+        'EventsDate'
     );
 
     public $belongsTo = array(
@@ -205,5 +206,34 @@ class Event extends AppModel
                 'Event.id' => $eventId
             )
         );
+    }
+
+    function getBlockedDates($id, $future = false, $json = true)
+    {
+        App::uses('EventsDate', 'Model');
+        $EventsDate = new EventsDate();
+
+        $conditions = ['event_id' => $id]; // normalmente é event_id
+        if ($future) {
+            $conditions['DATE(date) >='] = date('Y-m-d');
+        }
+
+        // Pega só os valores da coluna 'date' como array simples
+        $results = $EventsDate->find('all', [
+            'conditions' => $conditions,
+            'fields' => ['date'],
+            'recursive' => -1
+        ]);
+
+        // Extrai os valores para um array simples
+        $dates = [];
+        foreach ($results as $r) {
+            $dates[] = $r['EventsDate']['date'];
+        }
+
+        if($json){
+            return json_encode($dates); // já retorna JSON pronto para o JS
+        }
+        return $dates;
     }
 }

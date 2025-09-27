@@ -22,7 +22,7 @@
                         ) . $tag;
                         ?>
                     </div>
-                    
+
                 </div>
 
                 <div class="col-md-8">
@@ -37,9 +37,11 @@
                 <?php
                 $eventId = $event['Event']['id'];
                 echo $this->Form->create(
-                    'Cart', [
+                    'Cart',
+                    [
                         'class' => 'form-loading'
-                    ]);
+                    ]
+                );
                 ?>
                 <input type="hidden" value="cart[<?php echo $eventId; ?>][event_id]">
                 <h5>Selecione a data do ingresso</h5>
@@ -294,6 +296,42 @@
         </div>
     </div>
 </section>
+
+<script>
+$(document).ready(function () {
+    var blockedDates = <?php echo !empty($blockedDates) ? $blockedDates : '[]'; ?>;
+
+    $("#dataIngresso").datepicker({
+        dateFormat: 'dd/mm/yy',
+        minDate: 0,
+        beforeShowDay: function (date) {
+            var day = date.getDay();
+            var dataFormatada = $.datepicker.formatDate("dd/mm/yy", date);
+
+            // Bloqueia segunda-feira
+            if (day === 1) {
+                // return [false, "", "Segunda-feira bloqueada"];
+            }
+
+            // Bloqueia datas específicas vindas do CakePHP
+            if ($.inArray(dataFormatada, blockedDates) !== -1) {
+                return [false, "", "Data indisponível"];
+            }
+
+            return [true, ""];
+        },
+        dayNames: ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"],
+        dayNamesMin: ["D", "S", "T", "Q", "Q", "S", "S"],
+        monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],
+        nextText: "Próximo",
+        prevText: "Anterior"
+    });
+
+    $("#abrirCalendario").on("click", function () {
+        $("#dataIngresso").datepicker("show");
+    });
+});
+</script>
 
 <?php
 echo $this->Html->script('buy', array('block' => 'scriptBottom'));
