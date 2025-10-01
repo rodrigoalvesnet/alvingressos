@@ -43,6 +43,7 @@
                                         'email',
                                         array(
                                             'label' => false,
+                                            'type' => 'email',
                                             'placeholder' => 'Seu e-mail',
                                             'class' => 'form-control',
                                             'div' => false,
@@ -54,7 +55,25 @@
                                     <div class="help-block with-errors"></div>
                                 </div>
                             </div>
-                            <div class="col-md-12">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <?php
+                                    echo $this->Form->input(
+                                        'phone',
+                                        array(
+                                            'label' => false,
+                                            'placeholder' => 'Telefone',
+                                            'class' => 'form-control fone',
+                                            'div' => false,
+                                            'required' => true,
+                                            'required data-error' => 'Telefone'
+                                        )
+                                    );
+                                    ?>
+                                    <div class="help-block with-errors"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <?php
                                     echo $this->Form->input(

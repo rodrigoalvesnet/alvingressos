@@ -228,6 +228,7 @@ class PagesController extends AppController
                 $arrayDados['assunto'] =  'Contato do Site - ' . $this->data['Page']['subject'];
                 $arrayDados['mensagem'] = '<strong>Nome:</strong> ' . $this->data['Page']['name'] . '<br />
             <strong>E-mail: </strong>' . $this->data['Page']['email'] . '<br />
+            <strong>Telefone: </strong>' . $this->data['Page']['phone'] . '<br />
             <strong>Assunto: </strong>' . $this->data['Page']['subject'] . '<br/>
             <strong>Mensagem: </strong>' . $this->data['Page']['message'];
                 //envia o email                

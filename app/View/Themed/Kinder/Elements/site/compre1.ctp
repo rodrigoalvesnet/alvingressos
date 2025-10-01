@@ -5,7 +5,7 @@
                 <div class="cta-trial text-center">
                     <h3>Garanta já o seu ingresso!</h3>
                     <p>É possível comprar online agora mesmo e evitar filas quando chegar no Kinder Park!</p>
-                    <a href="https://www.diskingressos.com.br/event/972" class="btn btn-common btn-effect">COMPRAR PASSAPORTE</a>
+                    <a href="/comprar-ingresso" class="btn btn-common btn-effect">COMPRAR PASSAPORTE</a>
                 </div>
             </div>
         </div>

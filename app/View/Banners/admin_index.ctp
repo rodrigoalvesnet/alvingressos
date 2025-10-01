@@ -103,7 +103,7 @@
                                 echo $this->Form->postLink(
                                     '<i class="fas fa-trash"></i>',
                                     array(
-                                        'controller' => 'Excluir',
+                                        'controller' => 'banners',
                                         'action' => 'delete',
                                         $registro['Banner']['id']
                                     ),

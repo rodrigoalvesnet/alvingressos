@@ -5,7 +5,7 @@
 <section id="services" class="mt-4">
     <div class="container">
         <div class="section-header">
-            <a href="https://www.diskingressos.com.br/event/972" class="btn btn-secondary btn-effect"><i class="bi bi-cart icon-enter"></i> Comprar Passaporte</a>
+            <a href="/comprar-ingresso" class="btn btn-secondary btn-effect"><i class="bi bi-cart icon-enter"></i> Comprar Passaporte</a>
         </div>
         <div class="row">
             <div class="col-lg-4 col-md-6 col-xs-12">
