@@ -48,7 +48,7 @@ echo $this->Form->hidden('Checkin.ticket_id', array('value' => $this->data['Tick
                 }
                 //Se está atrasado
                 if ($bloqueiaCheckinAtrasado) {
-                    $icon = '<i class="fas fa-calendar-xmark text-info"></i>';
+                    $icon = '<i class="fas fa-exclamation text-danger"></i>';
                     $title = 'Passaporte Vencido!';
                     $reason = 'Passaporte vencido em <strong>' . date('d/m/Y', strtotime($this->data['Ticket']['modalidade_data'])) . '</strong>';
                 }
