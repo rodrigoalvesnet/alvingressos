@@ -39,13 +39,7 @@ echo $this->Form->hidden('Checkin.ticket_id', array('value' => $this->data['Tick
                     $icon = '<i class="fas fa-exclamation text-danger"></i>';
                     $title = 'Cancelado';
                     $reason = '';
-                }
-                //Se já foi feito
-                if ($checkinExists) {
-                    $icon = '<i class="fas fa-exclamation text-info"></i>';
-                    $title = 'Já Realizado!';
-                    $reason = 'às ' . date('d/m/Y H:i', strtotime($this->data['Checkin']['created'])) . ' - Por ' . $this->data['Checkin']['User']['name'];
-                }
+                }                
                 //Se está adiantado
                 if ($bloqueiaCheckinAdiantado) {
                     $icon = '<i class="fas fa-clock text-info"></i>';
@@ -57,6 +51,12 @@ echo $this->Form->hidden('Checkin.ticket_id', array('value' => $this->data['Tick
                     $icon = '<i class="fas fa-calendar-xmark text-info"></i>';
                     $title = 'Passaporte Vencido!';
                     $reason = 'Passaporte vencido em <strong>' . date('d/m/Y', strtotime($this->data['Ticket']['modalidade_data'])) . '</strong>';
+                }
+                //Se já foi feito
+                if ($checkinExists) {
+                    $icon = '<i class="fas fa-exclamation text-info"></i>';
+                    $title = 'Já Realizado!';
+                    $reason = 'às ' . date('d/m/Y H:i', strtotime($this->data['Checkin']['created'])) . ' - Por ' . $this->data['Checkin']['User']['name'];
                 }
                 ?>
                 <div class="checkin-icon text-center"><?php echo $icon; ?></div>
