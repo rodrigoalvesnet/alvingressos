@@ -10,7 +10,81 @@ class CheckinsController extends AppController
         parent::beforeFilter();
     }
 
-    public function admin_index() {}
+    public function admin_index()
+    {
+        //se foi solicitadoa limpeza dos filtros
+        if (isset($this->params['named']['limpar'])) {
+            //veriica se o cache existe
+            if ($this->Session->check('Filtros.Checkins')) {
+                //remove os filtros do cache
+                $this->Session->delete('Filtros.Checkins');
+            }
+            //atualiza a pagina
+            $this->redirect(array(
+                'admin' => true
+            ));
+        }
+
+        //condição padrão
+        $arrayConditions = array();
+        //se o this->data não está vazio, prepara o filtro
+        if (!empty($this->request->data)) {
+            if (isset($this->request->data['Filtro']['name']) && !empty($this->request->data['Filtro']['name'])) {
+                $arrayConditions['Ticket.nome LIKE'] = '%' . $this->request->data['Filtro']['name'] . '%';
+            }
+            if (isset($this->request->data['Filtro']['cpf']) && !empty($this->request->data['Filtro']['cpf'])) {
+                $arrayConditions['Ticket.cpf'] = $this->request->data['Filtro']['cpf'];
+            }
+            if (isset($this->request->data['Filtro']['ticket_id']) && !empty($this->request->data['Filtro']['ticket_id'])) {
+                $arrayConditions['Checkin.ticket_id'] = $this->request->data['Filtro']['ticket_id'];
+            }
+            if (isset($this->request->data['Filtro']['order_id']) && !empty($this->request->data['Filtro']['order_id'])) {
+                $arrayConditions['Checkin.order_id'] = $this->request->data['Filtro']['order_id'];
+            }
+            if (isset($this->request->data['Filtro']['date']) && !empty($this->request->data['Filtro']['date'])) {
+                $arrayConditions['DATE(Checkin.created)'] = $this->Alv->tratarData($this->request->data['Filtro']['date']);
+            }
+            //salva as condições na session            
+            $this->Session->write('Filtros.Checkins', $arrayConditions);
+        } else {
+            //verifica se tem condições na session
+            if ($this->Session->check('Filtros.Checkins')) {
+                //utiliza os filtros do cache
+                $arrayConditions = $this->Session->read('Filtros.Checkins');
+            }
+        }
+
+        //Prepara a busca
+        $this->paginate = array(
+            'conditions'    => $arrayConditions,
+            'contain' => array(
+                'Ticket' => [
+                    'id',
+                    'event_id',
+                    'nome',
+                    'cpf',
+                    'telefone',
+                    'modalidade_nome'
+                ],
+                'User' => [
+                    'name'
+                ]
+            ),
+            'fields' => array(
+                'id',
+                'created',
+                'ticket_id',
+                'order_id'
+            ),
+            'order' => array(
+                'Checkin.created DESC'
+            ),
+            'limit' => Configure::read('Sistema.limit')
+        );
+
+        //envia os dados para a view
+        $this->set('registros', $this->paginate('Checkin'));
+    }
 
     public function admin_add($eventId)
     {
@@ -49,47 +123,6 @@ class CheckinsController extends AppController
         $this->log($this->data);
         if (!empty($this->data)) {
             if ($this->Checkin->save($this->data)) {
-                $arrayReturn['success'] = true;
-            }
-        }
-        return json_encode($arrayReturn);
-    }
-
-    public function admin_checkin_manual($orderId)
-    {
-        $this->autoRender = false;
-        $arrayReturn = array(
-            'success' => false,
-            'message' => 'Não foi possível encontrar a inscrição.',
-        );
-        //Verifica se o checkin já foi feito
-        if ($this->Checkin->checkinExists($orderId)) {
-            $arrayReturn['message'] = 'O checkin já foi feito!';
-            return json_encode($arrayReturn);
-        }
-        //Busca os dados do pedido
-        $this->loadModel('Order');
-        $order = $this->Order->find(
-            'first',
-            array(
-                'conditions' => array(
-                    'id' => $orderId,
-                    'status' => 'approved'
-                ),
-                'recursive' => -1,
-                'fields' => array(
-                    'event_id'
-                )
-            )
-        );
-
-        if (!empty($order)) {
-            $dataSave = array(
-                'order_id' => $$orderId,
-                'event_id' => $order['Order']['event_id'],
-                'user_id' => AuthComponent::user('id'),
-            );
-            if ($this->Checkin->save($dataSave)) {
                 $arrayReturn['success'] = true;
             }
         }
@@ -159,7 +192,6 @@ class CheckinsController extends AppController
             }
         }
         $this->set('bloqueiaCheckinAtrasado', $bloqueiaCheckinAtrasado);
-
     }
 
     public function admin_checkins($eventId)
@@ -193,41 +225,6 @@ class CheckinsController extends AppController
         );
         // pr($presentes);exit();
         $this->set('presentes', $presentes);
-    }
-
-    public function admin_subscribeds($eventId)
-    {
-        $this->layout = 'ajax';
-        $this->loadModel('Order');
-        $subscribeds = $this->Order->find(
-            'all',
-            array(
-                'conditions' => array(
-                    'Order.event_id' => $eventId,
-                    'Checkin.id IS NULL'
-                ),
-                'contain' => array(
-                    'Checkin' => array(
-                        'id',
-                        'order_id',
-                        'created'
-                    ),
-                    'Unidade' => array(
-                        'name'
-                    )
-                ),
-                'fields' => array(
-                    'event_id',
-                    'name',
-                    'cpf',
-                    'phone',
-                ),
-                'order' => array(
-                    'Order.name ASC'
-                )
-            )
-        );
-        $this->set('subscribeds', $subscribeds);
     }
 
     public function admin_delete($id)
