@@ -24,7 +24,7 @@ class CheckinsController extends AppController
         $event = $this->Event->find(
             'first',
             array(
-                'conditions' => array(                    
+                'conditions' => array(
                     'id' => $eventId
                 ),
                 'fields' => array(
@@ -130,13 +130,36 @@ class CheckinsController extends AppController
                 )
             )
         );
- 
+
         $checkinExists = false;
         //Verifica se o checkin já foi feito
         if ($this->Checkin->checkinExists($ticketId)) {
             $checkinExists = true;
         }
         $this->set('checkinExists', $checkinExists);
+
+        $bloqueiaCheckinAdiantado = false;
+        //Verifica se a data do ticket é MAIOR a hoje
+        if ($this->data['Ticket']['modalidade_data'] > date('Y-m-d')) {
+            $permiteCheckinAdiantado = Configure::read('Checkin.permitir_adiantado');
+            //Se NÃO permite checkin adiantado
+            if (!$permiteCheckinAdiantado) {
+                $bloqueiaCheckinAdiantado = true;
+            }
+        }
+        $this->set('bloqueiaCheckinAdiantado', $bloqueiaCheckinAdiantado);
+
+        $bloqueiaCheckinAtrasado = false;
+        //Verifica se a data do ticket é MENOR que hoje
+        if ($this->data['Ticket']['modalidade_data'] < date('Y-m-d')) {
+            $permiteCheckinAtrasado = Configure::read('Checkin.permitir_atrasado');
+            //Se NÃO permite checkin atrasado
+            if (!$permiteCheckinAtrasado) {
+                $bloqueiaCheckinAtrasado = true;
+            }
+        }
+        $this->set('bloqueiaCheckinAtrasado', $bloqueiaCheckinAtrasado);
+
     }
 
     public function admin_checkins($eventId)

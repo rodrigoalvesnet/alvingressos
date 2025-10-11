@@ -46,6 +46,18 @@ echo $this->Form->hidden('Checkin.ticket_id', array('value' => $this->data['Tick
                     $title = 'Já Realizado!';
                     $reason = 'às ' . date('d/m/Y H:i', strtotime($this->data['Checkin']['created'])) . ' - Por ' . $this->data['Checkin']['User']['name'];
                 }
+                //Se está adiantado
+                if ($bloqueiaCheckinAdiantado) {
+                    $icon = '<i class="fas fa-clock text-info"></i>';
+                    $title = 'Data Incorreta!';
+                    $reason = 'Passaporte agendado somente para <strong>' . date('d/m/Y', strtotime($this->data['Ticket']['modalidade_data'])) . '</strong>';
+                }
+                //Se está atrasado
+                if ($bloqueiaCheckinAtrasado) {
+                    $icon = '<i class="fas fa-calendar-xmark text-info"></i>';
+                    $title = 'Passaporte Vencido!';
+                    $reason = 'Passaporte vencido em <strong>' . date('d/m/Y', strtotime($this->data['Ticket']['modalidade_data'])) . '</strong>';
+                }
                 ?>
                 <div class="checkin-icon text-center"><?php echo $icon; ?></div>
                 <div class="checkin-title"><?php echo $title; ?></div>
@@ -76,7 +88,7 @@ echo $this->Form->hidden('Checkin.ticket_id', array('value' => $this->data['Tick
     //se pode fazer o checkin
     if ($this->data['Order']['status'] == 'approved') {
         //Se ainda não foi feito
-        if (!$checkinExists) {
+        if (!$checkinExists && !$bloqueiaCheckinAdiantado && !$bloqueiaCheckinAtrasado) {
             $eventId = $this->data['Order']['event_id'];
             echo $this->Form->button(
                 'Confirmar Checkin',
