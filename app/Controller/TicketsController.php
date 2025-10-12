@@ -49,6 +49,9 @@ class TicketsController extends AppController
             if (isset($this->request->data['Filtro']['modalidade']) && !empty($this->request->data['Filtro']['modalidade'])) {
                 $arrayConditions['Ticket.modalidade_nome LIKE '] = '%' . $this->request->data['Filtro']['modalidade'] . '%';
             }
+            if (isset($this->request->data['Filtro']['date']) && !empty($this->request->data['Filtro']['date'])) {
+                $arrayConditions['DATE(Ticket.modalidade_data)'] = $this->Alv->tratarData($this->request->data['Filtro']['date']);
+            }
             //salva as condições na session            
             $this->Session->write('Filtros.Tickets', $arrayConditions);
             $this->Session->write('Filtros.ThisData', $this->request->data);

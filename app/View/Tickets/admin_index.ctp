@@ -15,7 +15,7 @@
                 );
                 ?>
             </div>
-            <div class="col-lg-3">
+            <div class="col-lg-2">
                 <?php
                 echo $this->Form->input(
                     'ticket_id',
@@ -27,7 +27,7 @@
                 );
                 ?>
             </div>
-            <div class="col-lg-3">
+            <div class="col-lg-2">
                 <?php
                 echo $this->Form->input(
                     'order_id',
@@ -35,6 +35,17 @@
                         'type' => 'text',
                         'label' => 'Número do Pedido',
                         'class' => 'form-control',
+                    )
+                );
+                ?>
+            </div>
+            <div class="col-lg-2">
+                <?php
+                echo $this->Form->input(
+                    'date',
+                    array(
+                        'label' => 'Data',
+                        'class' => 'form-control datepicker ',
                     )
                 );
                 ?>
