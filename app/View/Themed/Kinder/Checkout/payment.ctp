@@ -27,6 +27,8 @@
                         ]
                     );
 
+                    $this->Form->unlockField('Order.coupon_id');
+
                     $resumo = [];
                     foreach ($ingressos['eventos'] as $eventId => $evento) {
                         $resumo[$eventId] = [
@@ -115,34 +117,66 @@
                         }
                     }
                     ?>
+
                     <hr class="my-3" />
                     <?php
                     //Se não estiver logado
                     if ($this->Session->check('Auth.User')) { ?>
 
-                        <h4><i class="fas fa-money-bill-alt"></i> Informações de Pagamento</h4>
-                        <div class="row">
+                        <?php
+                        //Se tem cupons de desconto
+                        if (!empty($event['Coupon'])) {
+                        ?>
 
-                            <div class="col-md-6">
-                                <?php
-                                echo $this->Form->hidden('Order.event_id', array(
-                                    'value' => $eventId
-                                ));
-                                echo $this->Form->input(
-                                    'Order.payment_type',
-                                    array(
-                                        'label' => 'Forma de pagamento',
-                                        'options' => $optionsPayment,
-                                        'class' => 'form-control',
-                                        'div' => 'form-group',
-                                        'empty' => 'Selecione a forma de pagamento',
-                                        'required' => true
-                                    )
-                                );
-                                ?>
+                            <h4><i class="fas fa-gift"></i> Cupom de desconto</h4>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <?php
+                                    $buttonApply = '<div class="input-group-append">
+                                    <button class="btn btn-info" type="button" id="btnApplyDiscount">Aplicar Cupom</button>
+                                </div>';
+                                    echo $this->Form->input(
+                                        'Order.coupon',
+                                        array(
+                                            'label' => false,
+                                            'class' => 'form-control',
+                                            'div' => 'form-group input-group',
+                                            'after' => $buttonApply
+                                        )
+                                    );
+                                    ?>
+                                </div>
+                                <div id="callbackcoupon"></div>
                             </div>
-                            <div class="col-lg-6">
-                                <div id="divInstallments">
+
+                        <?php }  ?>
+
+                        <div id="divPagamentos">
+                            <hr class="my-3" />
+                            <h4><i class="fas fa-money-bill-alt"></i> Informações de Pagamento</h4>
+                            <div class="row">
+
+                                <div class="col-md-6">
+                                    <?php
+                                    echo $this->Form->hidden('Order.event_id', array(
+                                        'value' => $eventId
+                                    ));
+                                    echo $this->Form->input(
+                                        'Order.payment_type',
+                                        array(
+                                            'label' => 'Forma de pagamento',
+                                            'options' => $optionsPayment,
+                                            'class' => 'form-control',
+                                            'div' => 'form-group',
+                                            'empty' => 'Selecione a forma de pagamento',
+                                            'required' => true
+                                        )
+                                    );
+                                    ?>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div id="divInstallments">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -392,6 +426,27 @@ $this->Js->get('#OrderPaymentType')->event(
     'change',
     $getInstallments
 );
+
+$applyDiscount = $this->Js->request(
+    array(
+        'controller' => 'Checkout',
+        'action' => 'apply_discount'
+    ),
+    array(
+        'async' => true,
+        'update' => '#callbackcoupon',
+        'data' => $data,
+        'dataExpression' => true,
+        'method' => 'POST',
+        'before' => 'setLoadingRequest("callbackcoupon", " Aguarde! Verificando cupom...")',
+        'complete' => $getInstallments
+    )
+);
+$this->Js->get('#btnApplyDiscount')->event(
+    'click',
+    $applyDiscount
+);
+
 
 //Se foi informada parcelas
 if (isset($this->data['Order']['installments']) && !empty($this->data['Order']['installments'])) {

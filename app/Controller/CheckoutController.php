@@ -16,7 +16,7 @@ class CheckoutController extends AppController
 
     public function payment()
     {
-        
+
         $this->theme = Configure::read('Site.tema');
         $this->layout = 'site';
         //Quando posta
@@ -61,9 +61,14 @@ class CheckoutController extends AppController
                         'id',
                         'title'
                     ],
-                    'recursive' => -1
+                    'contain' => array(
+                        'Coupon' => [
+                            'id'
+                        ]
+                    )
                 )
             );
+
             $ingressos['cart']['eventos'][$eventId]['id'] = $evento['Event']['id'];
             $ingressos['cart']['eventos'][$eventId]['title'] = $evento['Event']['title'];
             $ingressos['cart']['eventos'][$eventId]['event_id'] = $eventId;
@@ -99,6 +104,7 @@ class CheckoutController extends AppController
         $this->set('optionsPayment', $optionsPayment);
         $this->set('ingressos', $ingressos['cart']);
         $this->set('remaining', $cart['remaining']);
+        $this->set('event', $evento);
     }
 
     function _sendPayment($dados)
@@ -107,8 +113,13 @@ class CheckoutController extends AppController
             'success' => false,
             'message' => ''
         ];
-        // pr($dados);
-        // exit();
+
+        //Se teve desconto de 100%
+        if (!isset($dados['Order']['value'])) {
+            $dados['Order']['value'] = 0;
+            $dados['Order']['payment_type'] = 'free';
+        }
+
         $this->loadModel('Order');
         //Cria o pedido
         $createNewOrder = $this->Order->newOrder($dados, true);
@@ -122,8 +133,22 @@ class CheckoutController extends AppController
 
         //Se salvar corretamente
         if ($createNewOrder['success']) {
-            //Cria o pedido no Asaas
-            $invoiceCreated = $this->Asaas->createOrder($dados['Order']['id'], $dados);
+            //Se tem valor
+            if ($dados['Order']['value'] > 0) {
+                //Cria o pedido no Asaas
+                $invoiceCreated = $this->Asaas->createOrder($dados['Order']['id'], $dados);
+            } else {
+                /**
+                 * Se o valor é zero, é porque teve um cupom de desconto
+                 * aí já aprova a compra
+                 * e não gera cobrança no Asaas
+                 */
+                $this->Order->changeStatus($dados['Order']['id'], 'approved');
+                $invoiceCreated = [
+                    'success' => true,
+                    'message' => 'Compra realizada com sucesso!'
+                ];
+            }
 
             if ($invoiceCreated['success']) {
                 //Cria o tickets
@@ -150,7 +175,6 @@ class CheckoutController extends AppController
         $paymentsType = Configure::read('Site.pagamentos');
 
         $this->set('paymentsType', $paymentsType);
-
         $price = 0;
         foreach ($this->data['Checkout'] as $checkout) {
             foreach ($checkout as $eventId => $data) {
@@ -159,8 +183,80 @@ class CheckoutController extends AppController
                 }
             }
         }
-
+        //Verifica se tem desconto
+        if (isset($this->data['Order']['coupon_id']) && !empty($this->data['Order']['coupon_id'])) {
+            $this->loadModel('Order');
+            $price = $this->Order->applyDiscount(
+                $price,
+                $this->data['Order']['coupon_id']
+            );
+        }
         $this->set('price', $price);
+    }
+
+    function apply_discount()
+    {
+        $this->layout = 'ajax';
+        $this->theme = Configure::read('Site.tema');
+        $arrayResult = array(
+            'success' =>  true,
+            'message' => '',
+            'coupon_id' => null
+        );
+        //Se foi preenchido o cupom
+        if (!empty($this->data['Order']['coupon'])) {
+            $code = trim($this->data['Order']['coupon']);
+            $this->loadModel('Coupon');
+            //Procura pelo cupom
+            $coupon = $this->Coupon->find(
+                'first',
+                array(
+                    'conditions' => array(
+                        'Coupon.code' => $code,
+                        'Coupon.event_id' => $this->data['Order']['event_id']
+                    ),
+                    'fields' => array(
+                        'id',
+                        'code'
+                    ),
+                    'recursive' => -1
+                )
+            );
+            //Se NÃO encontoru o cupom
+            if (empty($coupon)) {
+                $arrayResult['success'] = false;
+                $arrayResult['message'] = 'Cupom não localizado.';
+            } else {
+                //Se foi preenchido o CPF
+                if (!empty($this->data['Order']['cpf'])) {
+                    $cpf = $this->data['Order']['cpf'];
+                } else {
+                    $cpf = AuthComponent::user('cpf');
+                }
+                $this->loadModel('Order');
+                //Verifica se já foi usado por este usuário
+                $orderUsed = $this->Order->find(
+                    'first',
+                    array(
+                        'conditions' => array(
+                            'coupon_id' => $coupon['Coupon']['id'],
+                            'cpf' => $cpf,
+                            'status !=' => 'canceled'
+                        ),
+                        'recursive' => -1
+                    )
+                );
+                //Se já foi usado
+                if (!empty($orderUsed)) {
+                    $arrayResult['success'] = false;
+                    $arrayResult['message'] = 'O cupom informado já foi utilizado para o CPF informado.';
+                } else {
+                    $arrayResult['coupon_id'] = $coupon['Coupon']['id'];
+                    $arrayResult['message'] = 'Cupom <strong>' . $coupon['Coupon']['code'] . '</strong> aplicado com sucesso!';
+                }
+            }
+        }
+        $this->set('result', $arrayResult);
     }
 
     function _gerarAsaasDescription($orderId, $dados)
