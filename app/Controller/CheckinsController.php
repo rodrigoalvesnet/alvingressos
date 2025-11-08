@@ -129,13 +129,105 @@ class CheckinsController extends AppController
         return json_encode($arrayReturn);
     }
 
-    public function admin_check($ticketId)
+    public function admin_check($id)
     {
-
         $this->layout = 'ajax';
+        /**
+         * Se o checkin é único, a leitura do qrcode é pelo ID do Pedido,
+         * senão, é feito por cada ticket gerado no pedido
+         */
 
+        if (isset($this->params->query['data'])) {
+            $this->_checkinByOrder($id, $this->params->query['data']);
+            $this->render('admin_check_order');
+        } else {
+            $this->_checkinByTicket($id);
+            $this->render('admin_check_ticket');
+        }
+    }
+
+    function _checkinByOrder($orderId, $date)
+    {
         //Busca os dados do pedido
         $this->loadModel('Order');
+        $this->data = $this->Order->find(
+            'first',
+            array(
+                'conditions' => array(
+                    'Order.id' => $orderId
+                ),
+                'contain' => array(
+                    'Unidade' => array(
+                        'id',
+                        'name'
+                    ),
+                    'Event' => array(
+                        'id',
+                        'title',
+                        'status'
+                    ),
+                    'Checkin' => array(
+                        'created',
+                        'User' => array(
+                            'name'
+                        )
+                    ),
+                    'Ticket' => [
+                        'conditions' => [
+                            'modalidade_data' => $date
+                        ]
+                    ]
+                ),
+                'fields' => array(
+                    'id',
+                    'event_id',
+                    'name',
+                    'cpf',
+                    'email',
+                    'birthday',
+                    'payment_type',
+                    'value',
+                    'status',
+                    'reason'
+                )
+            )
+        );
+        $this->set('modalidade_data', $this->params->query['data']);
+
+
+        $checkinExists = false;
+        //Verifica se o checkin já foi feito
+        if ($this->Checkin->checkinExists($orderId, 'order')) {
+            $checkinExists = true;
+        }
+        $this->set('checkinExists', $checkinExists);
+
+        $bloqueiaCheckinAdiantado = false;
+        //Verifica se a data do ticket é MAIOR a hoje
+        if ($this->params->query['data'] > date('Y-m-d')) {
+            $permiteCheckinAdiantado = Configure::read('Checkin.permitir_adiantado');
+            //Se NÃO permite checkin adiantado
+            if (!$permiteCheckinAdiantado) {
+                $bloqueiaCheckinAdiantado = true;
+            }
+        }
+        $this->set('bloqueiaCheckinAdiantado', $bloqueiaCheckinAdiantado);
+
+        $bloqueiaCheckinAtrasado = false;
+        //Verifica se a data do ticket é MENOR que hoje
+        if ($this->params->query['data'] < date('Y-m-d')) {
+            $permiteCheckinAtrasado = Configure::read('Checkin.permitir_atrasado');
+            //Se NÃO permite checkin atrasado
+            if (!$permiteCheckinAtrasado) {
+                $bloqueiaCheckinAtrasado = true;
+            }
+        }
+        $this->set('bloqueiaCheckinAtrasado', $bloqueiaCheckinAtrasado);
+    }
+
+    function _checkinByTicket($ticketId)
+    {
+        //Busca os dados do pedido
         $this->loadModel('Ticket');
         $this->data = $this->Ticket->find(
             'first',

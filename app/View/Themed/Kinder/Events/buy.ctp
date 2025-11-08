@@ -151,7 +151,7 @@
 
                     function gerarSelectModalidade(data, k) {
                         let _opcoesDisponiveis = filtrarOpcoesPorData(modalidades, regras, data);
-                        let select = `<select name="cart[<?php echo $eventId; ?>][ingressos][${data}][${k}][modalidade]" class="form-control modalidade">`;
+                        let select = `<select name="cart[<?php echo $eventId; ?>][ingressos][${data}][${k}][modalidade]" class="form-control modalidade" required>`;
                         select += `<option value=""></option>`;
                         for (let key in _opcoesDisponiveis) {
                             select += `<option value="${key}">${_opcoesDisponiveis[key].name}</option>`;
@@ -199,7 +199,7 @@
                                             <div class="linha pt-2">
                                                 <div class="row">
                                                     <div class="col-md-5 ">
-                                                        <input type="text" name="cart[<?php echo $eventId; ?>][ingressos][${data}][][nome]" placeholder="Nome da pessoa" class="form-control">
+                                                        <input type="text" name="cart[<?php echo $eventId; ?>][ingressos][${data}][][nome]" placeholder="Nome da pessoa" class="form-control" required>
                                                     </div>
                                                     <div class="col-md-4">
                                                         ${gerarSelectModalidade(data, 0)}
@@ -238,7 +238,7 @@
                                         <div class="linha border-top pt-2">
                                             <div class="row">
                                                 <div class="col-md-5 ">
-                                                    <input type="text" name="cart[<?php echo $eventId; ?>][ingressos][${bloco.data("data")}][${i}][nome]" placeholder="Nome da pessoa" class="form-control">
+                                                    <input type="text" name="cart[<?php echo $eventId; ?>][ingressos][${bloco.data("data")}][${i}][nome]" placeholder="Nome da pessoa" class="form-control" required>
                                                 </div>
                                                 <div class="col-md-4 ">
                                                     ${gerarSelectModalidade(bloco.data("data"), i)}

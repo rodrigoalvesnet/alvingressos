@@ -9,23 +9,39 @@ class Checkin extends AppModel
         'User'
     );
 
-    function checkinExists($ticketId){
-        $checkin = $this->find(
-            'first',
-            array(
-                'conditions' => array(
-                    'ticket_id' => $ticketId 
-                ),
-                'recursive' => -1,
-                'fields' => array(
-                    'id'
+    function checkinExists($id, $type = 'ticket')
+    {
+        if ($type == 'ticket') {
+            $checkin = $this->find(
+                'first',
+                array(
+                    'conditions' => array(
+                        'ticket_id' => $id
+                    ),
+                    'recursive' => -1,
+                    'fields' => array(
+                        'id'
+                    )
                 )
-            )
-        );
-        if(empty($checkin)){
+            );
+        } else {
+            $checkin = $this->find(
+                'first',
+                array(
+                    'conditions' => array(
+                        'order_id' => $id
+                    ),
+                    'recursive' => -1,
+                    'fields' => array(
+                        'id'
+                    )
+                )
+            );
+        }
+
+        if (empty($checkin)) {
             return false;
         }
         return true;
     }
-
 }
