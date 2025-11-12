@@ -135,7 +135,7 @@
                                             )
                                         );
                                         echo $this->Html->link(
-                                            '<i class="fas fa-cart"></i> Ver Pedido',
+                                            '<i class="fas fa-eye"></i> Ver Pedido',
                                             array(
                                                 'admin' => false,
                                                 'controller' => 'Orders',
@@ -145,6 +145,20 @@
                                             array(
                                                 'target' => '_blank',
                                                 'title' => 'Ver Pedido',
+                                                'class' => 'dropdown-item',
+                                                'escape' => false
+                                            )
+                                        );
+                                        echo $this->Html->link(
+                                            '<i class="fas fa-edit"></i> Editar',
+                                            array(
+                                                'admin' => true,
+                                                'controller' => 'Tickets',
+                                                'action' => 'edit',
+                                                $registro['Ticket']['order_id']
+                                            ),
+                                            array(
+                                                'title' => 'Editar',
                                                 'class' => 'dropdown-item',
                                                 'escape' => false
                                             )

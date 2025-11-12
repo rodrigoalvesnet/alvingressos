@@ -72,7 +72,57 @@ class TicketsController extends AppController
             'recursive' => -1
         );
         $this->set('registros', $this->paginate('Ticket'));
+    }
 
+    public function admin_edit($id)
+    {
+        if ($this->request->is('post') || $this->request->is('put')) {
+            //Se foi informado o aniversário nos campos adicionais
+            if (!empty($this->request->data['Ticket']['modalidade_data'])) {
+                $this->request->data['Ticket']['modalidade_data'] = $this->Alv->tratarData($this->request->data['Ticket']['modalidade_data']);
+            }
+
+            //Se salvar corretamente
+            if ($this->Ticket->saveAll($this->request->data)) {
+                $this->Flash->success('Registro salvo com sucesso');
+            } else {
+                $this->Flash->error('Não foi possível salvar o registro');
+            }
+        }
+        $this->request->data = $this->Ticket->find(
+            'first',
+            array(
+                'conditions' => array(
+                    'Ticket.id' => $id
+                ),
+                'contain' => array(
+                    'Order'
+                )
+            )
+        );
+        //Se foi informado o aniversário nos campos adicionais
+        if (!empty($this->request->data['Ticket']['modalidade_data'])) {
+            $this->request->data['Ticket']['modalidade_data'] = $this->Alv->tratarData($this->request->data['Ticket']['modalidade_data'], 'pt');
+        }
+
+        $this->loadModel('Unidade');
+        $unidades = $this->Unidade->find(
+            'list',
+            array(
+                'fields' => array(
+                    'id',
+                    'name'
+                ),
+                'recursive' => -1,
+                'order' => 'name ASC'
+            )
+        );
+        $this->set('unidades', $unidades);
+        $this->set('bcLinks', array(
+            'Tickets' => '/admin/tickets'
+        ));
+        $this->set('status', Configure::read('Order.status'));
+        $this->set('title_for_layout', 'Editar Ticket');
     }
 
     public function view()

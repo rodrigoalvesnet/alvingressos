@@ -44,6 +44,20 @@
                     <div class="col-lg-12">
                         <?php
                         echo $this->Form->input(
+                            'footer',
+                            array(
+                                'label' => 'Texto do Rodapé do Site',
+                                'type' => 'textarea',
+                                'rows' => 2,
+                                'class' => 'form-control',
+                                'div' => 'form-group'
+                            )
+                        );
+                        ?>
+                    </div>
+                    <div class="col-lg-12">
+                        <?php
+                        echo $this->Form->input(
                             'keywords',
                             array(
                                 'label' => 'Palavras-chaves',

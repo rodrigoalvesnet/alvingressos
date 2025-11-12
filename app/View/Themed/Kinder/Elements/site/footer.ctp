@@ -5,7 +5,7 @@
             <div class="row">
                 <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 col-mb-12">
                     <h3><?php echo Configure::read('Site.title'); ?></h3>
-                    <div class="textwidget"><?php echo Configure::read('Site.description'); ?></div>
+                    <div class="textwidget"><?php echo $siteConfig['Site']['footer'] ?></div>
                     <ul class="footer-social">
                         <li><a class="facebook" href="#"><i class="lni-facebook-filled"></i></a></li>
                         <li><a class="twitter" href="#"><i class="lni-twitter-filled"></i></a></li>
