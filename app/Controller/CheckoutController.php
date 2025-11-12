@@ -21,6 +21,7 @@ class CheckoutController extends AppController
         $this->layout = 'site';
         //Quando posta
         if ($this->request->is('post')) {
+
             $resultPayment = $this->_sendPayment($this->data);
             //Se salvar corretamente
             if ($resultPayment['success']) {
@@ -114,10 +115,19 @@ class CheckoutController extends AppController
             'message' => ''
         ];
 
-        //Se teve desconto de 100%
+        //Se não tem valor informado
         if (!isset($dados['Order']['value'])) {
-            $dados['Order']['value'] = 0;
-            $dados['Order']['payment_type'] = 'free';
+            //Se teve desconto de 100%
+            if (isset($dados['Order']['coupon_id']) && !empty($dados['Order']['coupon_id'])) {
+                $dados['Order']['value'] = 0;
+                $dados['Order']['payment_type'] = 'free';
+            } else {
+                
+                return [
+                    'success' => false,
+                    'message' => 'Houve uma falha no processamento da compra, tente novamente!'
+                ];
+            }
         }
 
         $this->loadModel('Order');
