@@ -155,7 +155,7 @@
                                                 'admin' => true,
                                                 'controller' => 'Tickets',
                                                 'action' => 'edit',
-                                                $registro['Ticket']['order_id']
+                                                $registro['Ticket']['id']
                                             ),
                                             array(
                                                 'title' => 'Editar',
