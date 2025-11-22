@@ -303,6 +303,8 @@ $(document).ready(function () {
 
     $("#dataIngresso").datepicker({
         dateFormat: 'dd/mm/yy',
+        //minDate: '<?php echo $this->Alv->tratarData($event['Event']['start_date'], 'pt');?>',
+        maxDate: '<?php echo $this->Alv->tratarData($event['Event']['end_date'], 'pt');?>',
         minDate: 0,
         beforeShowDay: function (date) {
             var day = date.getDay();
