@@ -10,7 +10,8 @@ class EventsController extends AppController
         parent::beforeFilter();
         $this->set('title_for_layout', 'Evento');
         $this->Auth->allow(array(
-            'buy'
+            'buy',
+            'index'
         ));
         //verifica as permissões
         if (in_array($this->action, array(
@@ -353,7 +354,7 @@ class EventsController extends AppController
         }
     }
 
-    public function buy($eventId)
+    public function buy($eventId = null)
     {
         if ($this->request->is('post')) {
             //se não escolheu nenhuma data
@@ -371,7 +372,25 @@ class EventsController extends AppController
                 )
             );
         }
-        // $this->Session->delete('Cart');
+
+        $arrayConditions = array();
+        //Se tem slug
+        if (isset($this->params['slug']) && !empty($this->params['slug'])) {
+            $arrayConditions = array(
+                'Event.slug' => $this->params['slug']
+            );
+        }
+        //Se tem ID
+        if (!empty($eventId)) {
+            $arrayConditions = array(
+                'Event.id' => $eventId
+            );
+        }
+        //Se não conseguiu pegar o ID nem o Slug
+        if (empty($arrayConditions)) {
+            $this->Flash->error('O endereço solicitado não foi encontrado :(');
+            $this->redirect('/');
+        }
 
         $this->Cart->checkCart();
 
@@ -383,9 +402,7 @@ class EventsController extends AppController
         $event = $this->Event->find(
             'first',
             array(
-                'conditions' => array(
-                    'Event.id' => $eventId
-                ),
+                'conditions' => $arrayConditions,
                 'contain' => array(
                     'Lot',
                     'Field',
@@ -425,5 +442,40 @@ class EventsController extends AppController
         $this->theme = Configure::read('Site.tema');
         $this->layout = 'site';
         $this->set('title_for_layout', 'Comprar Ingresso');
+    }
+
+    function index()
+    {
+        $this->loadModel('Event');
+        $events = $this->Event->find(
+            'all',
+            array(
+                'conditions' => array(
+                    'status != ' => array('sketch', 'oculto'),
+                    'end_date >= ' => date('Y-m-d')
+                ),
+                'order' => array(
+                    'Event.priority' => 'ASC',
+                    'Event.start_date' => 'ASC'
+                ),
+                'recursive' => -1,
+                'fields' => array(
+                    'id',
+                    'title',
+                    'slug',
+                    'banner_mobile',
+                    'banner_desktop',
+                    'end_date',
+                    'start_date',
+                    'status'
+                )
+            )
+        );
+        $this->set('events', $events);
+
+
+        $this->theme = Configure::read('Site.tema');
+        $this->layout = 'site';
+        $this->set('title_for_layout', 'Eventos');
     }
 }
