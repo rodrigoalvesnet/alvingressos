@@ -4,9 +4,9 @@
             <h2 class="section-title">Comprar Ingresso!</h2>
             <p class="section-subtitle">Veja todos os nossos eventos disponíveis!</p>
         </div>
-        <div class="row">
+        <div class="row justify-content-center">
             <?php foreach ($events as $k => $event) { ?>
-                <div class="col-lg-4 col-md-6 col-xs-12 mb-3">
+                <div class="col-lg-4 col-md-6 col-xs-12 mb-3 justify-content-center">
                     <div class="div-thumb-event position-relative">
                         <?php
                         //trata os tags da miniatura
