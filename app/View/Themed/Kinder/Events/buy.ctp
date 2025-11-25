@@ -6,7 +6,7 @@
 
      /* Estado TRUNCADO (limita em 300px) */
      .texto-resumo.truncado {
-         max-height: 400px;
+         max-height: 460px;
          overflow: hidden;
      }
 
