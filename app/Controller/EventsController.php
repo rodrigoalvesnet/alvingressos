@@ -472,7 +472,11 @@ class EventsController extends AppController
             )
         );
         $this->set('events', $events);
-
+        //se tem apenas um evento:
+        if(count($events) == 1){
+            //direciona para o unico evento
+            $this->redirect('/event/' . $events[0]['Event']['slug']);
+        }
 
         $this->theme = Configure::read('Site.tema');
         $this->layout = 'site';
