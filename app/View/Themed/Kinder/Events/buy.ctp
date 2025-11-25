@@ -363,31 +363,33 @@
 
          $("#dataIngresso").datepicker({
              dateFormat: 'dd/mm/yy',
-             //minDate: '<?php echo $this->Alv->tratarData($event['Event']['start_date'], 'pt'); ?>',
-             maxDate: '<?php echo $this->Alv->tratarData($event['Event']['end_date'], 'pt'); ?>',
              minDate: 0,
+             maxDate: '31/12/2025',
+
              beforeShowDay: function(date) {
                  var day = date.getDay();
                  var dataFormatada = $.datepicker.formatDate("dd/mm/yy", date);
-                 var hoje = $.datepicker.formatDate("dd/mm/yy", new Date());
+                 var hoje = new Date();
+                 var dataHojeFormatada = $.datepicker.formatDate("dd/mm/yy", hoje);
 
-                 // Bloqueia segunda-feira
-                 if (day === 1) {
-                     // return [false, "", "Segunda-feira bloqueada"];
+                 // Hora atual
+                 var horaAtual = hoje.getHours();
+                 var minutoAtual = hoje.getMinutes();
+                 var passouDas1330 = (horaAtual > 13) || (horaAtual === 13 && minutoAtual >= 30);
+
+                 // Bloqueia o dia atual APENAS se já passou de 13:30
+                 if (dataFormatada === dataHojeFormatada && passouDas1330) {
+                     return [false, "", "Hoje não disponível após 13:30"];
                  }
 
-                 // Bloqueia o dia atual
-                 if (dataFormatada === hoje) {
-                     return [false, "", "Hoje não disponível"];
-                 }
-
-                 // Bloqueia datas específicas vindas do CakePHP
+                 // Bloqueia datas específicas do CakePHP
                  if ($.inArray(dataFormatada, blockedDates) !== -1) {
                      return [false, "", "Data indisponível"];
                  }
 
                  return [true, ""];
              },
+
              dayNames: ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"],
              dayNamesMin: ["D", "S", "T", "Q", "Q", "S", "S"],
              monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],
