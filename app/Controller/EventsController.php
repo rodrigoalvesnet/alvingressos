@@ -431,7 +431,7 @@ class EventsController extends AppController
         $this->set('modalidades', $modalidades);
         $this->set('regras', $regras);
 
-        $blockedDates = $this->Event->getBlockedDates($eventId, true, false);
+        $blockedDates = $this->Event->getBlockedDates($event['Event']['id'], true, false);
 
         $dates = [];
         foreach ($blockedDates as $date) {
