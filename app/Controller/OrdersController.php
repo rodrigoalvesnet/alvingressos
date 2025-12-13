@@ -16,7 +16,8 @@ class OrdersController extends AppController
             'get_installments',
             'generate_qrcode_checkin',
             'sum_products',
-            'view'
+            'view',
+            'admin_index'
         );
         $this->Auth->allow(array(
             'generate_qrcode_pix',
@@ -75,9 +76,10 @@ class OrdersController extends AppController
                 'EventsAdmin.user_id' => AuthComponent::user('id')
             );
         }
-        // pr($this->data);exit();
         //se o this->data não está vazio, prepara o filtro
         if (!empty($this->request->data)) {
+            // pr($this->request->data['button']);exit();
+
             if (isset($this->request->data['Filtro']['customer']) && !empty($this->request->data['Filtro']['customer'])) {
                 $arrayConditions['Order.name LIKE '] = '%' . $this->request->data['Filtro']['customer'] . '%';
             }
@@ -100,6 +102,14 @@ class OrdersController extends AppController
             //salva as condições na session            
             $this->Session->write('Filtros.Orders', $arrayConditions);
             $this->Session->write('Filtros.ThisData', $this->request->data);
+
+            if(isset($this->request->data['button']) && $this->request->data['button'] == 'btnExport'){
+                $this->redirect([
+                    'controller' => 'Reports',
+                    'action' => 'orders',
+                    'admin' => true
+                ]);
+            }
         } else {
             //verifica se tem condições na session
             if ($this->Session->check('Filtros.Orders')) {

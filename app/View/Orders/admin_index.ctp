@@ -87,25 +87,36 @@
         echo $this->Form->submit(
             'Pesquisar',
             array(
-                'type'    => 'submit',
-                'class' => 'btn btn-primary',
-                'div'    => false,
-                'label' => false
+                'type'      => 'submit',
+                'class'     => 'btn btn-primary mx-1',
+                'div'       => false,
+                'label'     => false
+            )
+        );
+        echo $this->Form->button(
+            'Exportar',
+            array(
+                'type'      => 'submit',
+                'class'     => 'btn btn-outline-success mx-1',
+                'name'      => 'button',
+                'value'     => 'btnExport',
+                'div'       => false,
+                'label'     => false
             )
         );
         echo $this->Html->link(
-    'Limpar',
-    array(
-        'admin' => true,
-        'controller' => 'orders',
-        'action' => 'index',
-        'limpar' => 1
-    ),
-    array(
-        'class' => 'btn btn-outline-secondary mx-2',
-        'escape' => false
-    )
-);
+            'Limpar',
+            array(
+                'admin' => true,
+                'controller' => 'orders',
+                'action' => 'index',
+                'limpar' => 1
+            ),
+            array(
+                'class' => 'btn btn-outline-secondary mx-1',
+                'escape' => false
+            )
+        );
         ?>
     </div>
     <?php echo $this->Form->end(); ?>

@@ -51,17 +51,21 @@ class User extends AppModel
                 'message' => 'Já existe um registro com este email'
             ),
         ),
-        // 'cpf' => array(
-        //     'required' => array(
-        //         'rule' => array('notBlank'),
-        //         'message' => 'O campo nome é obrigatório'
-        //     ),
-        //     'unique' => array(
-        //         'rule' => 'isUnique',
-        //         'on' => 'create',
-        //         'message' => 'Já existe um registro com este CPF'
-        //     ),
-        // ),
+        'cpf' => array(
+            'required' => array(
+                'rule' => array('notBlank'),
+                'message' => 'O campo nome é obrigatório'
+            ),
+            'unique' => array(
+                'rule' => 'isUnique',
+                'on' => 'create',
+                'message' => 'Já existe um registro com este CPF'
+            ),
+            'cpfValido' => array(
+                'rule' => 'validarCpf',
+                'message' => 'CPF inválido'
+            )
+        ),
         'password' => array(
             'rule' => array('confirmPassword'),
             'message' => 'A confirmação da senha está errada!'
@@ -103,5 +107,43 @@ class User extends AppModel
             $senha .= substr($base, rand(0, strlen($base) - 1), 1);
         }
         return $senha;
+    }
+
+    /**
+     * Validação de CPF
+     */
+    public function validarCpf($check)
+    {
+        $cpf = array_values($check)[0];
+
+        // Remove tudo que não for número
+        $cpf = preg_replace('/\D/', '', $cpf);
+
+        // Deve ter 11 dígitos
+        if (strlen($cpf) != 11) {
+            return false;
+        }
+
+        // Rejeita CPFs com todos os dígitos iguais
+        if (preg_match('/^(\d)\1{10}$/', $cpf)) {
+            return false;
+        }
+
+        // Valida dígitos verificadores
+        for ($t = 9; $t < 11; $t++) {
+            $soma = 0;
+            for ($i = 0; $i < $t; $i++) {
+                $soma += $cpf[$i] * (($t + 1) - $i);
+            }
+
+            $digito = (10 * $soma) % 11;
+            $digito = ($digito == 10) ? 0 : $digito;
+
+            if ($cpf[$t] != $digito) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

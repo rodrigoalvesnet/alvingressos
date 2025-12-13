@@ -41,7 +41,7 @@
                         'label' => 'CPF',
                         'class' => 'form-control cpf',
                         'div' => 'form-group',
-                        'disabled' => true,
+                        'disabled' => false,
                     )
                 );
                 ?>
