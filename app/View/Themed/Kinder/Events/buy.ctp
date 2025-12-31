@@ -357,6 +357,10 @@
      </div>
  </section>
 
+ <?php
+    $startDate = $event['Event']['start_date'] > date('Y-m-d') ? date('d/m/Y', strtotime($event['Event']['start_date'])) : 0;
+    $endDate = date('d/m/Y', strtotime($event['Event']['end_date']));
+    ?>
  <script>
      $(document).ready(function() {
          var blockedDates = <?php echo !empty($blockedDates) ? $blockedDates : '[]'; ?>;
@@ -364,8 +368,7 @@
          $("#dataIngresso").datepicker({
              dateFormat: 'dd/mm/yy',
              minDate: 0,
-             maxDate: '31/12/2025',
-
+             maxDate: '<?php echo $endDate; ?>',
              beforeShowDay: function(date) {
                  var day = date.getDay();
                  var dataFormatada = $.datepicker.formatDate("dd/mm/yy", date);
@@ -436,7 +439,6 @@
 
      });
  </script>
-
 
  <?php
     echo $this->Html->script('buy', array('block' => 'scriptBottom'));
