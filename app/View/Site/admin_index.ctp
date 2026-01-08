@@ -102,7 +102,7 @@
                             'instagram',
                             array(
                                 'label' => 'Instagram',
-                                'class' => 'form-control fone',
+                                'class' => 'form-control',
                                 'div' => 'form-group'
                             )
                         );
@@ -114,7 +114,7 @@
                             'facebook',
                             array(
                                 'label' => 'Facebook',
-                                'class' => 'form-control fone',
+                                'class' => 'form-control',
                                 'div' => 'form-group'
                             )
                         );

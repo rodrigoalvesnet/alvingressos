@@ -7,13 +7,15 @@
                     <h3><?php echo Configure::read('Site.title'); ?></h3>
                     <div class="textwidget"><?php echo $siteConfig['Site']['footer'] ?></div>
                     <ul class="footer-social">
-                        <li><a class="facebook" href="#"><i class="lni-facebook-filled"></i></a></li>
-                        <li><a class="twitter" href="#"><i class="lni-twitter-filled"></i></a></li>
-                        <li><a class="linkedin" href="#"><i class="lni-linkedin-fill"></i></a></li>
-                        <li><a class="google-plus" href="#"><i class="lni-google-plus"></i></a></li>
+                        <?php if (!empty($siteConfig['Site']['facebook'])) { ?>
+                            <li><a class="facebook" href="<?php echo $siteConfig['Site']['facebook']; ?>" target="_blank"><i class="lni-facebook-filled"></i></a></li>
+                        <?php } ?>
+                        <?php if (!empty($siteConfig['Site']['instagram'])) { ?>
+                            <li><a class="instagram" href="<?php echo $siteConfig['Site']['instagram']; ?>" target="_blank"><i class="lni-instagram-filled"></i></a></li>
+                        <?php } ?>
                     </ul>
                 </div>
-                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 col-mb-12">
+                <div class="col-lg-2 col-md-6 col-sm-6 col-xs-6 col-mb-12">
                     <div class="widget">
                         <h3 class="block-title">Links</h3>
                         <?php
@@ -22,10 +24,10 @@
                             'controller' => 'menus',
                             'action' => 'menuRodape'
                         ), array('return'));
-                        ?>                        
+                        ?>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 col-mb-12">
+                <div class="col-lg-4 col-md-6 col-sm-6 col-xs-6 col-mb-12">
                     <div class="widget">
                         <h3 class="block-title">Contato</h3>
                         <ul class="contact-footer">
