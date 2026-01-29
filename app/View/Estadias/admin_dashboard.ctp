@@ -71,3 +71,32 @@
   </div>
 
 </div>
+
+<div class="card shadow">
+  <div class="card-header">
+    <h5 class="mb-0">Estadias em andamento</h5>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>Brinquedo</th>
+          <th>Cliente</th>
+          <th>Início</th>
+          <th>Duração</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Pula-pula</td>
+          <td>João</td>
+          <td>14:20</td>
+          <td>1h 10min</td>
+          <td><span class="badge badge-warning">Em andamento</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
