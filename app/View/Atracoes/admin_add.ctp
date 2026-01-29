@@ -5,7 +5,7 @@
     ?>
     <div class="card-body">
         <div class="row">
-            <div class="col-lg-12">
+            <div class="col-lg-4">
                 <?php
                 echo $this->Form->input('nome', [
                     'label' => 'Nome da Atração',
@@ -16,7 +16,20 @@
                 ?>
             </div>
 
-            <div class="col-lg-12">
+            <div class="col-lg-4">
+                <?php
+                echo $this->Form->input('unidade_id', [
+                    'label' => 'Unidade',
+                    'options' => $unidades,
+                    'class' => 'form-control',
+                    'div' => 'form-group',
+                    'empty' => 'Selecione',
+                    'required' => true
+                ]);
+                ?>
+            </div>
+
+            <div class="col-lg-4">
                 <?php
                 echo $this->Form->input('ativo', [
                     'label' => 'Ativo',

@@ -119,132 +119,150 @@
 </div>
 
 
-<?php if (!empty($registros)) { ?>
-    <div class="card">
-        <div class="card-body">
-            <a href="<?php echo $this->Html->url(['action' => 'iniciar']); ?>"
-                class="btn btn-success mb-3 text-white">
-                <i class="mdi mdi-plus"></i> Nova Estadia
-            </a>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th class="text-center" scope="col"><?php echo $this->Paginator->sort('Estadia.sexo', '#'); ?></th>
-                        <th scope="col"><?php echo $this->Paginator->sort('Estadia.created', 'Data/Hora'); ?></th>
-                        <th class="text-center" scope="col"><?php echo $this->Paginator->sort('Estadia.pulseira_numero', 'Pulseira'); ?></th>
-                        <th scope="col"><?php echo $this->Paginator->sort('Estadia.crianca_nome', 'Criança'); ?></th>
-                        <th scope="col"><?php echo $this->Paginator->sort('Estadia.responsavel_nome', 'Responsável'); ?></th>
-                        <th scope="col"><?php echo $this->Paginator->sort('Atracao.nome', 'Atração/Brinquedo'); ?></th>
-                        <th class="text-center" scope="col"><?php echo $this->Paginator->sort('Estadia.status', 'Situação'); ?></th>
-                        <th class="text-center">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($registros as $registro) {
-                        $id = $registro['Estadia']['id'];
-                        switch ($registro['Estadia']['status']) {
-                            case 'aberta':
-                                $classBadge = 'bg-primary';
-                                break;
-                            case 'pausada':
-                                $classBadge = 'bg-warning';
-                                break;
-                            case 'encerrada':
-                                $classBadge = 'bg-success';
-                                break;
-                            case 'cancelada':
-                                $classBadge = 'bg-danger';
-                                break;
-                        }
-                    ?>
+<div class="card">
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <a href="<?php echo $this->Html->url(['action' => 'iniciar']); ?>"
+                    class="btn btn-success mb-3 text-white">
+                    <i class="mdi mdi-plus"></i> Nova Estadia
+                </a>
+            </div>
+            <div>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="mdi mdi-filter"></i>
+                    </span>
+                    <input type="search" class="form-control" id="inputSearch" placeholder="Localizar...">
+                </div>
+
+            </div>
+        </div>
+
+        <?php if (empty($registros)) : ?>
+            <div class="alert alert-info">Nenhum registro encontrado.</div>
+        <?php else : ?>
+            <div class="table-responsive">
+                <table class="table table-striped" id="tableEstadias">
+                    <thead>
                         <tr>
-                            <td class="text-center">
-                                <?php echo $registro['Estadia']['id']; ?>
-                            </td>
-                            <td><?php echo date('d/m/Y H:i', strtotime($registro['Estadia']['created'])); ?></td>
-                            <td class="text-center">
-                                <span class="badge rounded-pill bg-primary">
-                                    <?php echo $registro['Estadia']['pulseira_numero']; ?>
-                                </span>
-                            </td>
-                            <td><img src="<?= $registro['Estadia']['sexo'] === 'feminino' ? '/img/icon-girl.jpg' : '/img/icon-boy.jpg' ?>" class="img-avatar thumbnail" /><?php echo $registro['Estadia']['crianca_nome']; ?></td>
-                            <td><?php echo $registro['Estadia']['responsavel_nome']; ?></td>
-                            <td><?php echo $registro['Atracao']['nome']; ?></td>
-                            <td class="text-center">
-                                <span class="badge rounded-pill <?php echo $classBadge; ?>">
-                                    <?php echo $status[$registro['Estadia']['status']]; ?>
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <?php if ($registro['Estadia']['status'] === 'aberta'): ?>
-                                    <?php
-                                    echo $this->Form->postLink(
-                                        '<i class="mdi mdi-pause"></i>',
-                                        ['action' => 'pausar', $id],
-                                        [
-                                            'title' => 'Pausar',
-                                            'class' => 'btn btn-warning btn-sm',
-                                            'confirm' => 'Tem certeza que deseja PAUSAR a estadia de ' . $registro['Estadia']['crianca_nome'] . '?',
-                                            'escape' => false
-                                        ]
-                                    );
-                                    ?>
+                            <th class="text-center" scope="col"><?php echo $this->Paginator->sort('Estadia.sexo', '#'); ?></th>
+                            <th scope="col"><?php echo $this->Paginator->sort('Estadia.created', 'Data/Hora'); ?></th>
+                            <th class="text-center" scope="col"><?php echo $this->Paginator->sort('Estadia.pulseira_numero', 'Pulseira'); ?></th>
+                            <th scope="col"><?php echo $this->Paginator->sort('Estadia.crianca_nome', 'Criança'); ?></th>
+                            <th scope="col"><?php echo $this->Paginator->sort('Estadia.responsavel_nome', 'Responsável'); ?></th>
+                            <th scope="col"><?php echo $this->Paginator->sort('Atracao.nome', 'Atração/Brinquedo'); ?></th>
+                            <th class="text-center" scope="col"><?php echo $this->Paginator->sort('Estadia.status', 'Situação'); ?></th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($registros as $registro) {
+                            $id = $registro['Estadia']['id'];
+                            switch ($registro['Estadia']['status']) {
+                                case 'aberta':
+                                    $classBadge = 'bg-primary';
+                                    break;
+                                case 'pausada':
+                                    $classBadge = 'bg-warning';
+                                    break;
+                                case 'encerrada':
+                                    $classBadge = 'bg-success';
+                                    break;
+                                case 'cancelada':
+                                    $classBadge = 'bg-danger';
+                                    break;
+                            }
+                        ?>
+                            <tr>
+                                <td class="text-center">
+                                    <?php echo $registro['Estadia']['id']; ?>
+                                </td>
+                                <td><?php echo date('d/m/Y H:i', strtotime($registro['Estadia']['created'])); ?></td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill bg-primary">
+                                        <?php echo $registro['Estadia']['pulseira_numero']; ?>
+                                    </span>
+                                </td>
+                                <td><img src="<?= $registro['Estadia']['sexo'] === 'feminino' ? '/img/icon-girl.jpg' : '/img/icon-boy.jpg' ?>" class="img-avatar thumbnail" /><?php echo $registro['Estadia']['crianca_nome']; ?></td>
+                                <td><?php echo $registro['Estadia']['responsavel_nome']; ?></td>
+                                <td><?php echo $registro['Atracao']['nome']; ?></td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill <?php echo $classBadge; ?>">
+                                        <?php echo $status[$registro['Estadia']['status']]; ?>
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <?php if ($registro['Estadia']['status'] === 'aberta'): ?>
+                                        <?php
+                                        echo $this->Form->postLink(
+                                            '<i class="mdi mdi-pause"></i>',
+                                            ['action' => 'pausar', $id],
+                                            [
+                                                'title' => 'Pausar',
+                                                'class' => 'btn btn-warning btn-sm',
+                                                'confirm' => 'Tem certeza que deseja PAUSAR a estadia de ' . $registro['Estadia']['crianca_nome'] . '?',
+                                                'escape' => false
+                                            ]
+                                        );
+                                        ?>
+                                        <button
+                                            type="button"
+                                            class="btn btn-success btn-sm text-white btn-encerrar"
+                                            data-id="<?php echo (int)$id; ?>"
+                                            title="Encerrar">
+                                            <i class="mdi mdi-check"></i>
+                                        </button>
+                                    <?php elseif ($registro['Estadia']['status'] === 'pausada'): ?>
+                                        <?php
+                                        echo $this->Form->postLink(
+                                            '<i class="mdi mdi-play"></i>',
+                                            ['action' => 'retomar', $id],
+                                            [
+                                                'title' => 'Retomar',
+                                                'class' => 'btn btn-info btn-sm',
+                                                'confirm' => 'Tem certeza que deseja RETOMAR a estadia de ' . $registro['Estadia']['crianca_nome'] . '?',
+                                                'escape' => false
+                                            ]
+                                        );
+                                        ?>
+                                    <?php endif; ?>
+
+                                    <?php if (in_array($registro['Estadia']['status'], ['aberta', 'pausada'])): ?>
+                                        <?php
+                                        echo $this->Form->postLink(
+                                            '<i class="mdi mdi-close"></i>',
+                                            ['action' => 'cancelar', $id],
+                                            [
+                                                'title' => 'Cancelar',
+                                                'class' => 'btn btn-danger btn-sm',
+                                                'confirm' => 'Tem certeza que deseja CANCELAR a estadia de ' . $registro['Estadia']['crianca_nome'] . '?',
+                                                'escape' => false
+                                            ]
+                                        );
+                                        ?>
+                                    <?php endif; ?>
+
                                     <button
                                         type="button"
-                                        class="btn btn-success btn-sm text-white btn-encerrar"
-                                        data-id="<?php echo (int)$id; ?>" 
-                                        title="Encerrar">
-                                        <i class="mdi mdi-check"></i>
+                                        class="btn btn-sm btn-primary btn-visualizar"
+                                        data-id="<?php echo (int)$id; ?>"
+                                        title="Visualizar">
+                                        <i class="mdi mdi-eye"></i>
                                     </button>
-                                <?php elseif ($registro['Estadia']['status'] === 'pausada'): ?>
-                                    <?php
-                                    echo $this->Form->postLink(
-                                        '<i class="mdi mdi-play"></i>',
-                                        ['action' => 'retomar', $id],
-                                        [
-                                            'title' => 'Retomar',
-                                            'class' => 'btn btn-info btn-sm',
-                                            'confirm' => 'Tem certeza que deseja RETOMAR a estadia de ' . $registro['Estadia']['crianca_nome'] . '?',
-                                            'escape' => false
-                                        ]
-                                    );
-                                    ?>
-                                <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php } ?>
 
-                                <?php if (in_array($registro['Estadia']['status'], ['aberta', 'pausada'])): ?>
-                                    <?php
-                                    echo $this->Form->postLink(
-                                        '<i class="mdi mdi-close"></i>',
-                                        ['action' => 'cancelar', $id],
-                                        [
-                                            'title' => 'Cancelar',
-                                            'class' => 'btn btn-danger btn-sm',
-                                            'confirm' => 'Tem certeza que deseja CANCELAR a estadia de ' . $registro['Estadia']['crianca_nome'] . '?',
-                                            'escape' => false
-                                        ]
-                                    );
-                                    ?>
-                                <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php echo $this->element('paginador'); ?>
 
-                                <button
-                                    type="button"
-                                    class="btn btn-sm btn-primary btn-visualizar"
-                                    data-id="<?php echo (int)$id; ?>"
-                                    title="Visualizar">
-                                    <i class="mdi mdi-eye"></i> 
-                                </button>
-                            </td>
-                        </tr>
-                    <?php } ?>
-
-                </tbody>
-            </table>
-        </div>
-        <?php echo $this->element('paginador'); ?>
+        <?php endif; ?>
     </div>
-<?php } else { ?>
-    <div class="alert alert-primary" Order="alert">Nenhum registro encontrado</div>
-<?php } ?>
+</div>
 <div class="modal fade" id="modalEncerrar" tabindex="-1" role="dialog" aria-labelledby="modalEncerrarLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -356,6 +374,19 @@
 <?php $this->start('scriptBottom'); ?>
 <script>
     (function() {
+
+
+        $('#inputSearch').on('keyup', function() {
+            var value = $(this).val().toLowerCase();
+
+            $('#tableEstadias tbody tr').filter(function() {
+                $(this).toggle(
+                    $(this).text().toLowerCase().indexOf(value) > -1
+                );
+            });
+        });
+
+
         function moneyBR(v) {
             v = Number(v || 0);
             return 'R$ ' + v.toFixed(2).replace('.', ',');

@@ -138,13 +138,13 @@ $roleId = $_SESSION['Auth']['User']['role_id'];
                         <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="mdi mdi-clock"></i><span class="hide-menu">Estadias </span></a>
                         <ul aria-expanded="false" class="collapse first-level">
                             <li class="sidebar-item">
-                                <a href="/admin/estadias" class="sidebar-link"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu"> Estadias </span></a>
+                                <a href="/admin/estadias" class="sidebar-link"><i class="mdi mdi-clock"></i><span class="hide-menu"> Estadias </span></a>
                             </li>
                             <li class="sidebar-item">
-                                <a href="/admin/atracoes" class="sidebar-link"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu"> Atrações </span></a>
+                                <a href="/admin/atracoes" class="sidebar-link"><i class="mdi mdi-gamepad-variant"></i><span class="hide-menu"> Atrações </span></a>
                             </li>
                             <li class="sidebar-item">
-                                <a href="/admin/tarifas" class="sidebar-link"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu"> Tarifas </span></a>
+                                <a href="/admin/tarifas" class="sidebar-link"><i class="mdi mdi-currency-usd"></i><span class="hide-menu"> Tarifas </span></a>
                             </li>
                         </ul>
                     </li>

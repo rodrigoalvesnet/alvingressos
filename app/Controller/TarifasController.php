@@ -5,15 +5,65 @@ class TarifasController extends AppController
 
     public $uses = ['Tarifa', 'TarifaFaixa'];
 
+    public function beforeFilter()
+    {
+        parent::beforeFilter();
+        $this->set('title_for_layout', 'Tarifas');
+    }
+
+    /**
+     * Lista atrações
+     * /estadias-atracoes
+     */
+
     public function admin_index()
     {
-        $list = $this->Tarifa->find('all', [
-            'conditions' => [],
-            'contain' => ['TarifaFaixa'],
-            'order' => ['Tarifa.id' => 'DESC'],
-            'recursive' => -1
-        ]);
-        $this->set(compact('list'));
+
+        //se foi solicitadoa limpeza dos filtros
+        if (isset($this->params['named']['limpar'])) {
+            //veriica se o cache existe
+            if ($this->Session->check('Filtros.Tarifas')) {
+                //remove os filtros do cache
+                $this->Session->delete('Filtros.Tarifas');
+            }
+            //atualiza a pagina
+            $this->redirect(array(
+                'admin' => true
+            ));
+        }
+
+        //condição padrão
+        $arrayConditions = array();
+        //se o this->data não está vazio, prepara o filtro
+        if (!empty($this->request->data)) {
+            if (isset($this->request->data['Filtro']['nome']) && !empty($this->request->data['Filtro']['nome'])) {
+                $arrayConditions['Tarifa.nome LIKE'] = '%' . $this->request->data['Filtro']['nome'] . '%';
+            }
+            if (isset($this->request->data['Filtro']['active']) && !empty($this->request->data['Filtro']['active'])) {
+                $arrayConditions['Tarifa.ativo'] = $this->request->data['Filtro']['active'];
+            }
+            //salva as condições na session            
+            $this->Session->write('Filtros.Tarifas', $arrayConditions);
+        } else {
+            //verifica se tem condições na session
+            if ($this->Session->check('Filtros.Tarifas')) {
+                //utiliza os filtros do cache
+                $arrayConditions = $this->Session->read('Filtros.Tarifas');
+            }
+        }
+
+        //Prepara a busca
+        $this->paginate = array(
+            'conditions'    => $arrayConditions,
+            'limit'         => Configure::read('Sistema.limit'),
+            'contain'     => [
+                'TarifaFaixa'
+            ]
+        );
+
+        //envia os dados para a view
+        $this->set('registros', $this->paginate('Tarifa'));
+        
     }
 
     public function admin_add()
