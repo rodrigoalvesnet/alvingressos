@@ -116,4 +116,28 @@ class AppController extends Controller
         // }
         return false;
     }
+
+    protected function _isJson()
+    {
+        return !empty($this->request->params['ext']) && $this->request->params['ext'] === 'json'
+            || ($this->RequestHandler && $this->RequestHandler->prefers('json'))
+            || ($this->request->query('json') == 1);
+    }
+
+    protected function _respond($payload, $redirect = null)
+    {
+        if ($this->_isJson()) {
+            $this->set(['payload' => $payload, '_serialize' => ['payload']]);
+            return;
+        }
+
+        if (!empty($payload['ok'])) {
+            $this->Session->setFlash(!empty($payload['message']) ? $payload['message'] : 'Operação realizada.', 'default', [], 'success');
+        } else {
+            $this->Session->setFlash(!empty($payload['error']) ? $payload['error'] : 'Falha na operação.', 'default', [], 'error');
+        }
+
+        if ($redirect) return $this->redirect($redirect);
+        return $this->redirect($this->referer());
+    }
 }
