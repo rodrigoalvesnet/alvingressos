@@ -310,4 +310,8 @@ class EstadiasController extends AppController
 
         $this->set(compact('row'));
     }
+
+    public function admin_dashboard(){
+
+    }
 }
