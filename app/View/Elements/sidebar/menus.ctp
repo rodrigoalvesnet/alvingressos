@@ -149,6 +149,9 @@ $roleId = $_SESSION['Auth']['User']['role_id'];
                             <li class="sidebar-item">
                                 <a href="/admin/tarifas" class="sidebar-link"><i class="mdi mdi-currency-usd"></i><span class="hide-menu"> Tarifas </span></a>
                             </li>
+                            <li class="sidebar-item">
+                                <a href="/admin/formas_pagamentos" class="sidebar-link"><i class="mdi mdi-currency-usd"></i><span class="hide-menu"> Formas de Pagamentos </span></a>
+                            </li>
                         </ul>
                     </li>
                 <?php } ?>

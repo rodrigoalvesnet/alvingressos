@@ -142,7 +142,6 @@ class EstadiasController extends AppController
             } else {
                 $this->Flash->error('Erro: ' . $res['error']);
             }
-            
         }
         $this->loadModel('Atracao');
         $atracoes = $this->Atracao->find(
@@ -246,7 +245,7 @@ class EstadiasController extends AppController
         $preview['entrada'] = date('d/m/Y H:i', strtotime($row['Estadia']['created']));
         $preview['status'] = $row['Estadia']['status'];
         $preview['id'] = $row['Estadia']['id'];
-// $this->log($preview);
+        // $this->log($preview);
         return $this->response->body(json_encode($preview));
     }
 
@@ -311,7 +310,97 @@ class EstadiasController extends AppController
         $this->set(compact('row'));
     }
 
-    public function admin_dashboard(){
+    public function admin_dashboard()
+    {
+        $results = [
+            'valor_total' => 0,
+            'encerradas' => [
+                'pausado_segundos' => 0,
+                'duracao_segundos' => 0
+            ],
+            'unidades' => []
+        ];
+        $encerradas = $this->Estadia->find(
+            'all',
+            array(
+                'fields' => [
+                    'id',
+                    'pausado_segundos',
+                    'duracao_segundos',
+                    'valor_total'
+                ],
+                'conditions' => [
+                    'DATE(inicio_em)' => date('Y-m-d'),
+                    'status' => 'encerrada'
+                ],
+                'recursive' => -1
+            )
+        );
+        if (!empty($encerradas)) {
+            foreach ($encerradas as $k => $encerrada) {
+                $results['valor_total'] += $encerrada['Estadia']['valor_total'];
+                $results['encerradas']['pausado_segundos'] += $encerrada['Estadia']['pausado_segundos'];
+                $results['encerradas']['duracao_segundos'] += $encerrada['Estadia']['duracao_segundos'];
+            }
+        }
 
+        $estadiasByUnidade = $this->Estadia->find(
+            'all',
+            array(
+                'fields' => [
+                    'id',
+                    'pausado_segundos',
+                    'duracao_segundos',
+                    'valor_total',
+                    'unidade_id'
+                ],
+                'conditions' => [
+                    'DATE(inicio_em)' => date('Y-m-d'),
+                    'status' => 'encerrada'
+                ],
+                'contain' => [
+                    'Unidade' => [
+                        'name'
+                    ]
+                ]
+            )
+        );
+        // pr($estadiasByUnidade);
+        if (!empty($estadiasByUnidade)) {
+            foreach ($estadiasByUnidade as $unidade) {
+                $unidadeId = $unidade['Estadia']['unidade_id'];
+                if (!isset($results['unidades'][$unidadeId])) {
+                    $results['unidades'][$unidadeId] = [
+                        'nome' => $unidade['Unidade']['name'],
+                        'quantidade' => 0,
+                        'faturado' => 0,
+                        'tempo_segundos' => 0
+                    ];
+                }
+
+                $pausado  = is_numeric($unidade['Estadia']['pausado_segundos']) ? (int)$unidade['Estadia']['pausado_segundos'] : 0;
+                $duracao  = is_numeric($unidade['Estadia']['duracao_segundos']) ? (int)$unidade['Estadia']['duracao_segundos'] : 0;
+                $segundos = max(0, $duracao - $pausado); // evita negativo
+
+                $results['unidades'][$unidadeId]['quantidade'] += 1;
+                $results['unidades'][$unidadeId]['faturado'] += $unidade['Estadia']['valor_total'];
+                $results['unidades'][$unidadeId]['tempo_segundos'] += $segundos;  // <-- soma em número
+
+            }
+            foreach ($results['unidades'] as $id => $u) {
+                $results['unidades'][$id]['tempo'] = $this->_traitSeconds($u['tempo_segundos']);
+            }
+        }
+        // pr($results);
+        // exit();
+        $this->set(compact('results'));
+    }
+
+    function _traitSeconds($seconds)
+    {
+        $horas = floor($seconds / 3600);
+        $minutos = floor(($seconds % 3600) / 60);
+
+        return sprintf('%02d:%02d', $horas, $minutos); // 02:13
     }
 }

@@ -4,18 +4,13 @@ class Estadia extends AppModel {
     public $useTable = 'estadias';
 
     public $belongsTo = [
-        'Tarifa' => [
-            'className' => 'Tarifa',
-            'foreignKey' => 'tarifa_id'
-        ],
+        'Unidade',
+        'Tarifa',
         'TarifaFaixa' => [
             'className' => 'TarifaFaixa',
             'foreignKey' => 'faixa_id'
         ],
-        'Atracao' => [
-            'className' => 'Atracao',
-            'foreignKey' => 'atracao_id'
-        ]
+        'Atracao'
     ];
 
     public $validate = [
