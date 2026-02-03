@@ -136,7 +136,7 @@
                                                              type="text"
                                                              value="<?php echo $pessoa['nome']; ?>"
                                                              name="cart[<?php echo $eventId; ?>][ingressos][<?php echo $date; ?>][<?php echo $i; ?>][nome]"
-                                                             placeholder="Nome da pessoa"
+                                                             placeholder="Nome(s) da(s) criança(s)"
                                                              class="form-control">
                                                      </div>
                                                      <div class="col-md-4 div-select-modalidade" data-modalidade-id="<?php echo $pessoa['modalidade']; ?>" data-date="<?php echo $date; ?>">
@@ -259,7 +259,7 @@
                                             <div class="linha pt-2">
                                                 <div class="row">
                                                     <div class="col-md-5 ">
-                                                        <input type="text" name="cart[<?php echo $eventId; ?>][ingressos][${data}][][nome]" placeholder="Nome da pessoa" class="form-control" required>
+                                                        <input type="text" name="cart[<?php echo $eventId; ?>][ingressos][${data}][][nome]" placeholder="Nome(s) da(s) criança(s)" class="form-control" required>
                                                     </div>
                                                     <div class="col-md-4">
                                                         ${gerarSelectModalidade(data, 0)}
