@@ -94,7 +94,7 @@ for ($i = $anoAtual - 5; $i <= $anoAtual + 1; $i++) {
         <div class="d-flex justify-content-between align-items-center">
           <div>
             <h6 class="text-uppercase text-muted mb-1">
-              Estadias Ativas
+              Estadias Ativas <?php echo empty($this->data) ? '(Hoje)' : ''; ?>
             </h6>
             <h3 class="mb-0 font-weight-bold text-primary">
               <?php echo $results['abertas']['quantidade']; ?>
@@ -114,7 +114,7 @@ for ($i = $anoAtual - 5; $i <= $anoAtual + 1; $i++) {
         <div class="d-flex justify-content-between align-items-center">
           <div>
             <h6 class="text-uppercase text-muted mb-1">
-              Encerradas
+              Encerradas <?php echo empty($this->data) ? '(Hoje)' : ''; ?>
             </h6>
             <h3 class="mb-0 font-weight-bold text-success">
               <?php echo $results['encerradas']['quantidade']; ?>
@@ -134,7 +134,7 @@ for ($i = $anoAtual - 5; $i <= $anoAtual + 1; $i++) {
         <div class="d-flex justify-content-between align-items-center">
           <div>
             <h6 class="text-uppercase text-muted mb-1">
-              Canceladas
+              Canceladas <?php echo empty($this->data) ? '(Hoje)' : ''; ?>
             </h6>
             <h3 class="mb-0 font-weight-bold text-danger">
               <?php echo $results['canceladas']['quantidade']; ?>
@@ -154,7 +154,7 @@ for ($i = $anoAtual - 5; $i <= $anoAtual + 1; $i++) {
         <div class="d-flex justify-content-between align-items-center">
           <div>
             <h6 class="text-uppercase text-muted mb-1">
-              Faturamento
+              Faturamento <?php echo empty($this->data) ? '(Hoje)' : ''; ?>
             </h6>
             <h3 class="mb-0 font-weight-bold text-success">
               R$ <?php echo $this->Alv->tratarValor($results['valor_total'], 'pt'); ?>
