@@ -4,7 +4,7 @@ class EstadiasController extends AppController
 {
 
     public $uses = ['Estadia', 'Tarifa', 'TarifaFaixa', 'Atracao'];
-    public $components = ['Session', 'RequestHandler', 'EstadiasCalculator'];
+    public $components = ['Session', 'RequestHandler', 'EstadiasCalculator', 'Alv'];
 
     public function beforeFilter()
     {
@@ -312,15 +312,40 @@ class EstadiasController extends AppController
 
     public function admin_dashboard()
     {
+        $conditions = [
+            'DATE(inicio_em)' => date('Y-m-d')
+        ];
+        if (!empty($this->data)) {
+            $conditions = [
+                'DATE(inicio_em) >=' => $this->data['Filtro']['data_inicial'],
+                'DATE(fim_em) <=' => $this->data['Filtro']['data_final']
+            ];
+        }
+
         $results = [
             'valor_total' => 0,
+            'abertas' => [
+                'quantidade' => 0,
+                'pausado_segundos' => 0,
+                'duracao_segundos' => 0
+            ],
             'encerradas' => [
+                'quantidade' => 0,
+                'pausado_segundos' => 0,
+                'duracao_segundos' => 0
+            ],
+            'canceladas' => [
+                'quantidade' => 0,
                 'pausado_segundos' => 0,
                 'duracao_segundos' => 0
             ],
             'unidades' => []
         ];
-        $encerradas = $this->Estadia->find(
+
+        /**
+         * Estadias ativas
+         */
+        $abertas = $this->Estadia->find(
             'all',
             array(
                 'fields' => [
@@ -330,9 +355,35 @@ class EstadiasController extends AppController
                     'valor_total'
                 ],
                 'conditions' => [
-                    'DATE(inicio_em)' => date('Y-m-d'),
-                    'status' => 'encerrada'
+                    'status' => 'aberta'
                 ],
+                'recursive' => -1
+            )
+        );
+
+        if (!empty($abertas)) {
+            foreach ($abertas as $k => $aberta) {
+                $results['abertas']['pausado_segundos'] += $aberta['Estadia']['pausado_segundos'];
+                $results['abertas']['duracao_segundos'] += $aberta['Estadia']['duracao_segundos'];
+                $results['abertas']['quantidade'] += 1;
+            }
+        }
+
+        /**
+         * Estadias Encerradas
+         */
+        $encerradas = $this->Estadia->find(
+            'all',
+            array(
+                'fields' => [
+                    'id',
+                    'pausado_segundos',
+                    'duracao_segundos',
+                    'valor_total'
+                ],
+                'conditions' => array_merge($conditions, [
+                    'status' => 'encerrada'
+                ]),
                 'recursive' => -1
             )
         );
@@ -341,9 +392,39 @@ class EstadiasController extends AppController
                 $results['valor_total'] += $encerrada['Estadia']['valor_total'];
                 $results['encerradas']['pausado_segundos'] += $encerrada['Estadia']['pausado_segundos'];
                 $results['encerradas']['duracao_segundos'] += $encerrada['Estadia']['duracao_segundos'];
+                $results['encerradas']['quantidade'] += 1;
             }
         }
 
+        /**
+         * Estadias Canceladas
+         */
+        $canceladas = $this->Estadia->find(
+            'all',
+            array(
+                'fields' => [
+                    'id',
+                    'pausado_segundos',
+                    'duracao_segundos',
+                    'valor_total'
+                ],
+                'conditions' => array_merge($conditions, [
+                    'status' => 'cancelada'
+                ]),
+                'recursive' => -1
+            )
+        );
+        if (!empty($canceladas)) {
+            foreach ($canceladas as $k => $cancelada) {
+                $results['canceladas']['pausado_segundos'] += $cancelada['Estadia']['pausado_segundos'];
+                $results['canceladas']['duracao_segundos'] += $cancelada['Estadia']['duracao_segundos'];
+                $results['canceladas']['quantidade'] += 1;
+            }
+        }
+        // pr($abertas);
+        // pr($encerradas);
+        // pr($results);
+        // exit();
         $estadiasByUnidade = $this->Estadia->find(
             'all',
             array(
@@ -354,10 +435,7 @@ class EstadiasController extends AppController
                     'valor_total',
                     'unidade_id'
                 ],
-                'conditions' => [
-                    'DATE(inicio_em)' => date('Y-m-d'),
-                    'status' => 'encerrada'
-                ],
+                'conditions' => $conditions,
                 'contain' => [
                     'Unidade' => [
                         'name'
