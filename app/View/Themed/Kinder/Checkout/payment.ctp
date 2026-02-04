@@ -161,6 +161,10 @@
                                     echo $this->Form->hidden('Order.event_id', array(
                                         'value' => $eventId
                                     ));
+                                    /**
+                                     * Remove o boleto - falta terminar, tem que trazer as formas de pagamento de acordo com o evento
+                                     */
+                                    unset($optionsPayment['ticket']);
                                     echo $this->Form->input(
                                         'Order.payment_type',
                                         array(
