@@ -179,7 +179,7 @@ for ($i = $anoAtual - 5; $i <= $anoAtual + 1; $i++) {
           <!-- Cabeçalho -->
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0 font-weight-bold text-info">
-              <?php echo $unidade['nome']; ?>
+              <?php echo $unidade['nome']; ?><?php echo empty($this->data) ? ' (Hoje)' : ''; ?>
             </h5>
             <i class="fa fa-store fa-lg text-info"></i>
           </div>
