@@ -68,12 +68,12 @@
     <?php echo $this->element('site/navbar'); ?>
     <?php echo $this->Flash->render(); ?>
     <?php echo $this->fetch('content'); ?>
-    <?php 
-    if($this->action !== 'buy'){
-        echo $this->element('site/compre1'); 
+    <?php
+    if ($this->action !== 'buy') {
+        echo $this->element('site/compre1');
+        echo $this->element('site/contact');
     }
     ?>
-    <?php echo $this->element('site/contact'); ?>
     <?php echo $this->element('site/mapa'); ?>
     <?php echo $this->element('site/footer'); ?>
     <?php echo $this->element('site/whatsapp'); ?>
