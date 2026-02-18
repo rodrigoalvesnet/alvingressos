@@ -34,65 +34,33 @@ $roleId = $_SESSION['Auth']['User']['role_id'];
                         </ul>
                     </li>
                     <li class="sidebar-item">
-                        <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="mdi mdi-web"></i><span class="hide-menu">Páginas </span></a>
-                        <ul aria-expanded="false" class="collapse first-level">
-                            <li class="sidebar-item">
-                                <a href="/admin/pages/index" class="sidebar-link"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu"> Listar </span></a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a href="/admin/pages/add" class="sidebar-link"><i class="mdi mdi-plus"></i><span class="hide-menu"> Adicionar </span></a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="mdi mdi-image"></i><span class="hide-menu">Galerias de Fotos </span></a>
-                        <ul aria-expanded="false" class="collapse first-level">
-                            <li class="sidebar-item">
-                                <a href="/admin/galerias/index" class="sidebar-link"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu"> Listar </span></a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a href="/admin/galerias/add" class="sidebar-link"><i class="mdi mdi-plus"></i><span class="hide-menu"> Adicionar </span></a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="mdi mdi-image"></i><span class="hide-menu">Banners </span></a>
-                        <ul aria-expanded="false" class="collapse first-level">
-                            <li class="sidebar-item">
-                                <a href="/admin/banners/index" class="sidebar-link"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu"> Listar </span></a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a href="/admin/banners/add" class="sidebar-link"><i class="mdi mdi-plus"></i><span class="hide-menu"> Adicionar </span></a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="mdi mdi-message"></i><span class="hide-menu">Depoimentos </span></a>
-                        <ul aria-expanded="false" class="collapse first-level">
-                            <li class="sidebar-item">
-                                <a href="/admin/depoimentos/index" class="sidebar-link"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu"> Listar </span></a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a href="/admin/depoimentos/add" class="sidebar-link"><i class="mdi mdi-plus"></i><span class="hide-menu"> Adicionar </span></a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu">Menus </span></a>
-                        <ul aria-expanded="false" class="collapse first-level">
-                            <li class="sidebar-item">
-                                <a href="/admin/menus/index" class="sidebar-link"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu"> Listar </span></a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a href="/admin/menus/add" class="sidebar-link"><i class="mdi mdi-plus"></i><span class="hide-menu"> Adicionar </span></a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="sidebar-item">
                         <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="mdi mdi-web"></i><span class="hide-menu">Website </span></a>
                         <ul aria-expanded="false" class="collapse first-level">
                             <li class="sidebar-item">
                                 <a href="/admin/site" class="sidebar-link"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu"> Informações </span></a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="/admin/pages/index" class="sidebar-link"><i class="mdi mdi-web"></i><span class="hide-menu"> Páginas </span></a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="/admin/galerias/index" class="sidebar-link"><i class="mdi mdi-image"></i><span class="hide-menu"> Galerias de Fotos </span></a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="/admin/depoimentos/index" class="sidebar-link"><i class="mdi mdi-message"></i><span class="hide-menu"> Depoimentos </span></a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="/admin/menus/index" class="sidebar-link"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu"> Menus </span></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="mdi mdi-package"></i><span class="hide-menu">Produtos </span></a>
+                        <ul aria-expanded="false" class="collapse first-level">
+                            <li class="sidebar-item">
+                                <a href="/admin/produtos/index" class="sidebar-link"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu"> Listar </span></a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="/admin/produtos_categorias/index" class="sidebar-link"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu"> Categorias </span></a>
                             </li>
                         </ul>
                     </li>

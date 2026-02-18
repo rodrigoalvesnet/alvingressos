@@ -8,6 +8,7 @@ class EstadiasCalculatorComponent extends Component
     protected $Estadia;
     protected $Tarifa;
     protected $TarifaFaixa;
+    protected $EstadiaItem;
 
     public function initialize(Controller $controller)
     {
@@ -16,6 +17,7 @@ class EstadiasCalculatorComponent extends Component
         $this->Estadia     = ClassRegistry::init('Estadia');
         $this->Tarifa      = ClassRegistry::init('Tarifa');
         $this->TarifaFaixa = ClassRegistry::init('TarifaFaixa');
+        $this->EstadiaItem = ClassRegistry::init('EstadiaItem');
     }
 
     // ============================================================
@@ -213,6 +215,11 @@ class EstadiasCalculatorComponent extends Component
         $calc = $this->_calcularCobranca($estadiaRow, $duracaoCobrada);
         if (empty($calc['ok'])) return $calc;
 
+        $subtotalProdutos = $this->_subtotalProdutos((int)$row['id']);
+        $valorTempo = (float)$calc['valor_total'];
+        $valorTotalFinal = $valorTempo + $subtotalProdutos;
+
+
         return [
             'ok' => true,
             'fim_em' => $fimEm,
@@ -223,7 +230,9 @@ class EstadiasCalculatorComponent extends Component
             'faixa_id' => (int)$calc['faixa_id'],
             'valor_base' => (float)$calc['valor_base'],
             'valor_adicional' => (float)$calc['valor_adicional'],
-            'valor_total' => (float)$calc['valor_total'],
+            'valor_tempo' => $valorTempo,
+            'subtotal_produtos' => $subtotalProdutos,
+            'valor_total' => $valorTotalFinal,
         ];
     }
 
@@ -258,6 +267,12 @@ class EstadiasCalculatorComponent extends Component
         $calc = $this->_calcularCobranca($estadia, $duracaoCobrada);
         if (!$calc['ok']) return $calc;
 
+        $subtotalProdutos = $this->_subtotalProdutos($estadiaId);
+
+        $valorTempo = (float)$calc['valor_total']; // tempo = base + adicional
+        $valorTotalFinal = $valorTempo + (float)$subtotalProdutos;
+
+
         $data = [
             'Estadia' => [
                 'id' => (int)$estadiaId,
@@ -268,7 +283,7 @@ class EstadiasCalculatorComponent extends Component
                 'faixa_id' => (int)$calc['faixa_id'],
                 'valor_base' => $calc['valor_base'],
                 'valor_adicional' => $calc['valor_adicional'],
-                'valor_total' => $calc['valor_total'],
+                'valor_total' => $valorTotalFinal,
                 'status' => 'encerrada',
             ]
         ];
@@ -288,7 +303,9 @@ class EstadiasCalculatorComponent extends Component
             'faixa_id' => (int)$calc['faixa_id'],
             'valor_base' => (float)$calc['valor_base'],
             'valor_adicional' => (float)$calc['valor_adicional'],
-            'valor_total' => (float)$calc['valor_total'],
+            'valor_tempo' => (float)$valorTempo,
+            'subtotal_produtos' => (float)$subtotalProdutos,
+            'valor_total' => (float)$valorTotalFinal,
         ];
     }
 
@@ -414,5 +431,16 @@ class EstadiasCalculatorComponent extends Component
         $m = floor(($seconds % 3600) / 60);
         $s = $seconds % 60;
         return sprintf('%02d:%02d:%02d', $h, $m, $s);
+    }
+
+    protected function _subtotalProdutos($estadiaId)
+    {
+        $sumRow = $this->EstadiaItem->find('first', [
+            'fields' => ['COALESCE(SUM(EstadiaItem.valor_total),0) AS total'],
+            'conditions' => ['EstadiaItem.estadia_id' => (int)$estadiaId],
+            'recursive' => -1
+        ]);
+
+        return (float)$sumRow[0]['total'];
     }
 }

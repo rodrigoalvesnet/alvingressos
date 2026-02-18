@@ -330,6 +330,78 @@
                             </div>
                         </div>
 
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label><strong>Total Tempo</strong></label>
+                                <input type="text" class="form-control" id="prev-total-tempo" disabled>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label><strong>Total Produtos</strong></label>
+                                <input type="text" class="form-control" id="prev-total-produtos" disabled>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mt-2">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex gap-2 align-items-end">
+                                        <div class="flex-grow-1">
+                                            <label><strong>Produto</strong></label>
+                                            <select class="form-control" id="produto-id">
+                                                <?php foreach ($produtos as $p):
+                                                    $pid = (int)$p['Produto']['id'];
+                                                    $pname = $p['Produto']['nome'];
+                                                    $preco = (float)$p['Produto']['valor_venda'];
+                                                ?>
+                                                    <option value="<?= $pid ?>" data-preco="<?= h($preco) ?>"><?= h($pname) ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+
+                                        </div>
+
+                                        <div style="width:120px">
+                                            <label><strong>Qtd</strong></label>
+                                            <input type="number" class="form-control" id="produto-qtd" value="1" min="1">
+                                        </div>
+
+                                        <div style="width:160px">
+                                            <label><strong>Valor unit.</strong></label>
+                                            <input type="text"
+                                                class="form-control money"
+                                                id="produto-valor-unit">
+                                        </div>
+
+
+                                        <div>
+                                            <button type="button" class="btn btn-primary" id="btnAddProduto">
+                                                <i class="mdi mdi-plus"></i> Adicionar
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-responsive mt-3">
+                                        <table class="table table-sm" id="tableProdutos">
+                                            <thead>
+                                                <tr>
+                                                    <th>Produto</th>
+                                                    <th class="text-center">Qtd</th>
+                                                    <th class="text-end">Unit.</th>
+                                                    <th class="text-end">Total</th>
+                                                    <th class="text-center">Ação</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+
                         <div class="col-md-12">
                             <div id="containerTotal" class="alert alert-success mb-0">
                                 <div class="d-flex justify-content-between align-items-center">
@@ -392,6 +464,15 @@
             return 'R$ ' + v.toFixed(2).replace('.', ',');
         }
 
+        var prevTotalTempo = document.getElementById('prev-total-tempo');
+        var prevTotalProdutos = document.getElementById('prev-total-produtos');
+
+        var produtoIdEl = document.getElementById('produto-id');
+        var produtoQtdEl = document.getElementById('produto-qtd');
+        var btnAddProduto = document.getElementById('btnAddProduto');
+        var tableProdutosBody = document.querySelector('#tableProdutos tbody');
+
+
         var modalEl = document.getElementById('modalEncerrar');
         var loadingEl = document.getElementById('encerrar-loading');
         var contentEl = document.getElementById('encerrar-content');
@@ -443,6 +524,13 @@
             prevCrianca.value = '';
             prevResponsavel.value = '';
             prevEntrada.value = '';
+            prevTotalTempo.value = '';
+            prevTotalProdutos.value = '';
+            tableProdutosBody.innerHTML = '';
+            // if (produtoIdEl) produtoIdEl.disabled = true;
+            // if (produtoQtdEl) produtoQtdEl.disabled = true;
+            // if (btnAddProduto) btnAddProduto.disabled = true;
+
             // prevBase.value = '';
             // prevAdd.value = '';
         }
@@ -452,21 +540,52 @@
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
+        function renderProdutos(res) {
+            tableProdutosBody.innerHTML = '';
+            (res.itens || []).forEach(function(it) {
+                var tr = document.createElement('tr');
+                tr.innerHTML =
+                    '<td>' + (it.descricao || '') + '</td>' +
+                    '<td class="text-center">' + (it.qtd || 0) + '</td>' +
+                    '<td class="text-end">' + moneyBR(it.valor_unit) + '</td>' +
+                    '<td class="text-end">' + moneyBR(it.valor_total) + '</td>' +
+                    '<td class="text-center">' +
+                    '<button class="btn btn-danger btn-sm btn-remover-item" data-item-id="' + it.id + '"><i class="mdi mdi-delete"></i></button>' +
+                    '</td>';
+                tableProdutosBody.appendChild(tr);
+            });
+        }
+
+        function loadProdutos(estadiaId) {
+            return fetch('/admin/estadia_itens/listar/' + encodeURIComponent(estadiaId) + '.json', {
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(r => r.json())
+                .then(function(res) {
+                    if (!res || !res.ok) throw new Error(res && res.error ? res.error : 'Erro ao listar produtos');
+
+                    renderProdutos(res);
+
+                    // ✅ mantém o “Total Produtos” alinhado com a lista
+                    if (typeof res.subtotal_produtos !== 'undefined') {
+                        prevTotalProdutos.value = moneyBR(res.subtotal_produtos || 0);
+                    }
+                });
+        }
+
         // 1) Um único listener para todos os botões (não duplica mesmo se o HTML for re-renderizado)
         document.addEventListener('click', function(e) {
-            var btn = e.target.closest('.btn-encerrar, .btn-visualizar');
-            var btnVisualizar = false;
-            var btnEncerrar = false;
+            var btn = e.target.closest('.btn-encerrar, .btn-visualizar, .btn-remover-item');
+            if (!btn) return; // ✅ primeiro!
 
-            if (btn.classList.contains('btn-encerrar')) {
-                btnEncerrar = true;
-            }
+            // Se clicou no remover-item, deixa o outro listener tratar
+            if (btn.classList.contains('btn-remover-item')) return;
 
-            if (btn.classList.contains('btn-visualizar')) {
-                btnVisualizar = true;
-            }
-
-            if (!btn) return;
+            var btnEncerrar = btn.classList.contains('btn-encerrar');
+            var btnVisualizar = btn.classList.contains('btn-visualizar');
 
             e.preventDefault();
 
@@ -505,13 +624,17 @@
                         return;
                     }
 
+                    prevTotalTempo.value = moneyBR(res.valor_tempo || 0);
+                    prevTotalProdutos.value = moneyBR(res.subtotal_produtos || 0);
+                    loadProdutos(id);
+
                     prevPulseira.value = res.pulseira || '';
                     prevTempo.value = res.duracao_cobrada_hms || '';
                     prevPausado.value = res.tempo_pausado_hms || '00:00:00';
                     prevStatus.value = ucfirst(res.status) || '';
                     prevTotal.innerText = moneyBR(res.valor_total);
                     prevCrianca.value = res.crianca_nome || '';
-                    prevResponsavel.value = res.reponsavel_nome || '';
+                    prevResponsavel.value = res.responsavel_nome || '';
                     prevEntrada.value = res.entrada || '';
                     // prevBase.value = moneyBR(res.valor_base);
                     // prevAdd.value = moneyBR(res.valor_adicional);
@@ -535,6 +658,12 @@
                             $('#labelTotal').text('Total Pago');
                         }
                     }
+
+                    var podeEditarProdutos = (res.status === 'aberta' || res.status === 'pausada');
+
+                    // if (produtoIdEl) produtoIdEl.disabled = !podeEditarProdutos;
+                    // if (produtoQtdEl) produtoQtdEl.disabled = !podeEditarProdutos;
+                    // if (btnAddProduto) btnAddProduto.disabled = !podeEditarProdutos;
 
                     setContent();
                 })
@@ -572,6 +701,114 @@
                 }
             });
         }
+
+        if (btnAddProduto) {
+            btnAddProduto.addEventListener('click', function() {
+                if (!currentId) return;
+
+                fetch('/admin/estadia_itens/adicionar.json', {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                            'Accept': 'application/json'
+                        },
+                        body: 'estadia_id=' + encodeURIComponent(currentId) +
+                            '&produto_id=' + encodeURIComponent(produtoIdEl.value) +
+                            '&qtd=' + encodeURIComponent(produtoQtdEl.value || 1) +
+                            '&valor_unit=' + encodeURIComponent(produtoValorUnitEl.value || 0)
+
+                    })
+                    .then(async function(r) {
+                        const text = await r.text();
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            console.error('Resposta não-JSON. HTTP:', r.status, 'Body:', text.substring(0, 500));
+                            throw new Error('Servidor retornou HTML (veja console/network).');
+                        }
+                    })
+
+                    .then(function(res) {
+                        if (!res || !res.ok) throw new Error(res && res.error ? res.error : 'Falha ao adicionar');
+                        produtoQtdEl.value = 1;
+                        // recarrega preview (para atualizar total) + lista itens
+                        return fetch('/admin/estadias/preview_encerrar/' + encodeURIComponent(currentId) + '.json', {
+                            credentials: 'same-origin',
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        }).then(r => r.json()).then(function(p) {
+                            if (p && p.ok) {
+                                prevTotalTempo.value = moneyBR(p.valor_tempo || 0);
+                                prevTotalProdutos.value = moneyBR(p.subtotal_produtos || 0);
+                                prevTotal.innerText = moneyBR(p.valor_total || 0);
+                            }
+                            return loadProdutos(currentId);
+                        });
+                    })
+                    .catch(function(err) {
+                        setError('Falha ao adicionar produto. (' + (err && err.message ? err.message : 'erro') + ')');
+                    });
+            });
+        }
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.btn-remover-item');
+            if (!btn) return;
+
+            if (!currentId) return;
+            if (!$('#modalEncerrar').hasClass('show')) return;
+
+            var itemId = btn.getAttribute('data-item-id');
+            if (!itemId || !currentId) return;
+
+            fetch('/admin/estadia_itens/remover/' + encodeURIComponent(itemId) + '.json', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(r => r.json())
+                .then(function(res) {
+                    if (!res || !res.ok) throw new Error(res && res.error ? res.error : 'Falha ao remover');
+
+                    return fetch('/admin/estadias/preview_encerrar/' + encodeURIComponent(currentId) + '.json', {
+                        credentials: 'same-origin',
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    }).then(r => r.json()).then(function(p) {
+                        if (p && p.ok) {
+                            prevTotalTempo.value = moneyBR(p.valor_tempo || 0);
+                            prevTotalProdutos.value = moneyBR(p.subtotal_produtos || 0);
+                            prevTotal.innerText = moneyBR(p.valor_total || 0);
+                        }
+                        return loadProdutos(currentId);
+                    });
+                })
+                .catch(function(err) {
+                    setError('Falha ao remover produto. (' + (err && err.message ? err.message : 'erro') + ')');
+                });
+        });
+
+        var produtoValorUnitEl = document.getElementById('produto-valor-unit');
+
+        function setValorUnitFromSelected() {
+            if (!produtoIdEl || !produtoValorUnitEl) return;
+            var opt = produtoIdEl.options[produtoIdEl.selectedIndex];
+            var preco = opt ? Number(opt.getAttribute('data-preco') || 0) : 0;
+            produtoValorUnitEl.value = (preco || 0).toFixed(2);
+        }
+
+        if (produtoIdEl) {
+            produtoIdEl.addEventListener('change', setValorUnitFromSelected);
+        }
+
+        // quando abrir o modal também já preenche
+        setValorUnitFromSelected();
+
+
     })();
 </script>
 <?php $this->end(); ?>
