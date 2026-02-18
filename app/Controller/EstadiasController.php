@@ -3,7 +3,7 @@
 class EstadiasController extends AppController
 {
 
-    public $uses = ['Estadia', 'Tarifa', 'TarifaFaixa', 'Atracao'];
+    public $uses = ['Estadia', 'Tarifa', 'TarifaFaixa', 'Atracao', 'EstadiaItem', 'Produto'];
     public $components = ['Session', 'RequestHandler', 'EstadiasCalculator', 'Alv'];
 
     public function beforeFilter()
@@ -110,6 +110,16 @@ class EstadiasController extends AppController
             )
         );
         $this->set('atracoes', $atracoes);
+
+        $produtos = $this->Produto->find('all', [
+            'conditions' => ['Produto.ativo' => 1],
+            'recursive' => -1,
+            'fields' => ['Produto.id', 'Produto.nome', 'Produto.valor_venda'],
+            'order' => ['Produto.nome' => 'ASC']
+        ]);
+        $this->set('produtos', $produtos);
+
+
 
         $status = Configure::read('Estadias.status');
         $this->set('status', $status);
@@ -231,6 +241,23 @@ class EstadiasController extends AppController
 
         $preview = $this->EstadiasCalculator->previewEncerramento($row);
 
+        $this->loadModel('EstadiaItem');
+
+        $sumRow = $this->EstadiaItem->find('first', [
+            'fields' => ['COALESCE(SUM(EstadiaItem.valor_total),0) AS total'],
+            'conditions' => ['EstadiaItem.estadia_id' => $id],
+            'recursive' => -1
+        ]);
+
+        $subtotalProdutos = (float)$sumRow[0]['total'];
+
+        // valor do tempo (antes de somar produtos)
+        $valorTempo = isset($preview['valor_total']) ? (float)$preview['valor_total'] : 0;
+
+        $preview['valor_tempo'] = $valorTempo;
+        $preview['subtotal_produtos'] = $subtotalProdutos;
+        $preview['valor_total'] = $valorTempo + $subtotalProdutos;
+
         // Tratar tempo
         $pausado = isset($preview['pausado_segundos']) ? (int)$preview['pausado_segundos'] : 0;
         $h = floor($pausado / 3600);
@@ -241,10 +268,11 @@ class EstadiasController extends AppController
         //Incluir nomes
         $preview['pulseira'] = $row['Estadia']['pulseira_numero'];
         $preview['crianca_nome'] = $row['Estadia']['crianca_nome'];
-        $preview['reponsavel_nome'] = $row['Estadia']['responsavel_nome'];
+        $preview['responsavel_nome'] = $row['Estadia']['responsavel_nome'];
         $preview['entrada'] = date('d/m/Y H:i', strtotime($row['Estadia']['created']));
         $preview['status'] = $row['Estadia']['status'];
         $preview['id'] = $row['Estadia']['id'];
+
         // $this->log($preview);
         return $this->response->body(json_encode($preview));
     }
