@@ -2,6 +2,8 @@
 class ProdutosController extends AppController
 {
 
+var $components = array('RequestHandler', 'Alv', 'Imagem');
+
     public function beforeFilter()
     {
         parent::beforeFilter();
