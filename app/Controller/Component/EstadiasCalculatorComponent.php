@@ -317,6 +317,9 @@ class EstadiasCalculatorComponent extends Component
     {
         $duracaoCobrada = max(0, (int)$duracaoCobrada);
 
+        // ✅ como suas faixas são em MINUTOS (pela tela), converte aqui
+        $duracaoMin = (int)ceil($duracaoCobrada / 60);
+
         $tarifaId = (int)Hash::get($estadia, 'Estadia.tarifa_id');
         $tarifa   = Hash::get($estadia, 'Tarifa');
 
@@ -331,13 +334,13 @@ class EstadiasCalculatorComponent extends Component
         }
         if (empty($tarifa)) return $this->_err('Tarifa não encontrada');
 
-        // encaixe em faixa
+        // ✅ encaixe em faixa (MINUTOS)
         $faixa = $this->TarifaFaixa->find('first', [
             'conditions' => [
                 'TarifaFaixa.tarifa_id' => $tarifaId,
                 'TarifaFaixa.ativo' => 1,
-                'TarifaFaixa.min_segundos <=' => $duracaoCobrada,
-                'TarifaFaixa.max_segundos >=' => $duracaoCobrada,
+                'TarifaFaixa.min_segundos <=' => $duracaoMin,
+                'TarifaFaixa.max_segundos >=' => $duracaoMin,
             ],
             'order' => ['TarifaFaixa.min_segundos' => 'ASC', 'TarifaFaixa.ordem' => 'ASC'],
             'recursive' => -1
@@ -347,7 +350,6 @@ class EstadiasCalculatorComponent extends Component
         if (!empty($faixa)) {
             $faixaRow = $faixa['TarifaFaixa'];
         } else {
-            // pega última faixa
             $ultima = $this->TarifaFaixa->find('first', [
                 'conditions' => [
                     'TarifaFaixa.tarifa_id' => $tarifaId,
@@ -368,24 +370,24 @@ class EstadiasCalculatorComponent extends Component
         $faixaId   = (int)$faixaRow['id'];
         $valorAdicional = 0.0;
 
-        // adicional por bloco acima do max da faixa base (normalmente a última)
+        // ✅ adicional agora também em MINUTOS (se seus campos de adicional foram pensados em minutos)
         if (!empty($tarifa['adicional_ativo'])) {
-            $maxBase = (int)$faixaRow['max_segundos'];
+            $maxBaseMin = (int)$faixaRow['max_segundos'];
 
-            if ($duracaoCobrada > $maxBase) {
-                $bloco = (int)$tarifa['adicional_bloco_segundos'];
+            if ($duracaoMin > $maxBaseMin) {
+                $blocoMin = (int)$tarifa['adicional_bloco_segundos'];
                 $valorBloco = (float)$tarifa['adicional_valor_bloco'];
-                $tol = (int)($tarifa['adicional_tolerancia_segundos'] ?: 0);
+                $tolMin = (int)($tarifa['adicional_tolerancia_segundos'] ?: 0);
 
-                if ($bloco <= 0 || $valorBloco < 0) {
+                if ($blocoMin <= 0 || $valorBloco < 0) {
                     return $this->_err('Tarifa com adicional inválido (bloco/valor)');
                 }
 
-                $excedente = $duracaoCobrada - $maxBase;
-                $excedenteLiquido = $excedente - $tol;
+                $excedenteMin = $duracaoMin - $maxBaseMin;
+                $excedenteLiquido = $excedenteMin - $tolMin;
 
                 if ($excedenteLiquido > 0) {
-                    $blocos = (int)ceil($excedenteLiquido / $bloco);
+                    $blocos = (int)ceil($excedenteLiquido / $blocoMin);
                     $valorAdicional = $blocos * $valorBloco;
                 }
             }
@@ -399,6 +401,7 @@ class EstadiasCalculatorComponent extends Component
             'valor_total' => (float)($valorBase + $valorAdicional),
         ];
     }
+
 
     // ============================================================
     // Helpers

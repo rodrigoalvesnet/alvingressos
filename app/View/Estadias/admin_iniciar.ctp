@@ -30,6 +30,19 @@
 
             <div class="col-lg-4">
                 <?php
+                echo $this->Form->input('formadepagamento_id', [
+                    'label' => 'Forma de Pagamento',
+                    'options' => $formasdepagamentos,
+                    'class' => 'form-control',
+                    'div' => 'form-group',
+                    'empty' => 'Selecione',
+                    'required' => true
+                ]);
+                ?>
+            </div>
+
+            <div class="col-lg-4">
+                <?php
                 echo $this->Form->input('pulseira_numero', [
                     'label' => 'Nº Pulseira',
                     'class' => 'form-control',
@@ -47,6 +60,20 @@
                     'div' => 'form-group',
                     'required' => true
                 ]);
+                ?>
+            </div>
+            <div class="col-lg-3">
+                <?php
+                echo $this->Form->input(
+                    'nascimento',
+                    array(
+                        'type' => 'text',
+                        'label' => 'Data de nascimento',
+                        'class' => 'form-control datepicker',
+                        'div' => 'form-group',
+                        'required' => false,
+                    )
+                );
                 ?>
             </div>
             <div class="col-lg-2">
@@ -111,7 +138,8 @@
 
     <div class="card-footer border-top">
         <?php
-        echo $this->Form->submit('Iniciar Estadia', [
+        $lblSubmit = $this->action == 'admin_iniciar' ? 'Iniciar Estadia' : 'Salvar Alterações';
+        echo $this->Form->submit($lblSubmit, [
             'class' => 'btn btn-primary',
             'div' => false
         ]);

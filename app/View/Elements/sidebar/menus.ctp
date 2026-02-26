@@ -53,7 +53,7 @@ $roleId = $_SESSION['Auth']['User']['role_id'];
                             </li>
                         </ul>
                     </li>
-                    <li class="sidebar-item">
+                    <!-- <li class="sidebar-item">
                         <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="mdi mdi-package"></i><span class="hide-menu">Produtos </span></a>
                         <ul aria-expanded="false" class="collapse first-level">
                             <li class="sidebar-item">
@@ -63,7 +63,7 @@ $roleId = $_SESSION['Auth']['User']['role_id'];
                                 <a href="/admin/produtos_categorias/index" class="sidebar-link"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu"> Categorias </span></a>
                             </li>
                         </ul>
-                    </li>
+                    </li> -->
                     <li class="sidebar-item">
                         <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="mdi mdi-calendar"></i><span class="hide-menu">Eventos </span></a>
                         <ul aria-expanded="false" class="collapse first-level">
@@ -110,6 +110,9 @@ $roleId = $_SESSION['Auth']['User']['role_id'];
                             </li>
                             <li class="sidebar-item">
                                 <a href="/admin/estadias" class="sidebar-link"><i class="mdi mdi-clock"></i><span class="hide-menu"> Estadias </span></a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="/admin/adicionals" class="sidebar-link"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu"> Adicionais </span></a>
                             </li>
                             <li class="sidebar-item">
                                 <a href="/admin/atracoes" class="sidebar-link"><i class="mdi mdi-gamepad-variant"></i><span class="hide-menu"> Atrações </span></a>
