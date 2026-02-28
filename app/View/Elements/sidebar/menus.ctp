@@ -43,6 +43,9 @@ $roleId = $_SESSION['Auth']['User']['role_id'];
                                 <a href="/admin/pages/index" class="sidebar-link"><i class="mdi mdi-web"></i><span class="hide-menu"> Páginas </span></a>
                             </li>
                             <li class="sidebar-item">
+                                <a href="/admin/banners/index" class="sidebar-link"><i class="mdi mdi-image"></i><span class="hide-menu"> Banners </span></a>
+                            </li>
+                            <li class="sidebar-item">
                                 <a href="/admin/galerias/index" class="sidebar-link"><i class="mdi mdi-image"></i><span class="hide-menu"> Galerias de Fotos </span></a>
                             </li>
                             <li class="sidebar-item">
