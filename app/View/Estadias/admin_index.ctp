@@ -196,16 +196,16 @@
                                 <td class="text-center">
                                     <?php if ($registro['Estadia']['status'] === 'aberta'): ?>
                                         <?php
-                                        echo $this->Form->postLink(
-                                            '<i class="mdi mdi-pause"></i>',
-                                            ['action' => 'pausar', $id],
-                                            [
-                                                'title' => 'Pausar',
-                                                'class' => 'btn btn-warning btn-sm',
-                                                'confirm' => 'Tem certeza que deseja PAUSAR a estadia de ' . $registro['Estadia']['crianca_nome'] . '?',
-                                                'escape' => false
-                                            ]
-                                        );
+                                        // echo $this->Form->postLink(
+                                        //     '<i class="mdi mdi-pause"></i>',
+                                        //     ['action' => 'pausar', $id],
+                                        //     [
+                                        //         'title' => 'Pausar',
+                                        //         'class' => 'btn btn-warning btn-sm',
+                                        //         'confirm' => 'Tem certeza que deseja PAUSAR a estadia de ' . $registro['Estadia']['crianca_nome'] . '?',
+                                        //         'escape' => false
+                                        //     ]
+                                        // );
                                         ?>
                                         <button
                                             type="button"
@@ -241,6 +241,18 @@
                                                 'escape' => false
                                             ]
                                         );
+                                        echo $this->Html->link(
+                                            '<i class="mdi mdi-pencil"></i>',
+                                            array(
+                                                'action' => 'editar',
+                                                $registro['Estadia']['id']
+                                            ),
+                                            array(
+                                                'class' => 'btn btn-warning btn-sm',
+                                                'escape' => false,
+                                                'style' => 'margin-left: 4px;'
+                                            )
+                                        );
                                         ?>
                                     <?php endif; ?>
 
@@ -263,186 +275,9 @@
         <?php endif; ?>
     </div>
 </div>
-<div class="modal fade" id="modalEncerrar" tabindex="-1" role="dialog" aria-labelledby="modalEncerrarLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
 
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalEncerrarLabel">Confirmar Encerramento</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
+<?php echo $this->element('estadias/resumo'); ?>
 
-
-            <div class="modal-body">
-
-                <div id="encerrar-loading" class="text-center py-4">
-                    <div class="spinner-border" role="status" aria-hidden="true"></div>
-                    <div class="mt-2">Calculando...</div>
-                </div>
-
-                <div id="encerrar-error" class="alert alert-danger" style="display:none;"></div>
-
-                <div id="encerrar-content" style="display:none;">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label><strong>Pulseira</strong></label>
-                                <input type="text" class="form-control" id="prev-pulseira" disabled>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label><strong>Tempo utilizado</strong></label>
-                                <input type="text" class="form-control" id="prev-tempo" disabled>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label><strong>Tempo pausado</strong></label>
-                                <input type="text" class="form-control" id="prev-pausado" disabled>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label><strong>Situação</strong></label>
-                                <input type="text" class="form-control" id="prev-status" disabled>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label><strong>Nome da Criança</strong></label>
-                                <input type="text" class="form-control" id="prev-crianca" disabled>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label><strong>Nome do Responsável</strong></label>
-                                <input type="text" class="form-control" id="prev-responsavel" disabled>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label><strong>Entrada</strong></label>
-                                <input type="text" class="form-control" id="prev-entrada" disabled>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label><strong>Total Tempo</strong></label>
-                                <input type="text" class="form-control" id="prev-total-tempo" disabled>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label><strong>Total Produtos</strong></label>
-                                <input type="text" class="form-control" id="prev-total-produtos" disabled>
-                            </div>
-                        </div>
-
-                        <div class="col-md-12 mt-2">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="d-flex gap-2 align-items-end">
-                                        <div class="flex-grow-1">
-                                            <label><strong>Produto</strong></label>
-                                            <select class="form-control" id="produto-id">
-                                                <?php foreach ($produtos as $p):
-                                                    $pid = (int)$p['Produto']['id'];
-                                                    $pname = $p['Produto']['nome'];
-                                                    $preco = (float)$p['Produto']['valor_venda'];
-                                                ?>
-                                                    <option value="<?= $pid ?>" data-preco="<?= h($preco) ?>"><?= h($pname) ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
-
-                                        </div>
-
-                                        <div style="width:120px">
-                                            <label><strong>Qtd</strong></label>
-                                            <input type="number" class="form-control" id="produto-qtd" value="1" min="1">
-                                        </div>
-
-                                        <div style="width:160px">
-                                            <label><strong>Valor unit.</strong></label>
-                                            <input type="text"
-                                                class="form-control money"
-                                                id="produto-valor-unit">
-                                        </div>
-
-
-                                        <div>
-                                            <button type="button" class="btn btn-primary" id="btnAddProduto">
-                                                <i class="mdi mdi-plus"></i> Adicionar
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div class="table-responsive mt-3">
-                                        <table class="table table-sm" id="tableProdutos">
-                                            <thead>
-                                                <tr>
-                                                    <th>Produto</th>
-                                                    <th class="text-center">Qtd</th>
-                                                    <th class="text-end">Unit.</th>
-                                                    <th class="text-end">Total</th>
-                                                    <th class="text-center">Ação</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody></tbody>
-                                        </table>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div class="col-md-12">
-                            <div id="containerTotal" class="alert alert-success mb-0">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <strong id="labelTotal">Total a pagar</strong>
-                                    <span id="prev-total" style="font-size: 1.25rem; font-weight: 700;"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="modal-footer">
-                <?php
-                // POST para admin_encerrar (salvar de fato)
-                echo $this->Form->create('Estadia', [
-                    'url' => ['action' => 'encerrar'],
-                    'id' => 'formEncerrar',
-                    'admin' => true
-                ]);
-                echo $this->Form->hidden('id', ['id' => 'encerrar-id']);
-                ?>
-
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Voltar</button>
-
-
-                <?php
-                echo $this->Form->submit('Confirmar Encerramento', [
-                    'class' => 'btn btn-success text-white',
-                    'id' => 'btnEncerrar',
-                    'div' => false
-                ]);
-                echo $this->Form->end();
-                ?>
-            </div>
-
-        </div>
-    </div>
-</div>
 <?php $this->start('scriptBottom'); ?>
 <script>
     (function() {
@@ -465,12 +300,12 @@
         }
 
         var prevTotalTempo = document.getElementById('prev-total-tempo');
-        var prevTotalProdutos = document.getElementById('prev-total-produtos');
+        var prevTotalAdicionals = document.getElementById('prev-total-adicionals');
 
-        var produtoIdEl = document.getElementById('produto-id');
-        var produtoQtdEl = document.getElementById('produto-qtd');
-        var btnAddProduto = document.getElementById('btnAddProduto');
-        var tableProdutosBody = document.querySelector('#tableProdutos tbody');
+        var adicionalIdEl = document.getElementById('adicional-id');
+        var adicionalQtdEl = document.getElementById('adicional-qtd');
+        var btnAddAdicional = document.getElementById('btnAddAdicional');
+        var tableAdicionalsBody = document.querySelector('#tableAdicionals tbody');
 
 
         var modalEl = document.getElementById('modalEncerrar');
@@ -525,11 +360,11 @@
             prevResponsavel.value = '';
             prevEntrada.value = '';
             prevTotalTempo.value = '';
-            prevTotalProdutos.value = '';
-            tableProdutosBody.innerHTML = '';
-            // if (produtoIdEl) produtoIdEl.disabled = true;
-            // if (produtoQtdEl) produtoQtdEl.disabled = true;
-            // if (btnAddProduto) btnAddProduto.disabled = true;
+            prevTotalAdicionals.value = '';
+            tableAdicionalsBody.innerHTML = '';
+            // if (adicionalIdEl) adicionalIdEl.disabled = true;
+            // if (adicionalQtdEl) adicionalQtdEl.disabled = true;
+            // if (btnAddAdicional) btnAddAdicional.disabled = true;
 
             // prevBase.value = '';
             // prevAdd.value = '';
@@ -540,8 +375,8 @@
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
-        function renderProdutos(res) {
-            tableProdutosBody.innerHTML = '';
+        function renderAdicionals(res) {
+            tableAdicionalsBody.innerHTML = '';
             (res.itens || []).forEach(function(it) {
                 var tr = document.createElement('tr');
                 tr.innerHTML =
@@ -552,11 +387,11 @@
                     '<td class="text-center">' +
                     '<button class="btn btn-danger btn-sm btn-remover-item" data-item-id="' + it.id + '"><i class="mdi mdi-delete"></i></button>' +
                     '</td>';
-                tableProdutosBody.appendChild(tr);
+                tableAdicionalsBody.appendChild(tr);
             });
         }
 
-        function loadProdutos(estadiaId) {
+        function loadAdicionals(estadiaId) {
             return fetch('/admin/estadia_itens/listar/' + encodeURIComponent(estadiaId) + '.json', {
                     credentials: 'same-origin',
                     headers: {
@@ -565,13 +400,13 @@
                 })
                 .then(r => r.json())
                 .then(function(res) {
-                    if (!res || !res.ok) throw new Error(res && res.error ? res.error : 'Erro ao listar produtos');
+                    if (!res || !res.ok) throw new Error(res && res.error ? res.error : 'Erro ao listar adicionals');
 
-                    renderProdutos(res);
+                    renderAdicionals(res);
 
-                    // ✅ mantém o “Total Produtos” alinhado com a lista
-                    if (typeof res.subtotal_produtos !== 'undefined') {
-                        prevTotalProdutos.value = moneyBR(res.subtotal_produtos || 0);
+                    // ✅ mantém o “Total Adicionals” alinhado com a lista
+                    if (typeof res.subtotal_adicionals !== 'undefined') {
+                        prevTotalAdicionals.value = moneyBR(res.subtotal_adicionals || 0);
                     }
                 });
         }
@@ -625,8 +460,8 @@
                     }
 
                     prevTotalTempo.value = moneyBR(res.valor_tempo || 0);
-                    prevTotalProdutos.value = moneyBR(res.subtotal_produtos || 0);
-                    loadProdutos(id);
+                    prevTotalAdicionals.value = moneyBR(res.subtotal_adicionals || 0);
+                    loadAdicionals(id);
 
                     prevPulseira.value = res.pulseira || '';
                     prevTempo.value = res.duracao_cobrada_hms || '';
@@ -659,11 +494,11 @@
                         }
                     }
 
-                    var podeEditarProdutos = (res.status === 'aberta' || res.status === 'pausada');
+                    var podeEditarAdicionals = (res.status === 'aberta' || res.status === 'pausada');
 
-                    // if (produtoIdEl) produtoIdEl.disabled = !podeEditarProdutos;
-                    // if (produtoQtdEl) produtoQtdEl.disabled = !podeEditarProdutos;
-                    // if (btnAddProduto) btnAddProduto.disabled = !podeEditarProdutos;
+                    // if (adicionalIdEl) adicionalIdEl.disabled = !podeEditarAdicionals;
+                    // if (adicionalQtdEl) adicionalQtdEl.disabled = !podeEditarAdicionals;
+                    // if (btnAddAdicional) btnAddAdicional.disabled = !podeEditarAdicionals;
 
                     setContent();
                 })
@@ -702,8 +537,8 @@
             });
         }
 
-        if (btnAddProduto) {
-            btnAddProduto.addEventListener('click', function() {
+        if (btnAddAdicional) {
+            btnAddAdicional.addEventListener('click', function() {
                 if (!currentId) return;
 
                 fetch('/admin/estadia_itens/adicionar.json', {
@@ -714,9 +549,9 @@
                             'Accept': 'application/json'
                         },
                         body: 'estadia_id=' + encodeURIComponent(currentId) +
-                            '&produto_id=' + encodeURIComponent(produtoIdEl.value) +
-                            '&qtd=' + encodeURIComponent(produtoQtdEl.value || 1) +
-                            '&valor_unit=' + encodeURIComponent(produtoValorUnitEl.value || 0)
+                            '&adicional_id=' + encodeURIComponent(adicionalIdEl.value) +
+                            '&qtd=' + encodeURIComponent(adicionalQtdEl.value || 1) +
+                            '&valor_unit=' + encodeURIComponent(adicionalValorUnitEl.value || 0)
 
                     })
                     .then(async function(r) {
@@ -731,7 +566,7 @@
 
                     .then(function(res) {
                         if (!res || !res.ok) throw new Error(res && res.error ? res.error : 'Falha ao adicionar');
-                        produtoQtdEl.value = 1;
+                        adicionalQtdEl.value = 1;
                         // recarrega preview (para atualizar total) + lista itens
                         return fetch('/admin/estadias/preview_encerrar/' + encodeURIComponent(currentId) + '.json', {
                             credentials: 'same-origin',
@@ -741,17 +576,18 @@
                         }).then(r => r.json()).then(function(p) {
                             if (p && p.ok) {
                                 prevTotalTempo.value = moneyBR(p.valor_tempo || 0);
-                                prevTotalProdutos.value = moneyBR(p.subtotal_produtos || 0);
+                                prevTotalAdicionals.value = moneyBR(p.subtotal_adicionals || 0);
                                 prevTotal.innerText = moneyBR(p.valor_total || 0);
                             }
-                            return loadProdutos(currentId);
+                            return loadAdicionals(currentId);
                         });
                     })
                     .catch(function(err) {
-                        setError('Falha ao adicionar produto. (' + (err && err.message ? err.message : 'erro') + ')');
+                        setError('Falha ao adicionar adicional. (' + (err && err.message ? err.message : 'erro') + ')');
                     });
             });
         }
+
         document.addEventListener('click', function(e) {
             var btn = e.target.closest('.btn-remover-item');
             if (!btn) return;
@@ -781,28 +617,28 @@
                     }).then(r => r.json()).then(function(p) {
                         if (p && p.ok) {
                             prevTotalTempo.value = moneyBR(p.valor_tempo || 0);
-                            prevTotalProdutos.value = moneyBR(p.subtotal_produtos || 0);
+                            prevTotalAdicionals.value = moneyBR(p.subtotal_adicionals || 0);
                             prevTotal.innerText = moneyBR(p.valor_total || 0);
                         }
-                        return loadProdutos(currentId);
+                        return loadAdicionals(currentId);
                     });
                 })
                 .catch(function(err) {
-                    setError('Falha ao remover produto. (' + (err && err.message ? err.message : 'erro') + ')');
+                    setError('Falha ao remover adicional. (' + (err && err.message ? err.message : 'erro') + ')');
                 });
         });
 
-        var produtoValorUnitEl = document.getElementById('produto-valor-unit');
+        var adicionalValorUnitEl = document.getElementById('adicional-valor-unit');
 
         function setValorUnitFromSelected() {
-            if (!produtoIdEl || !produtoValorUnitEl) return;
-            var opt = produtoIdEl.options[produtoIdEl.selectedIndex];
+            if (!adicionalIdEl || !adicionalValorUnitEl) return;
+            var opt = adicionalIdEl.options[adicionalIdEl.selectedIndex];
             var preco = opt ? Number(opt.getAttribute('data-preco') || 0) : 0;
-            produtoValorUnitEl.value = (preco || 0).toFixed(2);
+            adicionalValorUnitEl.value = (preco || 0).toFixed(2);
         }
 
-        if (produtoIdEl) {
-            produtoIdEl.addEventListener('change', setValorUnitFromSelected);
+        if (adicionalIdEl) {
+            adicionalIdEl.addEventListener('change', setValorUnitFromSelected);
         }
 
         // quando abrir o modal também já preenche

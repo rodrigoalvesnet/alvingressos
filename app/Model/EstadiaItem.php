@@ -7,6 +7,6 @@ class EstadiaItem extends AppModel
 
     public $belongsTo = [
         'Estadia' => ['className' => 'Estadia', 'foreignKey' => 'estadia_id'],
-        'Produto' => ['className' => 'Produto', 'foreignKey' => 'produto_id'],
+        'Adicional' => ['className' => 'Adicional', 'foreignKey' => 'adicional_id'],
     ];
 }

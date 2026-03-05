@@ -3,7 +3,7 @@
 class EstadiasController extends AppController
 {
 
-    public $uses = ['Estadia', 'Tarifa', 'TarifaFaixa', 'Atracao', 'EstadiaItem', 'Produto'];
+    public $uses = ['Estadia', 'Tarifa', 'TarifaFaixa', 'Atracao', 'EstadiaItem', 'Adicional'];
     public $components = ['Session', 'RequestHandler', 'EstadiasCalculator', 'Alv'];
 
     public function beforeFilter()
@@ -111,13 +111,13 @@ class EstadiasController extends AppController
         );
         $this->set('atracoes', $atracoes);
 
-        $produtos = $this->Produto->find('all', [
-            'conditions' => ['Produto.ativo' => 1],
+        $adicionals = $this->Adicional->find('all', [
+            'conditions' => ['Adicional.ativo' => 1],
             'recursive' => -1,
-            'fields' => ['Produto.id', 'Produto.nome', 'Produto.valor_venda'],
-            'order' => ['Produto.nome' => 'ASC']
+            'fields' => ['Adicional.id', 'Adicional.nome', 'Adicional.valor'],
+            'order' => ['Adicional.nome' => 'ASC']
         ]);
-        $this->set('produtos', $produtos);
+        $this->set('adicionals', $adicionals);
 
 
 
@@ -189,12 +189,114 @@ class EstadiasController extends AppController
             )
         );
 
+        $this->loadModel('FormasPagamento');
+        $formasdepagamentos = $this->FormasPagamento->find(
+            'list',
+            array(
+                'conditions' => array(
+                    'ativo' => 1
+                ),
+                'recursive' => -1,
+                'fields' => array(
+                    'id',
+                    'nome'
+                ),
+                'order' => array(
+                    'nome' => 'ASC'
+                )
+            )
+        );
 
         $sexo = Configure::read('Estadias.sexo');
 
-        $this->set(compact('atracoes', 'tarifas', 'sexo'));
+        $this->set(compact('atracoes', 'tarifas', 'formasdepagamentos', 'sexo'));
     }
 
+
+    public function admin_editar($id)
+    {
+        $this->Estadia->id = $id;
+        if (!$this->Estadia->exists()) {
+            throw new NotFoundException(__('Registro Inválido'));
+        }
+        if ($this->request->is('post') || $this->request->is('put')) {
+            $this->request->data['Estadia']['nascimento'] = $this->Alv->tratarData($this->request->data['Estadia']['nascimento']);
+            if ($this->Estadia->save($this->request->data)) {
+                $this->Flash->success('Registro salvo com sucesso');
+                $this->redirect('index');
+            } else {
+                $this->Flash->error('Não foi possível salvar o registro');
+            }
+        } else {
+            $this->request->data = $this->Estadia->findById($id);
+            $this->request->data['Estadia']['nascimento'] = $this->Alv->tratarData($this->request->data['Estadia']['nascimento'], 'pt');
+        }
+
+        $this->loadModel('Atracao');
+        $atracoes = $this->Atracao->find(
+            'list',
+            array(
+                'conditions' => array(
+                    'ativo' => 1
+                ),
+                'recursive' => -1,
+                'fields' => array(
+                    'id',
+                    'nome'
+                ),
+                'order' => array(
+                    'nome' => 'ASC'
+                )
+            )
+        );
+
+        $this->loadModel('Tarifa');
+        $tarifas = $this->Tarifa->find(
+            'list',
+            array(
+                'conditions' => array(
+                    'ativo' => 1
+                ),
+                'recursive' => -1,
+                'fields' => array(
+                    'id',
+                    'nome'
+                ),
+                'order' => array(
+                    'nome' => 'ASC'
+                )
+            )
+        );
+
+        $this->loadModel('FormasPagamento');
+        $formasdepagamentos = $this->FormasPagamento->find(
+            'list',
+            array(
+                'conditions' => array(
+                    'ativo' => 1
+                ),
+                'recursive' => -1,
+                'fields' => array(
+                    'id',
+                    'nome'
+                ),
+                'order' => array(
+                    'nome' => 'ASC'
+                )
+            )
+        );
+
+        $sexo = Configure::read('Estadias.sexo');
+
+        $this->set('bcLinks', array(
+            'Estadias' => '/admin/estadias'
+        ));
+
+        $this->set('title_for_layout', 'Editar Estadia #' . $id);
+
+        $this->set(compact('atracoes', 'tarifas', 'formasdepagamentos', 'sexo'));
+        $this->render('admin_iniciar');
+    }
     /**
      * Pausar (POST)
      */
@@ -239,44 +341,30 @@ class EstadiasController extends AppController
             return $this->response->body(json_encode(['ok' => false, 'error' => 'Estadia não encontrada']));
         }
 
+        // ✅ agora o component já traz valor_tempo, subtotal_adicionals e valor_total
         $preview = $this->EstadiasCalculator->previewEncerramento($row);
 
-        $this->loadModel('EstadiaItem');
+        if (empty($preview['ok'])) {
+            return $this->response->body(json_encode($preview));
+        }
 
-        $sumRow = $this->EstadiaItem->find('first', [
-            'fields' => ['COALESCE(SUM(EstadiaItem.valor_total),0) AS total'],
-            'conditions' => ['EstadiaItem.estadia_id' => $id],
-            'recursive' => -1
-        ]);
-
-        $subtotalProdutos = (float)$sumRow[0]['total'];
-
-        // valor do tempo (antes de somar produtos)
-        $valorTempo = isset($preview['valor_total']) ? (float)$preview['valor_total'] : 0;
-
-        $preview['valor_tempo'] = $valorTempo;
-        $preview['subtotal_produtos'] = $subtotalProdutos;
-        $preview['valor_total'] = $valorTempo + $subtotalProdutos;
-
-        // Tratar tempo
+        // Tratar tempo pausado hms (se você quiser manter no controller)
         $pausado = isset($preview['pausado_segundos']) ? (int)$preview['pausado_segundos'] : 0;
         $h = floor($pausado / 3600);
         $m = floor(($pausado % 3600) / 60);
         $s = $pausado % 60;
         $preview['tempo_pausado_hms'] = sprintf('%02d:%02d:%02d', $h, $m, $s);
 
-        //Incluir nomes
+        // Incluir nomes/dados
         $preview['pulseira'] = $row['Estadia']['pulseira_numero'];
         $preview['crianca_nome'] = $row['Estadia']['crianca_nome'];
         $preview['responsavel_nome'] = $row['Estadia']['responsavel_nome'];
         $preview['entrada'] = date('d/m/Y H:i', strtotime($row['Estadia']['created']));
         $preview['status'] = $row['Estadia']['status'];
-        $preview['id'] = $row['Estadia']['id'];
+        $preview['id'] = (int)$row['Estadia']['id'];
 
-        // $this->log($preview);
         return $this->response->body(json_encode($preview));
     }
-
 
     /**
      * Encerrar (POST)

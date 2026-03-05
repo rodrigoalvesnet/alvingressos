@@ -10,8 +10,13 @@ class Estadia extends AppModel {
             'className' => 'TarifaFaixa',
             'foreignKey' => 'faixa_id'
         ],
+        'FormasPagamento' => [
+            'className' => 'FormasPagamento',
+            'foreignKey' => 'formadepagamento_id'
+        ],
         'Atracao'
     ];
+    
 
     public $validate = [
         'pulseira_numero' => [
