@@ -62,12 +62,27 @@ class Order extends AppModel
         $orderSave['event_id'] = $dados['Order']['event_id'];
         $orderSave['coupon_id'] = isset($dados['Order']['coupon_id']) ? $dados['Order']['coupon_id'] : null;
 
+        //Pega os dados do evento
+        App::uses('Event', 'Model');
+        $Evento = new Event();
+        $eventoFind = $Evento->find('first',[
+            'conditions' => [
+                'id' => $orderSave['event_id']
+            ],
+            'fields' => [
+                'id',
+                'unidade_id'
+            ],
+            'recursive' => -1
+        ]);
+        //Pega os dados da unidade do evento
+        $orderSave['unidade_id'] = $eventoFind['Event']['unidade_id'];
+
         //Se foi informado o aniversário nos campos adicionais
         if (isset($orderSave['birthday']) && !empty($orderSave['birthday'])) {
             // $orderSave['birthday'] = $this->Alv->tratarData($dados['birthday']);
         }
-        //Se não foi informado a igreja nos campos adicionais, pega do usuário logado
-        $orderSave['unidade_id'] = AuthComponent::user('unidade_id');
+
         //Verifica se já foi comprado anteriormente
         $checkDuplicidade = $this->checkDuplicidade($dados, $checkout);
 
