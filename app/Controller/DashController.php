@@ -16,11 +16,14 @@ class DashController extends AppController
         $this->loadModel('Ticket');
         $this->loadModel('Checkin');
 
+        $unidadeId = (int)$this->Auth->user('unidade_id');
+
         // =========================
         // KPIs de HOJE (seus atuais)
         // =========================
         $ordersCountToday = $this->Order->find('count', array(
             'conditions' => array(
+                'Order.unidade_id' => $unidadeId,
                 'Order.status' => 'approved',
                 'DATE(Order.created)' => date('Y-m-d')
             ),
@@ -30,6 +33,7 @@ class DashController extends AppController
 
         $ordersTotalToday = $this->Order->find('all', array(
             'conditions' => array(
+                'Order.unidade_id' => $unidadeId,
                 'Order.status' => 'approved',
                 'DATE(Order.created)' => date('Y-m-d')
             ),
@@ -40,6 +44,7 @@ class DashController extends AppController
 
         $ticketsToday = $this->Ticket->find('count', array(
             'conditions' => array(
+                'Order.unidade_id' => $unidadeId,
                 'Order.status' => 'approved',
                 'DATE(Ticket.modalidade_data)' => date('Y-m-d')
             ),
@@ -51,9 +56,13 @@ class DashController extends AppController
 
         $checkinsToday = $this->Checkin->find('count', array(
             'conditions' => array(
+                'Order.unidade_id' => $unidadeId,
                 'DATE(Checkin.created)' => date('Y-m-d')
             ),
-            'recursive' => -1
+            'contain' => [
+                'Order'
+            ],
+            // 'recursive' => -1
         ));
         $this->set('checkinsToday', $checkinsToday);
 
@@ -84,6 +93,7 @@ class DashController extends AppController
             // 1) Passaportes vendidos (TOTAL em R$) no mês/ano
             $ordersTotalMonthRow = $this->Order->find('first', array(
                 'conditions' => array(
+                    'Order.unidade_id' => $unidadeId,
                     'Order.status' => 'approved',
                     'Order.created >=' => $start,
                     'Order.created <'  => $end,
@@ -97,11 +107,16 @@ class DashController extends AppController
             // 2) Checkins realizados (QUANTIDADE) no mês/ano
             $checkinsCountMonth = $this->Checkin->find('count', array(
                 'conditions' => array(
+                    'Order.unidade_id' => $unidadeId,
                     'Checkin.created >=' => $start,
                     'Checkin.created <'  => $end,
                 ),
-                'recursive' => -1
+                'contain' => [
+                    'Order'
+                ],
+                // 'recursive' => -1
             ));
+            // pr($checkinsCountMonth);exit();
             $this->set('checkinsCountMonth', (int)$checkinsCountMonth);
         } else {
             // para não dar "undefined" na view

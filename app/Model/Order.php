@@ -28,6 +28,14 @@ class Order extends AppModel
         'Product'
     );
 
+    // public function beforeFilter()
+    // {
+    //     parent::beforeFilter();
+
+    //     pr($this->request->params);
+    //     exit;
+    // }
+
     public function afterSave($created, $options = array())
     {
         //limpa o cache
@@ -66,10 +74,10 @@ class Order extends AppModel
         if (isset($orderSave['birthday']) && !empty($orderSave['birthday'])) {
             // $orderSave['birthday'] = $this->Alv->tratarData($dados['birthday']);
         }
-        
+
         App::uses('Event', 'Model');
         $Evento = new Event();
-        $eventoFind = $Evento->find('first',[
+        $eventoFind = $Evento->find('first', [
             'conditions' => [
                 'id' => $orderSave['event_id']
             ],
@@ -81,7 +89,7 @@ class Order extends AppModel
         ]);
         //Pega os dados da unidade do evento
         $orderSave['unidade_id'] = $eventoFind['Event']['unidade_id'];
-        
+
         //Verifica se já foi comprado anteriormente
         $checkDuplicidade = $this->checkDuplicidade($dados, $checkout);
 
@@ -225,7 +233,7 @@ class Order extends AppModel
             } catch (Exception $e) {
                 //Registra log para investigar depois
                 CakeLog::write('error', 'Falha ao enviar voucher do pedido ' . $orderId . ': ' . $e->getMessage());
-            }            
+            }
             return true;
         } else {
             $this->log('Erro ao alterar o status da ordem ' . $orderId);

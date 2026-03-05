@@ -76,6 +76,12 @@ class OrdersController extends AppController
                 'EventsAdmin.user_id' => AuthComponent::user('id')
             );
         }
+        //Se quem está logado é um oganizador
+        if (AuthComponent::user('role_id') == 4) {
+            $arrayConditions['OR'] =  array(
+                'Order.unidade_id' => AuthComponent::user('unidade_id'),
+            );
+        }
         //se o this->data não está vazio, prepara o filtro
         if (!empty($this->request->data)) {
             // pr($this->request->data['button']);exit();
