@@ -38,12 +38,9 @@ class EstadiasController extends AppController
 
         //condição padrão
         $arrayConditions = array(
-            'OR' => [
-                'DATE(Estadia.created)' => date('Y-m-d'),
-                'Estadia.status' => ['aberta', 'pausada']
-            ]
+            'DATE(Estadia.created)' => date('Y-m-d'),
+            'Estadia.status' => ['aberta', 'pausada']
         );
-
 
         //se o this->data não está vazio, prepara o filtro
         if (!empty($this->request->data)) {
