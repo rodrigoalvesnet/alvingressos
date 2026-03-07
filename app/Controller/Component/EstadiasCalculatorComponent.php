@@ -53,6 +53,7 @@ class EstadiasCalculatorComponent extends Component
             'Estadia' => [
                 'atracao_id' => (int)$data['atracao_id'],
                 'tarifa_id' => (int)$data['tarifa_id'],
+                'formadepagamento_id' => (int)$data['formadepagamento_id'],
                 'pulseira_numero' => $data['pulseira_numero'],
                 'crianca_nome' => $data['crianca_nome'],
                 'responsavel_nome' => $data['responsavel_nome'],
