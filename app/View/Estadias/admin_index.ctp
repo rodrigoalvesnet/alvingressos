@@ -148,7 +148,7 @@
                     <thead>
                         <tr>
                             <th class="text-center" scope="col"><?php echo $this->Paginator->sort('Estadia.pulseira_numero', 'Pulseira'); ?></th>
-                            <th scope="col"><?php echo $this->Paginator->sort('Estadia.created', 'Data/Hora'); ?></th>
+                            <th scope="col"><?php echo $this->Paginator->sort('Estadia.created', 'Entrada'); ?></th>
                             <th scope="col"><?php echo $this->Paginator->sort('Estadia.crianca_nome', 'Criança'); ?></th>
                             <th scope="col"><?php echo $this->Paginator->sort('Estadia.responsavel_nome', 'Responsável'); ?></th>
                             <th scope="col">Telefone</th>
@@ -182,7 +182,19 @@
                                     </span>
                                 </td>
                                 <td><?php echo date('H:i', strtotime($registro['Estadia']['created'])); ?></td>
-                                <td><img src="<?= $registro['Estadia']['sexo'] === 'feminino' ? '/img/icon-girl.jpg' : '/img/icon-boy.jpg' ?>" class="img-avatar thumbnail" /><?php echo $registro['Estadia']['crianca_nome']; ?></td>
+                                <td>
+                                    <img src="<?= $registro['Estadia']['sexo'] === 'feminino' ? '/img/icon-girl.jpg' : '/img/icon-boy.jpg' ?>" class="img-avatar thumbnail" />
+                                    <?php echo h($registro['Estadia']['crianca_nome']); ?>
+
+                                    <?php if (!empty($registro['Estadia']['nascimento'])): ?>
+                                        <?php
+                                        $dataNascimento = new DateTime($registro['Estadia']['nascimento']);
+                                        $hoje = new DateTime();
+                                        $idade = $hoje->diff($dataNascimento)->y;
+                                        ?>
+                                        <small class="text-muted">(<?php echo $idade . ' ' . ($idade == 1 ? 'ano' : 'anos'); ?>)</small>
+                                    <?php endif; ?>
+                                </td>
                                 <td><?php echo $registro['Estadia']['responsavel_nome']; ?></td>
                                 <td><?php echo $registro['Estadia']['telefone']; ?></td>
                                 <td><?php echo $registro['Atracao']['nome']; ?> (<?php echo $registro['Tarifa']['nome']; ?>)</td>

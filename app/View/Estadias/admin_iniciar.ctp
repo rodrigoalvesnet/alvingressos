@@ -41,7 +41,7 @@
                 ?>
             </div>
 
-            <div class="col-lg-4">
+            <div class="col-lg-2">
                 <?php
                 echo $this->Form->input('pulseira_numero', [
                     'label' => 'Nº Pulseira',
@@ -68,10 +68,24 @@
                     'nascimento',
                     array(
                         'type' => 'text',
-                        'label' => 'Data de nascimento',
+                        'label' => 'Data de nascimento (da criança)',
                         'class' => 'form-control datepicker',
                         'div' => 'form-group',
-                        'required' => false,
+                        'required' => true,
+                    )
+                );
+                ?>
+            </div>
+            <div class="col-lg-2">
+                <?php
+                echo $this->Form->input(
+                    'idade',
+                    array(
+                        'type' => 'text',
+                        'label' => 'Idade',
+                        'class' => 'form-control',
+                        'div' => 'form-group',
+                        'disabled' => true,
                     )
                 );
                 ?>
@@ -91,7 +105,7 @@
                 ?>
             </div>
 
-            <div class="col-lg-3">
+            <div class="col-lg-4">
                 <?php
                 echo $this->Form->input('responsavel_nome', [
                     'label' => 'Nome do Responsável',
@@ -111,7 +125,7 @@
                 ]);
                 ?>
             </div>
-            <div class="col-lg-2">
+            <div class="col-lg-4">
                 <?php
                 echo $this->Form->input('email', [
                     'label' => 'E-mail',
@@ -160,3 +174,82 @@
     </div>
     <?php echo $this->Form->end(); ?>
 </div>
+<?php $this->start('scriptBottom'); ?>
+<script>
+    (function () {
+        var nascimentoEl = document.getElementById('EstadiaNascimento');
+        var idadeEl = document.getElementById('EstadiaIdade');
+
+        function calcularIdade(dataStr) {
+            if (!dataStr) return '';
+
+            dataStr = String(dataStr).trim();
+
+            // formato esperado: dd/mm/aaaa
+            var partes = dataStr.split('/');
+            if (partes.length !== 3) return '';
+
+            var dia = parseInt(partes[0], 10);
+            var mes = parseInt(partes[1], 10) - 1;
+            var ano = parseInt(partes[2], 10);
+
+            if (isNaN(dia) || isNaN(mes) || isNaN(ano)) return '';
+
+            var nascimento = new Date(ano, mes, dia);
+
+            // valida data real
+            if (
+                nascimento.getFullYear() !== ano ||
+                nascimento.getMonth() !== mes ||
+                nascimento.getDate() !== dia
+            ) {
+                return '';
+            }
+
+            var hoje = new Date();
+            var idade = hoje.getFullYear() - ano;
+
+            var mesAtual = hoje.getMonth();
+            var diaAtual = hoje.getDate();
+
+            if (mesAtual < mes || (mesAtual === mes && diaAtual < dia)) {
+                idade--;
+            }
+
+            if (idade < 0) return '';
+
+            return idade;
+        }
+
+        function atualizarIdade() {
+            if (!nascimentoEl || !idadeEl) return;
+
+            var idade = calcularIdade(nascimentoEl.value);
+
+            idadeEl.value = (idade === '') ? '' : idade + ' ' + (idade === 1 ? 'ano' : 'anos');
+        }
+
+        if (nascimentoEl) {
+            // digitando manualmente
+            nascimentoEl.addEventListener('keyup', atualizarIdade);
+            nascimentoEl.addEventListener('change', atualizarIdade);
+            nascimentoEl.addEventListener('blur', atualizarIdade);
+
+            // quando escolher pelo datepicker via jQuery/plugin
+            if (window.jQuery) {
+                $(nascimentoEl).on('changeDate', function () {
+                    atualizarIdade();
+                });
+
+                // fallback para alguns plugins que só atualizam depois
+                $(nascimentoEl).on('hide', function () {
+                    setTimeout(atualizarIdade, 50);
+                });
+            }
+
+            // edição
+            atualizarIdade();
+        }
+    })();
+</script>
+<?php $this->end(); ?>
