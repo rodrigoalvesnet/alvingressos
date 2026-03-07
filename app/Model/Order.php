@@ -311,7 +311,7 @@ class Order extends AppModel
         $roleId = AuthComponent::user('role_id');
         $cpf = AuthComponent::user('cpf');
         //Se administrado
-        if ($roleId == 1 || $roleId == 2) {
+        if ($roleId == 1 || $roleId == 2 || $roleId = 4) {
             return true;
         }
         //Pega os dados do pedido

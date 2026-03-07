@@ -220,7 +220,12 @@ class EstadiasCalculatorComponent extends Component
 
         $subtotalProdutos = $this->_subtotalProdutos((int)$row['id']);
         $valorTempo = (float)$calc['valor_total'];
-        $valorTotalFinal = $valorTempo + $subtotalProdutos;
+        $somarEstadia = Configure::read('Estadias.finalizacao.somar_estadia');
+        if ($somarEstadia) {
+            $valorTotalFinal = $valorTempo + $subtotalProdutos;
+        } else {
+            $valorTotalFinal = 0.00;
+        }
 
         return [
             'ok' => true,
