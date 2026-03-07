@@ -1,12 +1,10 @@
-<div class="modal-header">
-    <h5 class="modal-title">Adicionais</h5>
-</div>
 <div class="col-md-12 mt-2">
 
     <div class="d-flex gap-2 align-items-end">
         <div class="flex-grow-1">
             <label><strong>Adicional</strong></label>
             <select class="form-control" id="adicional-id">
+                <option value=""></option>
                 <?php foreach ($adicionals as $p):
                     $pid = (int)$p['Adicional']['id'];
                     $pname = $p['Adicional']['nome'];
@@ -27,7 +25,8 @@
             <label><strong>Valor unit.</strong></label>
             <input type="text"
                 class="form-control money"
-                id="adicional-valor-unit">
+                id="adicional-valor-unit"
+                readonly>
         </div>
 
         <div>

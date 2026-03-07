@@ -89,11 +89,11 @@ class CheckinsController extends AppController
     public function admin_add($eventId)
     {
         $this->loadModel('Event');
-        $checkPermission = $this->Event->checkPermission($eventId);
-        if (!$checkPermission) {
-            $this->Flash->warning('Você não tem permissão para acessar este evento!');
-            $this->redirect($this->referer());
-        }
+        // $checkPermission = $this->Event->checkPermission($eventId);
+        // if (!$checkPermission) {
+        //     $this->Flash->warning('Você não tem permissão para acessar este evento!');
+        //     $this->redirect($this->referer());
+        // }
 
         $event = $this->Event->find(
             'first',

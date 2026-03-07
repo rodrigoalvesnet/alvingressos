@@ -122,6 +122,19 @@
                 ]);
                 ?>
             </div>
+            <div class="col-lg-2">
+                <?php
+                echo $this->Form->input(
+                    'cpf',
+                    array(
+                        'label' => 'CPF',
+                        'class' => 'form-control cpf',
+                        'div' => 'form-group',
+                        'required' => false,
+                    )
+                );
+                ?>
+            </div>
             <div class="col-lg-12">
                 <?php
                 echo $this->Form->input('observacoes', [

@@ -147,12 +147,12 @@
                 <table class="table table-striped" id="tableEstadias">
                     <thead>
                         <tr>
-                            <th class="text-center" scope="col"><?php echo $this->Paginator->sort('Estadia.sexo', '#'); ?></th>
-                            <th scope="col"><?php echo $this->Paginator->sort('Estadia.created', 'Data/Hora'); ?></th>
                             <th class="text-center" scope="col"><?php echo $this->Paginator->sort('Estadia.pulseira_numero', 'Pulseira'); ?></th>
+                            <th scope="col"><?php echo $this->Paginator->sort('Estadia.created', 'Data/Hora'); ?></th>
                             <th scope="col"><?php echo $this->Paginator->sort('Estadia.crianca_nome', 'Criança'); ?></th>
                             <th scope="col"><?php echo $this->Paginator->sort('Estadia.responsavel_nome', 'Responsável'); ?></th>
-                            <th scope="col"><?php echo $this->Paginator->sort('Atracao.nome', 'Atração/Brinquedo'); ?></th>
+                            <th scope="col">Telefone</th>
+                            <th scope="col"><?php echo $this->Paginator->sort('Atracao.nome', 'Atração'); ?></th>
                             <th class="text-center" scope="col"><?php echo $this->Paginator->sort('Estadia.status', 'Situação'); ?></th>
                             <th class="text-center">Ações</th>
                         </tr>
@@ -177,17 +177,15 @@
                         ?>
                             <tr>
                                 <td class="text-center">
-                                    <?php echo $registro['Estadia']['id']; ?>
-                                </td>
-                                <td><?php echo date('d/m/Y H:i', strtotime($registro['Estadia']['created'])); ?></td>
-                                <td class="text-center">
                                     <span class="badge rounded-pill bg-primary">
                                         <?php echo $registro['Estadia']['pulseira_numero']; ?>
                                     </span>
                                 </td>
+                                <td><?php echo date('H:i', strtotime($registro['Estadia']['created'])); ?></td>
                                 <td><img src="<?= $registro['Estadia']['sexo'] === 'feminino' ? '/img/icon-girl.jpg' : '/img/icon-boy.jpg' ?>" class="img-avatar thumbnail" /><?php echo $registro['Estadia']['crianca_nome']; ?></td>
                                 <td><?php echo $registro['Estadia']['responsavel_nome']; ?></td>
-                                <td><?php echo $registro['Atracao']['nome']; ?></td>
+                                <td><?php echo $registro['Estadia']['telefone']; ?></td>
+                                <td><?php echo $registro['Atracao']['nome']; ?> (<?php echo $registro['Tarifa']['nome']; ?>)</td>
                                 <td class="text-center">
                                     <span class="badge rounded-pill <?php echo $classBadge; ?>">
                                         <?php echo $status[$registro['Estadia']['status']]; ?>
@@ -473,7 +471,7 @@
                     prevEntrada.value = res.entrada || '';
                     // prevBase.value = moneyBR(res.valor_base);
                     // prevAdd.value = moneyBR(res.valor_adicional);
-                    console.log(res.status);
+                    //console.log(res.status);
 
                     if (btnEncerrar) {
                         if (res.status == 'aberta' || res.status == 'pausada') {
@@ -520,26 +518,50 @@
             loadingEl.style.display = 'none';
             contentEl.style.display = 'none';
         });
-
-        // 3) (Opcional) impede submit se ainda estiver calculando/sem preview
+        /**
+         * Encerra Estadia
+         */
         if (formEncerrar) {
             formEncerrar.addEventListener('submit', function(e) {
-                // se estiver carregando, bloqueia
+
                 if (loadingEl.style.display === 'block') {
                     e.preventDefault();
                     return;
                 }
-                // se não tem total preenchido, bloqueia
+
                 if (!prevTotal.innerText) {
                     e.preventDefault();
                     return;
                 }
+
+                e.preventDefault();
+
+                var confirmou = confirm('Tem certeza que deseja encerrar esta estadia?');
+
+                if (!confirmou) {
+                    setTimeout(function() {
+                        $('#btnEncerrar').prop('disabled', false);
+                    }, 1000);
+                    return;
+                }
+
+                setTimeout(function() {
+                    $('#btnEncerrar').text('Encerrando...');
+                }, 500);
+
+                formEncerrar.submit();
             });
         }
 
         if (btnAddAdicional) {
             btnAddAdicional.addEventListener('click', function() {
                 if (!currentId) return;
+
+                if (!adicionalIdEl.value) {
+                    alert('Você precisa selecionar um adicional antes de adicionar.');
+                    adicionalIdEl.focus();
+                    return;
+                }
 
                 fetch('/admin/estadia_itens/adicionar.json', {
                         method: 'POST',
@@ -597,6 +619,10 @@
 
             var itemId = btn.getAttribute('data-item-id');
             if (!itemId || !currentId) return;
+
+            if (!confirm('Tem certeza que deseja remover este adicional?')) {
+                return;
+            }
 
             fetch('/admin/estadia_itens/remover/' + encodeURIComponent(itemId) + '.json', {
                     method: 'POST',

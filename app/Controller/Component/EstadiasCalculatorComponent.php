@@ -10,6 +10,8 @@ class EstadiasCalculatorComponent extends Component
     protected $TarifaFaixa;
     protected $EstadiaItem;
 
+    var $components = array('Alv');
+
     public function initialize(Controller $controller)
     {
         parent::initialize($controller);
@@ -56,6 +58,8 @@ class EstadiasCalculatorComponent extends Component
                 'responsavel_nome' => $data['responsavel_nome'],
                 'telefone' => !empty($data['telefone']) ? $data['telefone'] : null,
                 'sexo' => $data['sexo'],
+                'cpf' => $data['cpf'],
+                'nascimento' => $this->Alv->tratarData($data['nascimento']),
                 'email' => $data['email'],
                 'observacoes' => !empty($data['observacoes']) ? $data['observacoes'] : null,
                 'inicio_em' => !empty($data['inicio_em']) ? $data['inicio_em'] : date('Y-m-d H:i:s'),
@@ -197,7 +201,6 @@ class EstadiasCalculatorComponent extends Component
     public function previewEncerramento(array $estadiaRow, $fimEm = null)
     {
         $fimEm = $fimEm ?: date('Y-m-d H:i:s');
-
         $row = $estadiaRow['Estadia'];
         if (empty($row['inicio_em'])) return ['ok' => false, 'error' => 'Estadia sem início'];
         if (empty($row['tarifa_id'])) return ['ok' => false, 'error' => 'Estadia sem tarifa'];
@@ -218,7 +221,6 @@ class EstadiasCalculatorComponent extends Component
         $subtotalProdutos = $this->_subtotalProdutos((int)$row['id']);
         $valorTempo = (float)$calc['valor_total'];
         $valorTotalFinal = $valorTempo + $subtotalProdutos;
-
 
         return [
             'ok' => true,
@@ -315,15 +317,14 @@ class EstadiasCalculatorComponent extends Component
 
     protected function _calcularCobranca(array $estadia, $duracaoCobrada)
     {
+
         $duracaoCobrada = max(0, (int)$duracaoCobrada);
-
-        // ✅ como suas faixas são em MINUTOS (pela tela), converte aqui
-        $duracaoMin = (int)ceil($duracaoCobrada / 60);
-
         $tarifaId = (int)Hash::get($estadia, 'Estadia.tarifa_id');
         $tarifa   = Hash::get($estadia, 'Tarifa');
 
-        if (!$tarifaId) return $this->_err('Estadia sem tarifa_id');
+        if (!$tarifaId) {
+            return $this->_err('Estadia sem tarifa_id');
+        }
 
         if (empty($tarifa)) {
             $t = $this->Tarifa->find('first', [
@@ -332,62 +333,72 @@ class EstadiasCalculatorComponent extends Component
             ]);
             $tarifa = $t ? $t['Tarifa'] : null;
         }
-        if (empty($tarifa)) return $this->_err('Tarifa não encontrada');
 
-        // ✅ encaixe em faixa (MINUTOS)
+        if (empty($tarifa)) {
+            return $this->_err('Tarifa não encontrada');
+        }
+
+        // tudo em SEGUNDOS
         $faixa = $this->TarifaFaixa->find('first', [
             'conditions' => [
                 'TarifaFaixa.tarifa_id' => $tarifaId,
                 'TarifaFaixa.ativo' => 1,
-                'TarifaFaixa.min_segundos <=' => $duracaoMin,
-                'TarifaFaixa.max_segundos >=' => $duracaoMin,
+                'TarifaFaixa.min_segundos <=' => $duracaoCobrada,
+                'TarifaFaixa.max_segundos >=' => $duracaoCobrada,
             ],
-            'order' => ['TarifaFaixa.min_segundos' => 'ASC', 'TarifaFaixa.ordem' => 'ASC'],
+            'order' => [
+                'TarifaFaixa.min_segundos' => 'ASC',
+                'TarifaFaixa.ordem' => 'ASC'
+            ],
             'recursive' => -1
         ]);
 
         $faixaRow = null;
+        $valorBase = 0.0;
+        $faixaId = 1;
+
         if (!empty($faixa)) {
             $faixaRow = $faixa['TarifaFaixa'];
+            $valorBase      = (float)$faixaRow['valor'];
+            $faixaId        = (int)$faixaRow['id'];
         } else {
             $ultima = $this->TarifaFaixa->find('first', [
                 'conditions' => [
                     'TarifaFaixa.tarifa_id' => $tarifaId,
                     'TarifaFaixa.ativo' => 1,
                 ],
-                'order' => ['TarifaFaixa.max_segundos' => 'DESC', 'TarifaFaixa.min_segundos' => 'DESC'],
+                'order' => [
+                    'TarifaFaixa.max_segundos' => 'DESC',
+                    'TarifaFaixa.min_segundos' => 'DESC'
+                ],
                 'recursive' => -1
             ]);
-            if (empty($ultima)) return $this->_err('Nenhuma faixa ativa cadastrada');
-            $faixaRow = $ultima['TarifaFaixa'];
 
-            if (empty($tarifa['adicional_ativo'])) {
-                return $this->_err('Tempo cobrado excedeu as faixas e adicional não está configurado');
+            if (empty($ultima)) {
+                return $this->_err('Nenhuma faixa ativa cadastrada');
             }
         }
 
-        $valorBase = (float)$faixaRow['valor'];
-        $faixaId   = (int)$faixaRow['id'];
         $valorAdicional = 0.0;
 
-        // ✅ adicional agora também em MINUTOS (se seus campos de adicional foram pensados em minutos)
+        // adicional também em SEGUNDOS
         if (!empty($tarifa['adicional_ativo'])) {
-            $maxBaseMin = (int)$faixaRow['max_segundos'];
+            $maxBaseSeg = (int)$faixaRow['max_segundos'];
 
-            if ($duracaoMin > $maxBaseMin) {
-                $blocoMin = (int)$tarifa['adicional_bloco_segundos'];
+            if ($duracaoCobrada > $maxBaseSeg) {
+                $blocoSeg   = (int)$tarifa['adicional_bloco_segundos'];
                 $valorBloco = (float)$tarifa['adicional_valor_bloco'];
-                $tolMin = (int)($tarifa['adicional_tolerancia_segundos'] ?: 0);
+                $tolSeg     = (int)($tarifa['adicional_tolerancia_segundos'] ?: 0);
 
-                if ($blocoMin <= 0 || $valorBloco < 0) {
+                if ($blocoSeg <= 0 || $valorBloco < 0) {
                     return $this->_err('Tarifa com adicional inválido (bloco/valor)');
                 }
 
-                $excedenteMin = $duracaoMin - $maxBaseMin;
-                $excedenteLiquido = $excedenteMin - $tolMin;
+                $excedenteSeg = $duracaoCobrada - $maxBaseSeg;
+                $excedenteLiquido = $excedenteSeg - $tolSeg;
 
                 if ($excedenteLiquido > 0) {
-                    $blocos = (int)ceil($excedenteLiquido / $blocoMin);
+                    $blocos = (int)ceil($excedenteLiquido / $blocoSeg);
                     $valorAdicional = $blocos * $valorBloco;
                 }
             }
@@ -401,7 +412,6 @@ class EstadiasCalculatorComponent extends Component
             'valor_total' => (float)($valorBase + $valorAdicional),
         ];
     }
-
 
     // ============================================================
     // Helpers

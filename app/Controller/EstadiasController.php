@@ -132,6 +132,9 @@ class EstadiasController extends AppController
             'contain'       => array(
                 'Atracao' => array(
                     'nome'
+                ),
+                'Tarifa' => array(
+                    'nome'
                 )
             )
         );
