@@ -224,7 +224,7 @@ class EstadiasCalculatorComponent extends Component
         if ($somarEstadia) {
             $valorTotalFinal = $valorTempo + $subtotalProdutos;
         } else {
-            $valorTotalFinal = 0.00;
+            $valorTotalFinal = $subtotalProdutos;
         }
 
         return [
