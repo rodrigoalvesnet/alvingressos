@@ -38,9 +38,12 @@ class EstadiasController extends AppController
 
         //condição padrão
         $arrayConditions = array(
-            'DATE(Estadia.created)' => date('Y-m-d'),
-            'Estadia.status' => ['aberta', 'pausada']
+            'OR' => [
+                'DATE(Estadia.created)' => date('Y-m-d'),
+                'Estadia.status' => ['aberta', 'pausada']
+            ]
         );
+
 
         //se o this->data não está vazio, prepara o filtro
         if (!empty($this->request->data)) {
@@ -596,5 +599,46 @@ class EstadiasController extends AppController
         $minutos = floor(($seconds % 3600) / 60);
 
         return sprintf('%02d:%02d', $horas, $minutos); // 02:13
+    }
+
+    public function admin_print()
+    {
+
+    $this->layout = 'pdf';
+
+        //verifica se tem condições na session
+        if ($this->Session->check('Filtros.Estadias')) {
+            //utiliza os filtros do cache
+            $arrayConditions = $this->Session->read('Filtros.Estadias');
+            $this->request->data = $this->Session->read('Filtros.ThisData');
+        }else{
+            $this->Flash->error('Nenhum registro encontrado');
+            //atualiza a pagina
+            $this->redirect(array(
+                'action' => 'index',
+                'admin' => true
+            ));
+        }
+
+        $status = Configure::read('Estadias.status');
+        $this->set('status', $status);
+
+        $registros = $this->Estadia->find(
+            'all',
+            array(
+                'conditions' => $arrayConditions,
+                'contain'       => array(
+                'Atracao' => array(
+                    'nome'
+                ),
+                'Tarifa' => array(
+                    'nome'
+                )
+            )
+            )
+        );
+
+        $this->set('registros', $registros);
+        $this->set('fileName', 'estadias-'.date('Y-m-d-H-i-s'));
     }
 }

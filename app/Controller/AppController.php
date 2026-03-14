@@ -20,6 +20,8 @@
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 
+use Illuminate\Support\Facades\Auth;
+
 App::uses('Controller', 'Controller');
 
 /**
@@ -58,6 +60,22 @@ class AppController extends Controller
 
         // disponibiliza para as views
         $this->set('siteConfig', $siteConfig);
+
+        $unidadeDados = Cache::read('site_dados');
+        if ($unidadeDados === false) {
+            // não existe em cache, buscar do banco
+            App::import('Model', 'Unidade'); // supondo que sua tabela é Config
+            $Unidade = new Unidade();
+
+            $unidadeDados = $Unidade->find('first', [
+                'conditions' => AuthComponent::user('unidade_id')
+            ]);
+
+            // salva no cache
+            Cache::write('site_dados', $unidadeDados);
+        }
+        // disponibiliza para as views
+        $this->set('unidadeDados', $unidadeDados);
     }
 
     public $components = array(
