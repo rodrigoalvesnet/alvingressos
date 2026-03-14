@@ -29,6 +29,9 @@
     .w-100 {
         width: 100% !important;
     }
+    th {
+        text-align: unset;;
+    }
 </style>
 
 <table border="0" class="cabecalho">

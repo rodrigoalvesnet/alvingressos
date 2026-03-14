@@ -15,7 +15,6 @@
         </thead>
         <tbody>
 
-
             <?php
             $valorTotal = 0;
             foreach ($registros as $registro) {
