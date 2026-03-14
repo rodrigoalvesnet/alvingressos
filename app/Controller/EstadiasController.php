@@ -38,10 +38,8 @@ class EstadiasController extends AppController
 
         //condição padrão
         $arrayConditions = array(
-            'OR' => [
-                'DATE(Estadia.created)' => date('Y-m-d'),
-                'Estadia.status' => ['aberta', 'pausada']
-            ]
+            'DATE(Estadia.created)' => date('Y-m-d'),
+            'Estadia.status' => ['aberta', 'pausada']
         );
 
 
@@ -127,7 +125,7 @@ class EstadiasController extends AppController
         //Prepara a busca
         $this->paginate = array(
             'conditions'    => $arrayConditions,
-            'limit'         => Configure::read('Sistema.limit'),
+            'limit'         => 100,
             'order'         => 'Estadia.created DESC',
             'contain'       => array(
                 'Atracao' => array(
@@ -604,14 +602,14 @@ class EstadiasController extends AppController
     public function admin_print()
     {
 
-    $this->layout = 'pdf';
+        $this->layout = 'pdf';
 
         //verifica se tem condições na session
         if ($this->Session->check('Filtros.Estadias')) {
             //utiliza os filtros do cache
             $arrayConditions = $this->Session->read('Filtros.Estadias');
             $this->request->data = $this->Session->read('Filtros.ThisData');
-        }else{
+        } else {
             $this->Flash->error('Nenhum registro encontrado');
             //atualiza a pagina
             $this->redirect(array(
@@ -628,17 +626,17 @@ class EstadiasController extends AppController
             array(
                 'conditions' => $arrayConditions,
                 'contain'       => array(
-                'Atracao' => array(
-                    'nome'
-                ),
-                'Tarifa' => array(
-                    'nome'
+                    'Atracao' => array(
+                        'nome'
+                    ),
+                    'Tarifa' => array(
+                        'nome'
+                    )
                 )
-            )
             )
         );
 
         $this->set('registros', $registros);
-        $this->set('fileName', 'estadias-'.date('Y-m-d-H-i-s'));
+        $this->set('fileName', 'estadias-' . date('Y-m-d-H-i-s'));
     }
 }
