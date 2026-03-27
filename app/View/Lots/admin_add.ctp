@@ -235,7 +235,6 @@
                         ?>
                         <div id="rule-week">
                             <?php
-                            $rulesDaysWeek = [];
                             foreach ($rulesConfigs['days']['week'] as $value => $name) { ?>
                                 <div class="col-lg-12">
                                     <?php
@@ -252,6 +251,45 @@
                                     ?>
                                 </div>
                             <?php } ?>
+
+                            <hr class="my-3">
+                            <p class="mb-1"><strong>Datas Especiais / Feriados</strong></p>
+                            <p class="text-muted small">Datas específicas que <strong>sobrescrevem</strong> a regra acima — útil para feriados. Deixe o valor em branco para usar o valor padrão do ingresso.</p>
+
+                            <?php
+                            $specificDates = [];
+                            if (!empty($this->request->data['Lot']['rules']['dates'])) {
+                                $specificDates = $this->request->data['Lot']['rules']['dates'];
+                            }
+                            $specificDateCount = count($specificDates);
+                            ?>
+                            <div id="specific-dates-list" data-count="<?php echo $specificDateCount; ?>">
+                                <?php foreach ($specificDates as $i => $dateRule): ?>
+                                <div class="specific-date-row row mb-2 align-items-center">
+                                    <div class="col-md-4">
+                                        <input type="text"
+                                               name="data[Lot][rules][dates][<?php echo $i; ?>][date]"
+                                               value="<?php echo h($dateRule['date']); ?>"
+                                               class="form-control datepicker"
+                                               placeholder="Data (dd/mm/aaaa)"
+                                               autocomplete="off">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text"
+                                               name="data[Lot][rules][dates][<?php echo $i; ?>][value]"
+                                               value="<?php echo !empty($dateRule['value']) ? h($dateRule['value']) : ''; ?>"
+                                               class="form-control money"
+                                               placeholder="Valor (opcional)">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-danger btn-sm btn-remove-date">Remover</button>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <button type="button" id="btn-add-specific-date" class="btn btn-sm btn-secondary mt-2">
+                                <i class="fas fa-plus"></i> Adicionar Data Especial
+                            </button>
                         </div>
                     </div>
                 </div>

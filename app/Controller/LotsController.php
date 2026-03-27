@@ -28,6 +28,17 @@ class LotsController extends AppController
                 }
             }
             $this->request->data['Lot']['payments_type'] = serialize($this->request->data['Lot']['payments_type']);
+            //trata os valores das datas especiais/feriados
+            if (!empty($this->request->data['Lot']['rules']['dates'])) {
+                foreach ($this->request->data['Lot']['rules']['dates'] as $k => $dateRule) {
+                    if (!empty($dateRule['value'])) {
+                        $this->request->data['Lot']['rules']['dates'][$k]['value'] = $this->Alv->tratarValor($dateRule['value']);
+                    }
+                }
+            }
+            if (!empty($this->request->data['Lot']['rules'])) {
+                $this->request->data['Lot']['rules'] = serialize($this->request->data['Lot']['rules']);
+            }
             //Se salvar corretamente
             if ($this->Lot->save($this->request->data)) {
                 $this->Flash->success('Registro salvo com sucesso');
@@ -79,6 +90,14 @@ class LotsController extends AppController
             $this->request->data['Lot']['value'] = $this->Alv->tratarValor($this->request->data['Lot']['value']);
             $this->request->data['Lot']['start_date'] = $this->Alv->tratarData($this->request->data['Lot']['start_date']);
             $this->request->data['Lot']['end_date'] = $this->Alv->tratarData($this->request->data['Lot']['end_date']);
+            //trata os valores das datas especiais/feriados
+            if (!empty($this->request->data['Lot']['rules']['dates'])) {
+                foreach ($this->request->data['Lot']['rules']['dates'] as $k => $dateRule) {
+                    if (!empty($dateRule['value'])) {
+                        $this->request->data['Lot']['rules']['dates'][$k]['value'] = $this->Alv->tratarValor($dateRule['value']);
+                    }
+                }
+            }
             $this->request->data['Lot']['rules'] = serialize($this->request->data['Lot']['rules']);
             //trata os valores dos tipos dos pagamentos
             foreach ($this->request->data['Lot']['payments_type'] as $k => $paymnentType) {
@@ -100,6 +119,14 @@ class LotsController extends AppController
             $this->request->data['Lot']['start_date'] = $this->Alv->tratarData($this->request->data['Lot']['start_date'], 'pt');
             $this->request->data['Lot']['end_date'] = $this->Alv->tratarData($this->request->data['Lot']['end_date'], 'pt');
             $this->request->data['Lot']['rules'] = unserialize($this->request->data['Lot']['rules']);
+            //formata os valores das datas especiais/feriados para exibição
+            if (!empty($this->request->data['Lot']['rules']['dates'])) {
+                foreach ($this->request->data['Lot']['rules']['dates'] as $k => $dateRule) {
+                    if (!empty($dateRule['value'])) {
+                        $this->request->data['Lot']['rules']['dates'][$k]['value'] = $this->Alv->tratarValor($dateRule['value'], 'pt');
+                    }
+                }
+            }
             $this->request->data['Lot']['payments_type'] = unserialize($this->request->data['Lot']['payments_type']);
             //trata os valores dos tipos dos pagamentos
             foreach ($this->request->data['Lot']['payments_type'] as $k => $paymnentType) {

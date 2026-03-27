@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(xargs grep:*)",
+      "Bash(find /d/PROJETOS/PHP/www/_ingressos -name *.sql -o -name schema*)",
+      "Bash(grep -r \"class.*Component\" /d/PROJETOS/PHP/www/_ingressos/app/Controller/Component/*.php)"
+    ]
+  }
+}

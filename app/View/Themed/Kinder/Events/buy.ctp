@@ -214,7 +214,7 @@
                          let select = `<select name="cart[<?php echo $eventId; ?>][ingressos][${data}][${k}][modalidade]" class="form-control modalidade" required>`;
                          select += `<option value=""></option>`;
                          for (let key in _opcoesDisponiveis) {
-                             select += `<option value="${key}">${_opcoesDisponiveis[key].name}</option>`;
+                             select += `<option value="${key}" data-valor="${_opcoesDisponiveis[key].valor}">${_opcoesDisponiveis[key].name}</option>`;
                          }
                          select += `</select>`;
                          return select;
