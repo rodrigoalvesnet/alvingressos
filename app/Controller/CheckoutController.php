@@ -76,22 +76,26 @@ class CheckoutController extends AppController
             foreach ($tickets['ingressos'] as $date => $pessoas) {
                 foreach ($pessoas as $pessoa) {
                     //Busca o valor da modalidade
-                    $modalidade = $this->Lot->find('first', [
-                        'conditions' => [
-                            'id' => $pessoa['modalidade']
-                        ],
-                        'fields' => [
-                            'id',
-                            'value',
-                            'name'
-                        ],
-                        'recursive' => -1
-                    ]);
+                    $modalidadeId = isset($pessoa['modalidade']) ? $pessoa['modalidade'] : null;
+                    $modalidade = null;
+                    if (!empty($modalidadeId)) {
+                        $modalidade = $this->Lot->find('first', [
+                            'conditions' => [
+                                'id' => $modalidadeId
+                            ],
+                            'fields' => [
+                                'id',
+                                'value',
+                                'name'
+                            ],
+                            'recursive' => -1
+                        ]);
+                    }
                     $ingressos['cart']['eventos'][$eventId]['ingressos'][$date][] = [
-                        'nome' => $pessoa['nome'],
-                        'modalidade_id' => $pessoa['modalidade'],
-                        'modalidade_nome' => $modalidade['Lot']['name'],
-                        'modalidade_valor' => $modalidade['Lot']['value']
+                        'nome' => isset($pessoa['nome']) ? $pessoa['nome'] : '',
+                        'modalidade_id' => $modalidadeId,
+                        'modalidade_nome' => (!empty($modalidade) && isset($modalidade['Lot']['name'])) ? $modalidade['Lot']['name'] : '',
+                        'modalidade_valor' => (!empty($modalidade) && isset($modalidade['Lot']['value'])) ? $modalidade['Lot']['value'] : 0
                     ];
                 }
             }
@@ -189,7 +193,7 @@ class CheckoutController extends AppController
         foreach ($this->data['Checkout'] as $checkout) {
             foreach ($checkout as $eventId => $data) {
                 foreach ($data as $ingresso) {
-                    $price +=  $ingresso['modalidade_valor'];
+                    $price += (float)$ingresso['modalidade_valor'];
                 }
             }
         }

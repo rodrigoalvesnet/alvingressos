@@ -120,7 +120,6 @@ class CheckinsController extends AppController
             'success' => false,
             'message' => 'Não foi possível encontrar a inscrição.',
         );
-        $this->log($this->data);
         if (!empty($this->data)) {
             if ($this->Checkin->save($this->data)) {
                 $arrayReturn['success'] = true;

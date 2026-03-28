@@ -415,6 +415,12 @@ class EventsController extends AppController
                 )
             )
         );
+        if (empty($event)) {
+            $this->Flash->error('Evento não encontrado.');
+            $this->redirect('/');
+            return;
+        }
+
         $this->set('event', $event);
 
         $modalidades = array();
