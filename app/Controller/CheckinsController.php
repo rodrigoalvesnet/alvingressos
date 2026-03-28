@@ -121,8 +121,23 @@ class CheckinsController extends AppController
             'message' => 'Não foi possível encontrar a inscrição.',
         );
         if (!empty($this->data)) {
-            if ($this->Checkin->save($this->data)) {
+            $orderId  = isset($this->data['Checkin']['order_id'])  ? $this->data['Checkin']['order_id']  : null;
+            $ticketId = isset($this->data['Checkin']['ticket_id']) ? $this->data['Checkin']['ticket_id'] : null;
+
+            $alreadyChecked = $this->Checkin->find('first', array(
+                'conditions' => array(
+                    'order_id'  => $orderId,
+                    'ticket_id' => $ticketId
+                ),
+                'fields'    => array('id'),
+                'recursive' => -1
+            ));
+
+            if (!empty($alreadyChecked)) {
+                $arrayReturn['message'] = 'Check-in já realizado anteriormente.';
+            } elseif ($this->Checkin->save($this->data)) {
                 $arrayReturn['success'] = true;
+                $arrayReturn['message'] = '';
             }
         }
         return json_encode($arrayReturn);
