@@ -97,7 +97,7 @@ class AsaasComponent extends Component
             'value' => $order['Order']['value'],
             'dueDate' => $vencimento,
             // 'description' =>  Inflector::slug($order['Order']['description'], ' '),
-            'description' =>  $order['Order']['description'],
+            'description' =>  substr($order['Order']['description'], 0, 499),
             'externalReference' => $orderId,
             'installmentCount' => $order['Order']['installments'],
             'installmentValue' => $order['Order']['installment_value'],
