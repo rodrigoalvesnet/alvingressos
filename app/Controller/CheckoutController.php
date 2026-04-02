@@ -86,16 +86,32 @@ class CheckoutController extends AppController
                             'fields' => [
                                 'id',
                                 'value',
-                                'name'
+                                'name',
+                                'rules'
                             ],
                             'recursive' => -1
                         ]);
+                    }
+                    $modalidadeValor = 0;
+                    if (!empty($modalidade)) {
+                        $modalidadeValor = $modalidade['Lot']['value'];
+                        if (!empty($modalidade['Lot']['rules'])) {
+                            $rules = unserialize($modalidade['Lot']['rules']);
+                            if (!empty($rules['dates'])) {
+                                foreach ($rules['dates'] as $dateRule) {
+                                    if (!empty($dateRule['date']) && $dateRule['date'] === $date && isset($dateRule['value']) && $dateRule['value'] !== '') {
+                                        $modalidadeValor = $dateRule['value'];
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
                     $ingressos['cart']['eventos'][$eventId]['ingressos'][$date][] = [
                         'nome' => isset($pessoa['nome']) ? $pessoa['nome'] : '',
                         'modalidade_id' => $modalidadeId,
                         'modalidade_nome' => (!empty($modalidade) && isset($modalidade['Lot']['name'])) ? $modalidade['Lot']['name'] : '',
-                        'modalidade_valor' => (!empty($modalidade) && isset($modalidade['Lot']['value'])) ? $modalidade['Lot']['value'] : 0
+                        'modalidade_valor' => $modalidadeValor
                     ];
                 }
             }
