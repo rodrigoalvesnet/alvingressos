@@ -68,6 +68,7 @@ class Order extends AppModel
         }
 
         $orderSave['event_id'] = $dados['Order']['event_id'];
+        $orderSave['lot_id']   = isset($dados['Order']['lot_id']) && $dados['Order']['lot_id'] ? (int)$dados['Order']['lot_id'] : null;
         $orderSave['coupon_id'] = isset($dados['Order']['coupon_id']) ? $dados['Order']['coupon_id'] : null;
 
         //Se foi informado o aniversário nos campos adicionais

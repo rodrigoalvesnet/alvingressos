@@ -41,6 +41,8 @@
                 ?>
             </div>
 
+            <?php echo $this->Form->hidden('unidade_id'); ?>
+
             <div class="col-lg-2">
                 <?php
                 echo $this->Form->input('pulseira_numero', [

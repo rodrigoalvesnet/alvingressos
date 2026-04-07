@@ -210,6 +210,11 @@ class EstadiasController extends AppController
 
         $sexo = Configure::read('Estadias.sexo');
 
+        // Pré-preenche unidade_id com a unidade do usuário logado
+        if (empty($this->request->data['Estadia']['unidade_id'])) {
+            $this->request->data['Estadia']['unidade_id'] = (int)$this->Auth->user('unidade_id');
+        }
+
         $this->set(compact('atracoes', 'tarifas', 'formasdepagamentos', 'sexo'));
     }
 
@@ -429,15 +434,33 @@ class EstadiasController extends AppController
 
     public function admin_dashboard()
     {
+        // Unidade selecionada no filtro (0 = todas)
+        $unidadeId = !empty($this->data['Filtro']['unidade_id'])
+            ? (int)$this->data['Filtro']['unidade_id']
+            : 0;
+
         $conditions = [
             'DATE(inicio_em)' => date('Y-m-d')
         ];
         if (!empty($this->data)) {
             $conditions = [
                 'DATE(inicio_em) >=' => $this->data['Filtro']['data_inicial'],
-                'DATE(fim_em) <=' => $this->data['Filtro']['data_final']
+                'DATE(fim_em) <='    => $this->data['Filtro']['data_final']
             ];
         }
+        if ($unidadeId) {
+            $conditions['Estadia.unidade_id'] = $unidadeId;
+        }
+
+        // Lista de unidades para o filtro
+        $this->loadModel('Unidade');
+        $unidades = $this->Unidade->find('list', [
+            'fields'    => ['id', 'name'],
+            'order'     => ['name' => 'ASC'],
+            'recursive' => -1,
+        ]);
+        $this->set('unidades', $unidades);
+        $this->set('unidadeId', $unidadeId);
 
         $results = [
             'valor_total' => 0,
@@ -462,6 +485,10 @@ class EstadiasController extends AppController
         /**
          * Estadias ativas
          */
+        $condAbertas = ['status' => 'aberta'];
+        if ($unidadeId) {
+            $condAbertas['Estadia.unidade_id'] = $unidadeId;
+        }
         $abertas = $this->Estadia->find(
             'all',
             array(
@@ -471,9 +498,7 @@ class EstadiasController extends AppController
                     'duracao_segundos',
                     'valor_total'
                 ],
-                'conditions' => [
-                    'status' => 'aberta'
-                ],
+                'conditions' => $condAbertas,
                 'recursive' => -1
             )
         );
@@ -588,7 +613,126 @@ class EstadiasController extends AppController
         }
         // pr($results);
         // exit();
-        $this->set(compact('results'));
+        // -------------------------------------------------------
+        // Extrai as datas do filtro para uso em todas as queries
+        // -------------------------------------------------------
+        if (!empty($this->data)) {
+            $dataInicial = $this->data['Filtro']['data_inicial'];
+            $dataFinal   = $this->data['Filtro']['data_final'];
+        } else {
+            $dataInicial = $dataFinal = date('Y-m-d');
+        }
+
+        // Condições base de Orders (com filtro de unidade opcional)
+        $condOrders = [
+            'Order.status'            => 'approved',
+            'DATE(Order.created) >='  => $dataInicial,
+            'DATE(Order.created) <='  => $dataFinal,
+        ];
+        if ($unidadeId) {
+            $condOrders['Order.unidade_id'] = $unidadeId;
+        }
+
+        // Condições base de EstadiaItem via JOIN (com filtro de unidade opcional)
+        $condItens = [
+            'Estadia.status'           => 'encerrada',
+            'DATE(Estadia.fim_em) >='  => $dataInicial,
+            'DATE(Estadia.fim_em) <='  => $dataFinal,
+        ];
+        if ($unidadeId) {
+            $condItens['Estadia.unidade_id'] = $unidadeId;
+        }
+
+        // -------------------------------------------------------
+        // Vendas do site: pedidos aprovados no período
+        // -------------------------------------------------------
+        $this->loadModel('Order');
+
+        $totalPedidosOrders = $this->Order->find('count', [
+            'conditions' => $condOrders,
+            'recursive'  => -1,
+        ]);
+
+        $rowValorOrders = $this->Order->find('first', [
+            'conditions' => $condOrders,
+            'fields'     => ['COALESCE(SUM(Order.value), 0) AS total_valor'],
+            'recursive'  => -1,
+        ]);
+        $totalValorOrders = isset($rowValorOrders[0]['total_valor'])
+            ? (float)$rowValorOrders[0]['total_valor']
+            : 0;
+
+        // -------------------------------------------------------
+        // Vendas por Lote/Modalidade (ingressos do site)
+        // -------------------------------------------------------
+        $vendasPorLote = $this->Order->find('all', [
+            'conditions' => $condOrders,
+            'fields' => [
+                'COALESCE(Lot.name, "(sem lote)") AS modalidade',
+                'COUNT(DISTINCT Order.id) AS qtd',
+                'COALESCE(SUM(Order.value), 0) AS total',
+            ],
+            'joins' => [
+                [
+                    'table'      => 'lots',
+                    'alias'      => 'Lot',
+                    'type'       => 'LEFT',
+                    'conditions' => ['Lot.id = Order.lot_id'],
+                ],
+            ],
+            'group'     => ['Order.lot_id', 'Lot.name'],
+            'order'     => ['Lot.name ASC'],
+            'recursive' => -1,
+        ]);
+
+        // -------------------------------------------------------
+        // Vendas por Adicional (estadia_itens de estadias encerradas)
+        // Agrupa por descricao (snapshot do nome do adicional no
+        // momento da venda) — sem depender da coluna adicional_id
+        // -------------------------------------------------------
+        $vendasPorAdicional = $this->EstadiaItem->find('all', [
+            'fields' => [
+                'MIN(EstadiaItem.descricao) AS modalidade',
+                'SUM(EstadiaItem.qtd) AS qtd',
+                'COALESCE(SUM(EstadiaItem.valor_total), 0) AS total',
+            ],
+            'joins' => [
+                [
+                    'table'      => 'estadias',
+                    'alias'      => 'Estadia',
+                    'type'       => 'INNER',
+                    'conditions' => ['Estadia.id = EstadiaItem.estadia_id'],
+                ],
+            ],
+            'conditions' => $condItens,
+            'group'      => ['EstadiaItem.descricao'],
+            'order'      => ['EstadiaItem.descricao ASC'],
+            'recursive'  => -1,
+        ]);
+
+        // -------------------------------------------------------
+        // Tempo das estadias encerradas (valor_base + valor_adicional,
+        // excluindo adicionais de produtos para não duplicar)
+        // -------------------------------------------------------
+        $rowTempoEstadias = $this->Estadia->find('first', [
+            'conditions' => array_merge($conditions, ['status' => 'encerrada']),
+            'fields'     => ['COALESCE(SUM(valor_base + valor_adicional), 0) AS total_tempo'],
+            'recursive'  => -1,
+        ]);
+        $totalTempoEstadias = isset($rowTempoEstadias[0]['total_tempo'])
+            ? (float)$rowTempoEstadias[0]['total_tempo']
+            : 0;
+
+        $this->set(compact(
+            'results',
+            'dataInicial',
+            'dataFinal',
+            'totalPedidosOrders',
+            'totalValorOrders',
+            'vendasPorLote',
+            'vendasPorAdicional',
+            'totalTempoEstadias'
+        ));
     }
 
     function _traitSeconds($seconds)

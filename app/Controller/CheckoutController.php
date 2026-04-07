@@ -135,6 +135,21 @@ class CheckoutController extends AppController
         }
 
         $this->loadModel('Order');
+
+        // Extrai lot_id do primeiro ingresso do carrinho para salvar no pedido
+        if (empty($dados['Order']['lot_id']) && !empty($dados['Checkout'])) {
+            foreach ($dados['Checkout'] as $eventId => $checkout) {
+                foreach ($checkout as $date => $ingressos) {
+                    foreach ($ingressos as $pessoa) {
+                        if (!empty($pessoa['modalidade_id'])) {
+                            $dados['Order']['lot_id'] = (int)$pessoa['modalidade_id'];
+                            break 3;
+                        }
+                    }
+                }
+            }
+        }
+
         //Cria o pedido
         $createNewOrder = $this->Order->newOrder($dados, true);
         //Gerar Descrição para o Asaas

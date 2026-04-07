@@ -4,7 +4,9 @@
       "Bash(ls:*)",
       "Bash(xargs grep:*)",
       "Bash(find /d/PROJETOS/PHP/www/_ingressos -name *.sql -o -name schema*)",
-      "Bash(grep -r \"class.*Component\" /d/PROJETOS/PHP/www/_ingressos/app/Controller/Component/*.php)"
+      "Bash(grep -r \"class.*Component\" /d/PROJETOS/PHP/www/_ingressos/app/Controller/Component/*.php)",
+      "Bash(mysql -u root -e \"DESCRIBE tickets; DESCRIBE orders; DESCRIBE lots;\" _ingressos)",
+      "Bash(mysql -u root _ingressos -e \"DESCRIBE tickets; DESCRIBE orders; DESCRIBE lots;\")"
     ]
   }
 }
