@@ -647,6 +647,7 @@ class EstadiasController extends AppController
         // Vendas do site: pedidos aprovados no período
         // -------------------------------------------------------
         $this->loadModel('Order');
+        $this->loadModel('Ticket');
 
         $totalPedidosOrders = $this->Order->find('count', [
             'conditions' => $condOrders,
@@ -663,26 +664,26 @@ class EstadiasController extends AppController
             : 0;
 
         // -------------------------------------------------------
-        // Vendas por Lote/Modalidade (ingressos do site)
+        // Vendas por Modalidade — agrupado por tickets.modalidade_nome
         // -------------------------------------------------------
-        $vendasPorLote = $this->Order->find('all', [
-            'conditions' => $condOrders,
+        $vendasPorLote = $this->Ticket->find('all', [
             'fields' => [
-                'COALESCE(Lot.name, "(sem lote)") AS modalidade',
-                'COUNT(DISTINCT Order.id) AS qtd',
-                'COALESCE(SUM(Order.value), 0) AS total',
+                'COALESCE(Ticket.modalidade_nome, "(sem modalidade)") AS modalidade',
+                'COUNT(Ticket.id) AS qtd',
+                'COALESCE(SUM(Ticket.modalidade_valor), 0) AS total',
             ],
             'joins' => [
                 [
-                    'table'      => 'lots',
-                    'alias'      => 'Lot',
-                    'type'       => 'LEFT',
-                    'conditions' => ['Lot.id = Order.lot_id'],
+                    'table'      => 'orders',
+                    'alias'      => 'Order',
+                    'type'       => 'INNER',
+                    'conditions' => ['Order.id = Ticket.order_id'],
                 ],
             ],
-            'group'     => ['Order.lot_id', 'Lot.name'],
-            'order'     => ['Lot.name ASC'],
-            'recursive' => -1,
+            'conditions' => $condOrders,
+            'group'      => ['Ticket.modalidade_nome'],
+            'order'      => ['Ticket.modalidade_nome ASC'],
+            'recursive'  => -1,
         ]);
 
         // -------------------------------------------------------
