@@ -28,7 +28,7 @@ class AsaasComponent extends Component
             );
             $customerResponse = $this->createCustomer($customerData, $asaasSettings);
             //Se deu certo a criação
-            if ($customerResponse['success']) {
+            if ($customerResponse['success'] && !empty($customerResponse['data'])) {
                 //Pega o ID do Cliente gravado no Asaas
                 $customerId = $customerResponse['data']->id;
                 //Se está configurado para salvar o CustomerId
@@ -47,7 +47,7 @@ class AsaasComponent extends Component
         //continua gerando a cobrança
         $invoiceResponse = $this->createInvoice($orderId, $order, $customerId, $asaasSettings);
         //Se deu certo a criação da cobrança
-        if ($invoiceResponse['success']) {
+        if ($invoiceResponse['success'] && !empty($invoiceResponse['data'])) {
             //Atualiza o pedidos
             $this->updateOrder($orderId, $invoiceResponse['data']);
         } else {
@@ -91,6 +91,7 @@ class AsaasComponent extends Component
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         curl_setopt($ch, CURLOPT_HEADER, FALSE);
         curl_setopt($ch, CURLOPT_POST, TRUE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, Configure::read('debug') == 0);
         $data = array(
             'customer' => $customerId,
             'billingType' => $billingType,
@@ -141,8 +142,16 @@ class AsaasComponent extends Component
             "access_token: $apiKey"
         ));
         $response = curl_exec($ch);
+        $curlError = curl_error($ch);
         curl_close($ch);
+
+        if (!$response) {
+            return ['success' => false, 'message' => 'Falha na comunicação com o Asaas (invoice): ' . $curlError, 'data' => null];
+        }
         $response = json_decode($response);
+        if ($response === null) {
+            return ['success' => false, 'message' => 'Resposta inválida do Asaas (invoice)', 'data' => null];
+        }
 
         //Array de retorno padrão
         $result = array(
@@ -171,6 +180,7 @@ class AsaasComponent extends Component
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         curl_setopt($ch, CURLOPT_HEADER, FALSE);
         curl_setopt($ch, CURLOPT_POST, TRUE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, Configure::read('debug') == 0);
         $data = json_encode($customer);
         curl_setopt($ch, CURLOPT_POSTFIELDS, "$data");
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
@@ -179,8 +189,17 @@ class AsaasComponent extends Component
             "access_token: $apiKey"
         ));
         $response = curl_exec($ch);
+        $curlError = curl_error($ch);
         curl_close($ch);
+
+        if (!$response) {
+            return ['success' => false, 'message' => 'Falha na comunicação com o Asaas (customer): ' . $curlError, 'data' => null];
+        }
         $response = json_decode($response);
+        if ($response === null) {
+            return ['success' => false, 'message' => 'Resposta inválida do Asaas (customer)', 'data' => null];
+        }
+
         //Array de retorno padrão
         $result = array(
             'success' => true,
