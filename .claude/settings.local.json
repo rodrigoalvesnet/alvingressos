@@ -6,7 +6,20 @@
       "Bash(find /d/PROJETOS/PHP/www/_ingressos -name *.sql -o -name schema*)",
       "Bash(grep -r \"class.*Component\" /d/PROJETOS/PHP/www/_ingressos/app/Controller/Component/*.php)",
       "Bash(mysql -u root -e \"DESCRIBE tickets; DESCRIBE orders; DESCRIBE lots;\" _ingressos)",
-      "Bash(mysql -u root _ingressos -e \"DESCRIBE tickets; DESCRIBE orders; DESCRIBE lots;\")"
+      "Bash(mysql -u root _ingressos -e \"DESCRIBE tickets; DESCRIBE orders; DESCRIBE lots;\")",
+      "Bash(cp /c/laragon/www/_ingressos/app/Controller/DashController.php /c/laragon/www/_ingressos/app/Controller/Dash2Controller.php)",
+      "Bash(mkdir -p /c/laragon/www/_ingressos/app/View/Dash2)",
+      "Bash(cp /c/laragon/www/_ingressos/app/View/Dash/admin_index.ctp /c/laragon/www/_ingressos/app/View/Dash2/admin_index.ctp)",
+      "Bash(mysql -u root kinderpark -e \"DESCRIBE tickets;\")",
+      "Bash(mysql -u root kinderpark -e \"DESCRIBE orders;\")",
+      "Bash(/c/laragon/bin/mysql/mysql-8.0.30-winx64/bin/mysql.exe --version)",
+      "Read(//c/laragon/bin/mysql//**)",
+      "Bash($MYSQL:*)",
+      "Bash(/c/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe -u root kinderpark -e 'DESCRIBE adicionais;')",
+      "Bash(/c/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe -u root kinderpark -e 'DESCRIBE users;')",
+      "Bash(/c/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe -u root kinderpark -e 'DESCRIBE adicionals;')",
+      "Bash(/c/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe -u root kinderpark -e 'SELECT DISTINCT modalidade_nome FROM tickets WHERE modalidade_nome IS NOT NULL LIMIT 30;')",
+      "Bash(/c/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe -u root kinderpark -e 'SELECT DISTINCT descricao FROM estadia_itens LIMIT 30;')"
     ]
   }
 }
