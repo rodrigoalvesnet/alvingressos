@@ -212,13 +212,7 @@ class EstadiasController extends AppController
 
         // Pré-preenche unidade_id com a unidade do usuário logado
         if (empty($this->request->data['Estadia']['unidade_id'])) {
-            // $this->request->data['Estadia']['unidade_id'] = (int)$this->Auth->user('unidade_id');
-            /**
-             * TODO: remover hardcode da unidade_id = 2 (Unidade Ingressos) e usar a unidade do usuário logado, como era antes. 
-             * O problema é que o usuário logado no caixa tem unidade_id = 1 (Unidade Principal), mas as estadias precisam ser criadas com unidade_id = 2 (Unidade Ingressos) para aparecerem no dashboard correto e não misturarem com as estadias da Unidade Principal.
-             * A solução ideal seria criar um usuário específico para o caixa com unidade_id = 2, ou permitir que o admin escolha a unidade ao iniciar a estadia. Por enquanto, vou deixar hardcoded para garantir que as estadias sejam criadas na unidade correta.
-             */
-            $this->request->data['Estadia']['unidade_id'] = 2;
+            $this->request->data['Estadia']['unidade_id'] = (int)$this->Auth->user('unidade_id');
         }
 
         $this->set(compact('atracoes', 'tarifas', 'formasdepagamentos', 'sexo'));
