@@ -131,9 +131,20 @@ $roleId = $_SESSION['Auth']['User']['role_id'];
                         </li>
                     </ul>
                 </li>
-                <?php //} 
-                ?>
 
+                <?php if ($roleId == 1 || $roleId == 2) { ?>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="mdi mdi-chart-bar"></i><span class="hide-menu">Relatórios </span></a>
+                        <ul aria-expanded="false" class="collapse first-level">
+                            <li class="sidebar-item">
+                                <a href="/admin/dash/gerente" class="sidebar-link"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu"> Resumo Geral </span></a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="/admin/estadias/dashboard2" class="sidebar-link"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu"> Resumo de Estadias </span></a>
+                            </li>
+                        </ul>
+                    </li>
+                <?php } ?>
                 <?php
                 //Se é Admin
                 if ($roleId == 1) {
@@ -149,12 +160,6 @@ $roleId = $_SESSION['Auth']['User']['role_id'];
                             </li>
                         </ul>
                     </li>
-                <?php } ?>
-
-                <?php
-                //Se é Admin
-                if ($roleId == 1) {
-                ?>
                     <li class="sidebar-item">
                         <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="mdi mdi-settings"></i><span class="hide-menu">Admin </span></a>
                         <ul aria-expanded="false" class="collapse first-level">
