@@ -39,6 +39,12 @@ echo $this->Form->hidden('Checkin.order_id', array('value' => $this->data['Order
                     $title = 'Cancelado';
                     $reason = '';
                 }                
+                //Se pertence a outra unidade
+                if ($bloqueiaUnidade) {
+                    $icon = '<i class="fas fa-ban text-danger"></i>';
+                    $title = 'Unidade Incorreta!';
+                    $reason = 'Este ingresso pertence à unidade <strong>' . h($nomeUnidadeCorreta) . '</strong>. O check-in deve ser realizado nessa unidade.';
+                }
                 //Se está adiantado
                 if ($bloqueiaCheckinAdiantado) {
                     $icon = '<i class="fas fa-clock text-info"></i>';
@@ -86,7 +92,7 @@ echo $this->Form->hidden('Checkin.order_id', array('value' => $this->data['Order
     //se pode fazer o checkin
     if ($this->data['Order']['status'] == 'approved') {
         //Se ainda não foi feito
-        if (!$checkinExists && !$bloqueiaCheckinAdiantado && !$bloqueiaCheckinAtrasado) {
+        if (!$checkinExists && !$bloqueiaCheckinAdiantado && !$bloqueiaCheckinAtrasado && !$bloqueiaUnidade) {
             $eventId = $this->data['Order']['event_id'];
             echo $this->Form->button(
                 'Confirmar Checkin',

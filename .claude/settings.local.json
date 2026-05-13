@@ -19,7 +19,10 @@
       "Bash(/c/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe -u root kinderpark -e 'DESCRIBE users;')",
       "Bash(/c/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe -u root kinderpark -e 'DESCRIBE adicionals;')",
       "Bash(/c/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe -u root kinderpark -e 'SELECT DISTINCT modalidade_nome FROM tickets WHERE modalidade_nome IS NOT NULL LIMIT 30;')",
-      "Bash(/c/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe -u root kinderpark -e 'SELECT DISTINCT descricao FROM estadia_itens LIMIT 30;')"
+      "Bash(/c/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe -u root kinderpark -e 'SELECT DISTINCT descricao FROM estadia_itens LIMIT 30;')",
+      "Bash(Get-ChildItem -Path \"D:\\\\PROJETOS\\\\PHP\\\\www\\\\_ingressos\" -Recurse -Filter \"*.php\")",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "PowerShell(head *)"
     ]
   }
 }

@@ -124,6 +124,47 @@ class CheckinsController extends AppController
             $orderId  = isset($this->data['Checkin']['order_id'])  ? $this->data['Checkin']['order_id']  : null;
             $ticketId = isset($this->data['Checkin']['ticket_id']) ? $this->data['Checkin']['ticket_id'] : null;
 
+            // Validação de unidade: usuários com unidade_id só podem validar
+            // tickets cujo evento pertença à mesma unidade
+            $userUnidadeId = AuthComponent::user('unidade_id');
+            if (!empty($userUnidadeId)) {
+                $eventUnidadeId = null;
+                if (!empty($ticketId)) {
+                    $this->loadModel('Ticket');
+                    $ticketData = $this->Ticket->find('first', array(
+                        'conditions' => array('Ticket.id' => $ticketId),
+                        'contain'    => array(
+                            'Event' => array(
+                                'fields' => array('unidade_id')
+                            )
+                        ),
+                        'fields' => array('id')
+                    ));
+                    if (!empty($ticketData)) {
+                        $eventUnidadeId = $ticketData['Event']['unidade_id'];
+                    }
+                } elseif (!empty($orderId)) {
+                    $this->loadModel('Order');
+                    $orderData = $this->Order->find('first', array(
+                        'conditions' => array('Order.id' => $orderId),
+                        'contain'    => array(
+                            'Event' => array(
+                                'fields' => array('unidade_id')
+                            )
+                        ),
+                        'fields' => array('id', 'event_id')
+                    ));
+                    if (!empty($orderData)) {
+                        $eventUnidadeId = $orderData['Event']['unidade_id'];
+                    }
+                }
+
+                if (!empty($eventUnidadeId) && $eventUnidadeId != $userUnidadeId) {
+                    $arrayReturn['message'] = 'Este ingresso pertence a outra unidade e não pode ser validado aqui.';
+                    return json_encode($arrayReturn);
+                }
+            }
+
             $alreadyChecked = $this->Checkin->find('first', array(
                 'conditions' => array(
                     'order_id'  => $orderId,
@@ -176,9 +217,8 @@ class CheckinsController extends AppController
                         'name'
                     ),
                     'Event' => array(
-                        'id',
-                        'title',
-                        'status'
+                        'fields'  => array('id', 'title', 'status', 'unidade_id'),
+                        'Unidade' => array('id', 'name')
                     ),
                     'Checkin' => array(
                         'created',
@@ -208,13 +248,26 @@ class CheckinsController extends AppController
         );
         $this->set('modalidade_data', $this->params->query['data']);
 
-
         $checkinExists = false;
         //Verifica se o checkin já foi feito
         if ($this->Checkin->checkinExists($orderId, 'order')) {
             $checkinExists = true;
         }
         $this->set('checkinExists', $checkinExists);
+
+        // Validação de unidade: usuário com unidade_id só pode validar
+        // tickets do evento que pertença à mesma unidade
+        $bloqueiaUnidade    = false;
+        $nomeUnidadeCorreta = '';
+        $userUnidadeId = AuthComponent::user('unidade_id');
+        if (!empty($userUnidadeId) && !empty($this->data['Event']['unidade_id'])) {
+            if ($this->data['Event']['unidade_id'] != $userUnidadeId) {
+                $bloqueiaUnidade    = true;
+                $nomeUnidadeCorreta = $this->data['Event']['Unidade']['name'];
+            }
+        }
+        $this->set('bloqueiaUnidade', $bloqueiaUnidade);
+        $this->set('nomeUnidadeCorreta', $nomeUnidadeCorreta);
 
         $bloqueiaCheckinAdiantado = false;
         //Verifica se a data do ticket é MAIOR a hoje
@@ -256,9 +309,8 @@ class CheckinsController extends AppController
                         'event_id'
                     ),
                     'Event' => array(
-                        'id',
-                        'title',
-                        'status'
+                        'fields'  => array('id', 'title', 'status', 'unidade_id'),
+                        'Unidade' => array('id', 'name')
                     ),
                     'Checkin' => array(
                         'created',
@@ -276,6 +328,20 @@ class CheckinsController extends AppController
             $checkinExists = true;
         }
         $this->set('checkinExists', $checkinExists);
+
+        // Validação de unidade: usuário com unidade_id só pode validar
+        // tickets do evento que pertença à mesma unidade
+        $bloqueiaUnidade    = false;
+        $nomeUnidadeCorreta = '';
+        $userUnidadeId = AuthComponent::user('unidade_id');
+        if (!empty($userUnidadeId) && !empty($this->data['Event']['unidade_id'])) {
+            if ($this->data['Event']['unidade_id'] != $userUnidadeId) {
+                $bloqueiaUnidade    = true;
+                $nomeUnidadeCorreta = $this->data['Event']['Unidade']['name'];
+            }
+        }
+        $this->set('bloqueiaUnidade', $bloqueiaUnidade);
+        $this->set('nomeUnidadeCorreta', $nomeUnidadeCorreta);
 
         $bloqueiaCheckinAdiantado = false;
         //Verifica se a data do ticket é MAIOR a hoje
