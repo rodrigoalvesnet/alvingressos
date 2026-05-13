@@ -363,9 +363,9 @@
                                 echo $this->Html->link(
                                     '<i class="bi bi-printer"></i> Imprimir Ingressos',
                                     array(
-                                            'controller' => 'Orders',
-                                            'action' => 'ticket',
-                                            $this->data['Order']['id']
+                                        'controller' => 'Orders',
+                                        'action' => 'ticket',
+                                        $this->data['Order']['id']
                                     ),
                                     array(
                                         'class' => 'btn btn-secondary mb-2 mr-3',
@@ -388,21 +388,20 @@
                                 );
                             }
 
-                            //Se tem link da fatura
-                            if (!empty($this->data['Order']['invoice_url'])) {
-                                echo $this->Html->link(
-                                    '<i class="bi bi-receipt"></i> Ver a cobrança',
-                                    $this->data['Order']['invoice_url'],
-                                    array(
-                                        'class' => 'btn btn-secondary mb-2 mr-3',
-                                        'target' => '_blank',
-                                        'escape' => false
-                                    )
-                                );
-                            }
-
                             //Se ainda não foi pago
                             if (!empty($this->data['Order']['status'] == 'pending')) {
+                                //Se tem link da fatura
+                                if (!empty($this->data['Order']['invoice_url'])) {
+                                    echo $this->Html->link(
+                                        '<i class="bi bi-receipt"></i> Realizar Pagamento',
+                                        $this->data['Order']['invoice_url'],
+                                        array(
+                                            'class' => 'btn btn-secondary mb-2 mr-3',
+                                            'target' => '_blank',
+                                            'escape' => false
+                                        )
+                                    );
+                                }
                                 //Se tem link do boleto
                                 if (!empty($this->data['Order']['invoice_boleto'])) {
                                     echo $this->Html->link(
@@ -416,7 +415,7 @@
                                     );
                                 }
                             }
-                            
+
                             ?>
                         </div>
                     </div>
