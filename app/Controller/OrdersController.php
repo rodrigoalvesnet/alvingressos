@@ -557,41 +557,21 @@ class OrdersController extends AppController
             return;
         }
 
-        // Validação 2: todos os tickets vencidos
+        // Coleta status de cada ticket (vencido / já utilizado) para exibir na view
         $hoje = date('Y-m-d');
-        $temTicketValido = false;
-        foreach ($order['Ticket'] as $ticket) {
-            if ($ticket['modalidade_data'] >= $hoje) {
-                $temTicketValido = true;
-                break;
-            }
-        }
-        if (!$temTicketValido) {
-            $this->set('mensagemBloqueio', 'Todos os ingressos deste pedido estão vencidos.');
-            $this->render('ticket_bloqueado');
-            return;
-        }
-
-        // Validação 3: todos os tickets já utilizados
         $this->loadModel('Checkin');
-        $temTicketNaoUsado = false;
+        $ticketsUsados = [];
         foreach ($order['Ticket'] as $ticket) {
             $usado = $this->Checkin->find('first', array(
                 'conditions' => array('ticket_id' => $ticket['id']),
                 'fields'     => array('id'),
                 'recursive'  => -1
             ));
-            if (empty($usado)) {
-                $temTicketNaoUsado = true;
-                break;
-            }
-        }
-        if (!$temTicketNaoUsado) {
-            $this->set('mensagemBloqueio', 'Todos os ingressos deste pedido já foram utilizados.');
-            $this->render('ticket_bloqueado');
-            return;
+            $ticketsUsados[$ticket['id']] = !empty($usado);
         }
 
+        $this->set('hoje', $hoje);
+        $this->set('ticketsUsados', $ticketsUsados);
         $this->set('order', $order);
         $tipoEvento = Configure::read('Sistema.evento');
         if ($tipoEvento == 'continuo') {

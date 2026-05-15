@@ -74,6 +74,33 @@ $qrCodeUnico = Configure::read('Checkin.qrCodeUnico');
         text-align: center;
         font-size: 11px;
     }
+
+    .qr-invalido {
+        display: inline-block;
+        width: <?php echo ($qrcodeWidth ?: 120); ?>px;
+        height: <?php echo ($qrcodeWidth ?: 120); ?>px;
+        background: #f2f2f2;
+        border: 2px dashed #c0392b;
+        border-radius: 4px;
+        text-align: center;
+        vertical-align: middle;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    .qr-invalido-icone {
+        font-size: 28px;
+        color: #c0392b;
+        margin-bottom: 6px;
+    }
+
+    .qr-invalido-label {
+        font-size: 11px;
+        font-weight: bold;
+        color: #c0392b;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
 </style>
 
 <div class="container">
@@ -162,9 +189,23 @@ $qrCodeUnico = Configure::read('Checkin.qrCodeUnico');
         // Para cada data, gera um QRCode único
         foreach ($ticketsPorData as $data => $tickets) {
             $dataFormatada = $this->Alv->tratarData($data, 'pt');
-            $qrcode = new QrcodeGen();
-            $urlQrCode = Configure::read('Checkin.url') . $order['Order']['id'] . '?data=' . urlencode($data);
-            $image = $qrcode->link($urlQrCode, $qrcodeWidth);
+
+            $estaVencido = ($data < $hoje);
+            $todoUsado = true;
+            foreach ($tickets as $t) {
+                if (empty($ticketsUsados[$t['id']])) {
+                    $todoUsado = false;
+                    break;
+                }
+            }
+            $qrInvalido = $estaVencido || $todoUsado;
+            $motivoInvalido = $estaVencido ? 'Vencido' : 'Já utilizado';
+
+            if (!$qrInvalido) {
+                $qrcode = new QrcodeGen();
+                $urlQrCode = Configure::read('Checkin.url') . $order['Order']['id'] . '?data=' . urlencode($data);
+                $image = $qrcode->link($urlQrCode, $qrcodeWidth);
+            }
     ?>
             <table class="border-bottom-dashed">
                 <tr>
@@ -176,9 +217,16 @@ $qrCodeUnico = Configure::read('Checkin.qrCodeUnico');
                         <?php } ?>
                     </td>
                     <td style="width: 30%; text-align: right;" class="td-qrcode">
-                        <div class="img-qrcode">
-                            <img src="data:image/png;base64, <?php echo base64_encode($image); ?>">
-                        </div>
+                        <?php if ($qrInvalido) { ?>
+                            <div class="qr-invalido">
+                                <div class="qr-invalido-icone">&#x26D4;</div>
+                                <div class="qr-invalido-label"><?php echo $motivoInvalido; ?></div>
+                            </div>
+                        <?php } else { ?>
+                            <div class="img-qrcode">
+                                <img src="data:image/png;base64, <?php echo base64_encode($image); ?>">
+                            </div>
+                        <?php } ?>
                     </td>
                 </tr>
             </table>
@@ -186,7 +234,18 @@ $qrCodeUnico = Configure::read('Checkin.qrCodeUnico');
         }
     } else {
         // Caso padrão: um QRCode por ingresso
-        foreach ($order['Ticket'] as $ticket) { ?>
+        foreach ($order['Ticket'] as $ticket) {
+            $estaVencido = ($ticket['modalidade_data'] < $hoje);
+            $estaUsado   = !empty($ticketsUsados[$ticket['id']]);
+            $qrInvalido  = $estaVencido || $estaUsado;
+            $motivoInvalido = $estaVencido ? 'Vencido' : 'Já utilizado';
+
+            if (!$qrInvalido) {
+                $qrcode = new QrcodeGen();
+                $urlQrCode = Configure::read('Checkin.url') . $ticket['id'];
+                $image = $qrcode->link($urlQrCode, $qrcodeWidth);
+            }
+        ?>
             <table class="border-bottom-dashed">
                 <tr>
                     <td style="width: 70%;">
@@ -197,18 +256,20 @@ $qrCodeUnico = Configure::read('Checkin.qrCodeUnico');
                         <span class="label">E-mail: </span><?php echo $ticket['email']; ?><br />
                     </td>
                     <td style="width: 30%; text-align: right;" class="td-qrcode">
-                        <?php
-                        $qrcode = new QrcodeGen();
-                        $urlQrCode = Configure::read('Checkin.url') . $ticket['id'];
-                        $image = $qrcode->link($urlQrCode, $qrcodeWidth);
-                        ?>
-                        <div class="img-qrcode">
-                            <img src="data:image/png;base64, <?php echo base64_encode($image); ?>">
-                        </div>
+                        <?php if ($qrInvalido) { ?>
+                            <div class="qr-invalido">
+                                <div class="qr-invalido-icone">&#x26D4;</div>
+                                <div class="qr-invalido-label"><?php echo $motivoInvalido; ?></div>
+                            </div>
+                        <?php } else { ?>
+                            <div class="img-qrcode">
+                                <img src="data:image/png;base64, <?php echo base64_encode($image); ?>">
+                            </div>
+                        <?php } ?>
                     </td>
                 </tr>
             </table>
-    <?php }
+        <?php }
     }
     ?>
 </div>

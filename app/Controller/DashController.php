@@ -273,11 +273,13 @@ class DashController extends AppController
             'conditions' => ['Order.id = Checkin.order_id'],
         ]];
         $condCheckins = [
+            'Order.status'             => 'approved',
             'DATE(Checkin.created) >=' => $dataInicial,
             'DATE(Checkin.created) <=' => $dataFinal,
         ];
 
         $totalCheckins = $this->Checkin->find('count', [
+            'joins'      => $checkinJoin,
             'conditions' => $condCheckins,
             'recursive'  => -1,
         ]);
