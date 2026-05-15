@@ -55,7 +55,7 @@ class TarifasController extends AppController
         //Prepara a busca
         $this->paginate = array(
             'conditions'    => $arrayConditions,
-            'limit'         => Configure::read('Sistema.limit'),
+            'limit'         => 50,
             'contain'     => [
                 'TarifaFaixa'
             ]
