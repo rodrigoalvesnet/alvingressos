@@ -624,12 +624,28 @@ class EstadiasController extends AppController
             ? (float)$rowTempoEstadias[0]['total_tempo']
             : 0;
 
+        // -------------------------------------------------------
+        // 11. Vendas por tarifa (estadias encerradas no período)
+        // -------------------------------------------------------
+        $vendasPorTarifa = $this->Estadia->find('all', [
+            'conditions' => array_merge($condPeriodo, ['Estadia.status' => 'encerrada']),
+            'fields'     => [
+                'Estadia.tarifa_id',
+                'COUNT(Estadia.id) AS quantidade',
+                'COALESCE(SUM(Estadia.valor_base + Estadia.valor_adicional), 0) AS total_tempo',
+            ],
+            'contain'    => ['Tarifa' => ['fields' => ['nome']]],
+            'group'      => ['Estadia.tarifa_id'],
+            'order'      => ['Estadia.tarifa_id ASC'],
+        ]);
+
         $this->set(compact(
             'results',
             'dataInicial',
             'dataFinal',
             'vendasPorAdicional',
-            'totalTempoEstadias'
+            'totalTempoEstadias',
+            'vendasPorTarifa'
         ));
     }
 

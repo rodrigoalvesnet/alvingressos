@@ -253,5 +253,16 @@
             atualizarIdade();
         }
     })();
+
+    // Força cursor para o início ao focar em campos com máscara
+    document.querySelectorAll('.fone, .cpf, .datepicker').forEach(function (el) {
+        el.addEventListener('focus', function () {
+            var self = this;
+            // setTimeout garante execução após o plugin de máscara reposicionar o cursor
+            setTimeout(function () {
+                self.setSelectionRange(0, 0);
+            }, 0);
+        });
+    });
 </script>
 <?php $this->end(); ?>

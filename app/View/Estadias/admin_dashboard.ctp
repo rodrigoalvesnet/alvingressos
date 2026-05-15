@@ -237,6 +237,23 @@ if (!empty($vendasPorAdicional)) {
             R$ <?php echo $this->Alv->tratarValor($totalTempoEstadias, 'pt'); ?>
           </td>
         </tr>
+        <?php if (!empty($vendasPorTarifa)): ?>
+          <?php foreach ($vendasPorTarifa as $vt): ?>
+            <?php
+              $tarifaNome = !empty($vt['Tarifa']['nome']) ? $vt['Tarifa']['nome'] : ('Tarifa #' . $vt['Estadia']['tarifa_id']);
+              $vtQtd   = (int)$vt[0]['quantidade'];
+              $vtTotal = (float)$vt[0]['total_tempo'];
+            ?>
+            <tr>
+              <td class="pl-4">
+                <i class="fa fa-tag text-info"></i>
+                <small><?php echo h($tarifaNome); ?></small>
+              </td>
+              <td class="text-center"><small><?php echo $vtQtd; ?></small></td>
+              <td class="text-right"><small>R$ <?php echo $this->Alv->tratarValor($vtTotal, 'pt'); ?></small></td>
+            </tr>
+          <?php endforeach; ?>
+        <?php endif; ?>
         <tr>
           <td>
             <i class="fa fa-plus-circle text-secondary"></i>

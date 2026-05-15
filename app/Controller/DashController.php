@@ -66,6 +66,25 @@ class DashController extends AppController
         ));
         $this->set('checkinsToday', $checkinsToday);
 
+        // Adulto Acompanhante EXCEDENTE agendados para hoje
+        $excedenteHojeRow = $this->Ticket->find('first', array(
+            'joins' => array(array(
+                'table'      => 'orders',
+                'alias'      => 'Order',
+                'type'       => 'INNER',
+                'conditions' => array('Order.id = Ticket.order_id'),
+            )),
+            'conditions' => array(
+                'Order.unidade_id'           => $unidadeId,
+                'Order.status'               => 'approved',
+                'Ticket.modalidade_nome LIKE' => '%EXCEDENTE%',
+                'DATE(Ticket.modalidade_data)' => date('Y-m-d'),
+            ),
+            'fields'    => array('COUNT(Ticket.id) AS qtd'),
+            'recursive' => -1,
+        ));
+        $this->set('excedenteHoje', (int)(isset($excedenteHojeRow[0]['qtd']) ? $excedenteHojeRow[0]['qtd'] : 0));
+
         // ============================================
         // NOVOS KPIs (somente Admin/Gerente) por mês/ano
         // ============================================
@@ -116,8 +135,8 @@ class DashController extends AppController
                 ],
                 // 'recursive' => -1
             ));
-            // pr($checkinsCountMonth);exit();
             $this->set('checkinsCountMonth', (int)$checkinsCountMonth);
+
         } else {
             // para não dar "undefined" na view
             $this->set('ordersTotalMonth', 0);

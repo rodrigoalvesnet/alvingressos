@@ -22,7 +22,9 @@
       "Bash(/c/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe -u root kinderpark -e 'SELECT DISTINCT descricao FROM estadia_itens LIMIT 30;')",
       "Bash(Get-ChildItem -Path \"D:\\\\PROJETOS\\\\PHP\\\\www\\\\_ingressos\" -Recurse -Filter \"*.php\")",
       "Bash(Select-Object -ExpandProperty FullName)",
-      "PowerShell(head *)"
+      "PowerShell(head *)",
+      "Bash(mysql -u root -e \"DESCRIBE kinderpark.tickets; SELECT DISTINCT modalidade_nome FROM kinderpark.tickets LIMIT 30;\")",
+      "Bash(mysql -u root --password=\"\" -e \"DESCRIBE kinderpark.tickets; SELECT DISTINCT modalidade_nome FROM kinderpark.tickets LIMIT 30;\")"
     ]
   }
 }
