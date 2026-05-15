@@ -347,11 +347,24 @@ class EstadiasController extends AppController
             return $this->response->body(json_encode(['ok' => false, 'error' => 'Estadia não encontrada']));
         }
 
-        // ✅ agora o component já traz valor_tempo, subtotal_adicionals e valor_total
-        $preview = $this->EstadiasCalculator->previewEncerramento($row);
+        // Para estadias já encerradas, usa fim_em real para não recalcular com "agora"
+        $fimEm = null;
+        if ($row['Estadia']['status'] === 'encerrada' && !empty($row['Estadia']['fim_em'])) {
+            $fimEm = $row['Estadia']['fim_em'];
+        }
+
+        $preview = $this->EstadiasCalculator->previewEncerramento($row, $fimEm);
 
         if (empty($preview['ok'])) {
             return $this->response->body(json_encode($preview));
+        }
+
+        // Para estadias já encerradas, usa o valor_total salvo no banco (evita inconsistência de config)
+        if ($row['Estadia']['status'] === 'encerrada') {
+            $preview['valor_total'] = (float)$row['Estadia']['valor_total'];
+            $preview['valor_base'] = (float)$row['Estadia']['valor_base'];
+            $preview['valor_adicional'] = (float)$row['Estadia']['valor_adicional'];
+            $preview['valor_tempo'] = (float)$row['Estadia']['valor_base'] + (float)$row['Estadia']['valor_adicional'];
         }
 
         // Tratar tempo pausado hms (se você quiser manter no controller)
