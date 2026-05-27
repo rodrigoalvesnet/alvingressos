@@ -217,7 +217,24 @@ class CheckoutController extends AppController
         $this->layout = 'ajax';
         $this->theme = Configure::read('Site.tema');
 
-        $paymentsType = Configure::read('Site.pagamentos');
+        $paymentsType = Configure::read('Site.pagamentos'); // fallback
+        if (!empty($this->data['Order']['event_id'])) {
+            $this->loadModel('Event');
+            $availableLot = $this->Event->checkAvailableLot($this->data['Order']['event_id']);
+            $event = $this->Event->find('first', array(
+                'conditions' => array('Event.id' => $this->data['Order']['event_id']),
+                'contain' => array(
+                    'Lot' => array(
+                        'conditions' => array('id' => $availableLot),
+                        'fields' => array('payments_type')
+                    )
+                ),
+                'fields' => array('id')
+            ));
+            if (!empty($event['Lot'][0]['payments_type'])) {
+                $paymentsType = unserialize($event['Lot'][0]['payments_type']);
+            }
+        }
 
         $this->set('paymentsType', $paymentsType);
         $price = 0;

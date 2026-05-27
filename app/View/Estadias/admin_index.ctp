@@ -277,6 +277,18 @@
                                         title="Visualizar">
                                         <i class="mdi mdi-eye"></i>
                                     </button>
+
+                                    <?php echo $this->Html->link(
+                                        '<i class="mdi mdi-printer"></i>',
+                                        ['action' => 'comprovante', $registro['Estadia']['id']],
+                                        [
+                                            'class'  => 'btn btn-outline-secondary btn-sm',
+                                            'escape' => false,
+                                            'title'  => 'Imprimir comprovante',
+                                            'target' => '_blank',
+                                            'style'  => 'margin-left: 4px;',
+                                        ]
+                                    ); ?>
                                 </td>
                             </tr>
                         <?php } ?>
@@ -296,6 +308,9 @@
 <script>
     (function() {
 
+        <?php if (!empty($novaEstadiaId)): ?>
+        window.open('/admin/estadias/comprovante/<?php echo (int)$novaEstadiaId; ?>', '_blank');
+        <?php endif; ?>
 
         $('#inputSearch').on('keyup', function() {
             var value = $(this).val().toLowerCase();
@@ -320,6 +335,9 @@
         var adicionalQtdEl = document.getElementById('adicional-qtd');
         var btnAddAdicional = document.getElementById('btnAddAdicional');
         var tableAdicionalsBody = document.querySelector('#tableAdicionals tbody');
+        var formAdicionarEl = document.getElementById('formAdicionarAdicional');
+        var thAcaoEl = document.getElementById('thAcaoAdicional');
+        var btnImprimirComprovante = document.getElementById('btnImprimirComprovante');
 
 
         var modalEl = document.getElementById('modalEncerrar');
@@ -343,6 +361,7 @@
         var formEncerrar = document.getElementById('formEncerrar');
 
         var isBusy = false;
+        var estadiaEditavel = false;
         var currentId = null;
 
         function setLoading() {
@@ -376,10 +395,10 @@
             prevTotalTempo.value = '';
             prevTotalAdicionals.value = '';
             tableAdicionalsBody.innerHTML = '';
-            // if (adicionalIdEl) adicionalIdEl.disabled = true;
-            // if (adicionalQtdEl) adicionalQtdEl.disabled = true;
-            // if (btnAddAdicional) btnAddAdicional.disabled = true;
-
+            estadiaEditavel = false;
+            if (formAdicionarEl) formAdicionarEl.style.display = 'none';
+            if (thAcaoEl) thAcaoEl.style.display = 'none';
+            if (btnImprimirComprovante) { btnImprimirComprovante.style.display = 'none'; btnImprimirComprovante.href = '#'; }
             // prevBase.value = '';
             // prevAdd.value = '';
         }
@@ -393,14 +412,15 @@
             tableAdicionalsBody.innerHTML = '';
             (res.itens || []).forEach(function(it) {
                 var tr = document.createElement('tr');
+                var tdAcao = estadiaEditavel
+                    ? '<td class="text-center"><button class="btn btn-danger btn-sm btn-remover-item" data-item-id="' + it.id + '"><i class="mdi mdi-delete"></i></button></td>'
+                    : '';
                 tr.innerHTML =
                     '<td>' + (it.descricao || '') + '</td>' +
                     '<td class="text-center">' + (it.qtd || 0) + '</td>' +
                     '<td class="text-end">' + moneyBR(it.valor_unit) + '</td>' +
                     '<td class="text-end">' + moneyBR(it.valor_total) + '</td>' +
-                    '<td class="text-center">' +
-                    '<button class="btn btn-danger btn-sm btn-remover-item" data-item-id="' + it.id + '"><i class="mdi mdi-delete"></i></button>' +
-                    '</td>';
+                    tdAcao;
                 tableAdicionalsBody.appendChild(tr);
             });
         }
@@ -509,10 +529,23 @@
                     }
 
                     var podeEditarAdicionals = (res.status === 'aberta' || res.status === 'pausada');
+                    estadiaEditavel = podeEditarAdicionals;
 
-                    // if (adicionalIdEl) adicionalIdEl.disabled = !podeEditarAdicionals;
-                    // if (adicionalQtdEl) adicionalQtdEl.disabled = !podeEditarAdicionals;
-                    // if (btnAddAdicional) btnAddAdicional.disabled = !podeEditarAdicionals;
+                    if (formAdicionarEl) formAdicionarEl.style.display = podeEditarAdicionals ? '' : 'none';
+                    if (thAcaoEl) thAcaoEl.style.display = podeEditarAdicionals ? '' : 'none';
+                    if (adicionalIdEl) adicionalIdEl.disabled = !podeEditarAdicionals;
+                    if (adicionalQtdEl) adicionalQtdEl.disabled = !podeEditarAdicionals;
+                    if (btnAddAdicional) btnAddAdicional.disabled = !podeEditarAdicionals;
+
+                    if (btnImprimirComprovante) {
+                        if (res.status === 'encerrada') {
+                            btnImprimirComprovante.href = '/admin/estadias/comprovante/' + encodeURIComponent(res.id);
+                            btnImprimirComprovante.style.display = '';
+                        } else {
+                            btnImprimirComprovante.style.display = 'none';
+                            btnImprimirComprovante.href = '#';
+                        }
+                    }
 
                     setContent();
                 })
@@ -559,6 +592,12 @@
                         $('#btnEncerrar').prop('disabled', false);
                     }, 1000);
                     return;
+                }
+
+                // Abre comprovante em nova aba antes de submeter
+                var idEncerrar = inputId.value;
+                if (idEncerrar) {
+                    window.open('/admin/estadias/comprovante/' + encodeURIComponent(idEncerrar), '_blank');
                 }
 
                 setTimeout(function() {

@@ -220,14 +220,9 @@ class EstadiasCalculatorComponent extends Component
         $calc = $this->_calcularCobranca($estadiaRow, $duracaoCobrada);
         if (empty($calc['ok'])) return $calc;
 
-        $subtotalProdutos = $this->_subtotalProdutos((int)$row['id']);
+        $subtotalAdicionals = $this->_subtotalProdutos((int)$row['id']);
         $valorTempo = (float)$calc['valor_total'];
-        $somarEstadia = Configure::read('Estadias.finalizacao.somar_estadia');
-        if ($somarEstadia) {
-            $valorTotalFinal = $valorTempo + $subtotalProdutos;
-        } else {
-            $valorTotalFinal = $subtotalProdutos;
-        }
+        $valorTotalFinal = $valorTempo + $subtotalAdicionals;
 
         return [
             'ok' => true,
@@ -240,7 +235,7 @@ class EstadiasCalculatorComponent extends Component
             'valor_base' => (float)$calc['valor_base'],
             'valor_adicional' => (float)$calc['valor_adicional'],
             'valor_tempo' => $valorTempo,
-            'subtotal_produtos' => $subtotalProdutos,
+            'subtotal_adicionals' => $subtotalAdicionals,
             'valor_total' => $valorTotalFinal,
         ];
     }

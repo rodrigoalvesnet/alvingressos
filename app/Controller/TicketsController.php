@@ -52,9 +52,20 @@ class TicketsController extends AppController
             if (isset($this->request->data['Filtro']['date']) && !empty($this->request->data['Filtro']['date'])) {
                 $arrayConditions['DATE(Ticket.modalidade_data)'] = $this->Alv->tratarData($this->request->data['Filtro']['date']);
             }
-            //salva as condições na session            
+            if (isset($this->request->data['Filtro']['event_id']) && !empty($this->request->data['Filtro']['event_id'])) {
+                $arrayConditions['Ticket.event_id'] = $this->request->data['Filtro']['event_id'];
+            }
+            //salva as condições na session
             $this->Session->write('Filtros.Tickets', $arrayConditions);
             $this->Session->write('Filtros.ThisData', $this->request->data);
+
+            if (isset($this->request->data['button']) && $this->request->data['button'] == 'btnExport') {
+                $this->redirect([
+                    'controller' => 'Reports',
+                    'action' => 'tickets',
+                    'admin' => true
+                ]);
+            }
         } else {
             //verifica se tem condições na session
             if ($this->Session->check('Filtros.Tickets')) {
@@ -66,12 +77,23 @@ class TicketsController extends AppController
 
         //Prepara a busca
         $this->paginate = array(
-            'conditions'    => $arrayConditions,
-            'limit'         => Configure::read('Sistema.limit'),
-            'order'         => 'Ticket.created DESC',
-            'recursive' => -1
+            'conditions' => $arrayConditions,
+            'limit'      => Configure::read('Sistema.limit'),
+            'order'      => 'Ticket.created DESC',
+            'contain'    => array(
+                'Event' => array('title')
+            )
         );
         $this->set('registros', $this->paginate('Ticket'));
+        $this->set('statusLabels', Configure::read('Order.status'));
+
+        $this->loadModel('Event');
+        $events = $this->Event->find('list', array(
+            'recursive' => -1,
+            'fields' => array('id', 'title'),
+            'order'  => array('title' => 'ASC')
+        ));
+        $this->set('events', $events);
     }
 
     public function admin_edit($id)

@@ -62,6 +62,19 @@
                 );
                 ?>
             </div>
+            <div class="col-lg-3">
+                <?php
+                echo $this->Form->input(
+                    'event_id',
+                    array(
+                        'label'   => 'Evento',
+                        'options' => $events,
+                        'class'   => 'form-control',
+                        'empty'   => 'Qualquer'
+                    )
+                );
+                ?>
+            </div>
         </div>
     </div>
     <div class="card-footer border-top">
@@ -69,9 +82,20 @@
         echo $this->Form->submit(
             'Pesquisar',
             array(
-                'type'    => 'submit',
-                'class' => 'btn btn-primary',
-                'div'    => false,
+                'type'  => 'submit',
+                'class' => 'btn btn-primary mx-1',
+                'div'   => false,
+                'label' => false
+            )
+        );
+        echo $this->Form->button(
+            'Exportar',
+            array(
+                'type'  => 'submit',
+                'class' => 'btn btn-outline-success mx-1',
+                'name'  => 'button',
+                'value' => 'btnExport',
+                'div'   => false,
                 'label' => false
             )
         );
@@ -84,7 +108,7 @@
                 'limpar' => 1
             ),
             array(
-                'class' => 'btn btn-outline-secondary mx-2',
+                'class' => 'btn btn-outline-secondary mx-1',
                 'escape' => false
             )
         );
@@ -106,6 +130,8 @@
                         <th scope="col"><?php echo $this->Paginator->sort('Ticket.nome', 'Pessoa'); ?></th>
                         <th scope="col"><?php echo $this->Paginator->sort('Ticket.modalidade_nome', 'Modalidade'); ?></th>
                         <th scope="col"><?php echo $this->Paginator->sort('Ticket.modalidade_data', 'Data Agendada'); ?></th>
+                        <th scope="col">Evento</th>
+                        <th scope="col">Situação</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -171,6 +197,11 @@
                             <td><?php echo $registro['Ticket']['nome']; ?></td>
                             <td><?php echo $registro['Ticket']['modalidade_nome']; ?></td>
                             <td><?php echo $this->Alv->tratarData($registro['Ticket']['modalidade_data'], 'pt'); ?></td>
+                            <td><?php echo !empty($registro['Event']['title']) ? $registro['Event']['title'] : '—'; ?></td>
+                            <td><?php
+                                $st = isset($registro['Ticket']['status']) ? $registro['Ticket']['status'] : '';
+                                echo isset($statusLabels[$st]) ? $statusLabels[$st] : $st;
+                            ?></td>
                         </tr>
                     <?php } ?>
 

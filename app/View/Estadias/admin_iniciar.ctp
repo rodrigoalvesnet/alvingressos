@@ -254,15 +254,36 @@
         }
     })();
 
-    // Força cursor para o início ao focar em campos com máscara
+    // alv.js aplica reverse:true no .cpf e .datepicker (preenchimento direita→esquerda),
+    // o que coloca o cursor no final e causa digitação incorreta.
+    // Re-aplica aqui sem reverse para forçar preenchimento esquerda→direita.
+    if (typeof $.fn.mask !== 'undefined') {
+        $('.cpf').unmask().mask('999.999.999-99');
+        $('.datepicker').unmask().mask('99/99/9999', { placeholder: '__/__/____' });
+    }
+
+    // Força cursor para o início em campos com máscara quando ainda não há dígitos
     document.querySelectorAll('.fone, .cpf, .datepicker').forEach(function (el) {
-        el.addEventListener('focus', function () {
-            var self = this;
-            // setTimeout garante execução após o plugin de máscara reposicionar o cursor
-            setTimeout(function () {
-                self.setSelectionRange(0, 0);
-            }, 0);
+        // focus/click: prepara posição antes de o usuário começar a digitar
+        ['focus', 'click'].forEach(function (evt) {
+            el.addEventListener(evt, function () {
+                var self = this;
+                setTimeout(function () {
+                    if (!self.value.replace(/\D/g, '')) {
+                        try { self.setSelectionRange(0, 0); } catch (e) {}
+                    }
+                }, 10);
+            });
         });
+
+        // keydown em fase de captura: corre ANTES do plugin de máscara processar a tecla,
+        // garantindo que o primeiro dígito vá para a posição 0 mesmo se o setTimeout ainda
+        // não tiver disparado (ex: clique + digitação imediata)
+        el.addEventListener('keydown', function (e) {
+            if (/^\d$/.test(e.key) && !this.value.replace(/\D/g, '')) {
+                try { this.setSelectionRange(0, 0); } catch (ex) {}
+            }
+        }, true); // true = fase de captura
     });
 </script>
 <?php $this->end(); ?>

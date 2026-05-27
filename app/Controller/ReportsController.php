@@ -9,7 +9,8 @@ class ReportsController extends AppController
     {
         parent::beforeFilter();
         $this->Security->unlockedActions = array(
-            'admin_orders'
+            'admin_orders',
+            'admin_tickets'
         );
     }
 
@@ -140,5 +141,35 @@ class ReportsController extends AppController
         $fileName = Inflector::slug($orders[0]['Event']['title'], '-');
         $this->set('fileName', $fileName);
         $this->set('title', $orders[0]['Event']['title']);
+    }
+
+    public function admin_tickets()
+    {
+        $this->layout = 'planilha';
+
+        if ($this->Session->check('Filtros.Tickets')) {
+            $arrayConditions = $this->Session->read('Filtros.Tickets');
+        } else {
+            $this->Flash->warning('Nenhum filtro encontrado para exportar.');
+            $this->redirect(['controller' => 'Tickets', 'action' => 'index', 'admin' => true]);
+        }
+
+        $this->loadModel('Ticket');
+        $tickets = $this->Ticket->find('all', array(
+            'conditions' => $arrayConditions,
+            'contain' => array(
+                'Event' => array('title'),
+                'Order' => array('id', 'status'),
+                'Checkin' => array('created')
+            ),
+            'fields' => array(
+                'id', 'order_id', 'event_id', 'nome', 'cpf', 'email',
+                'telefone', 'modalidade_nome', 'modalidade_data', 'created'
+            ),
+            'order' => 'Ticket.nome ASC'
+        ));
+
+        $this->set('registros', $tickets);
+        $this->set('fileName', 'passaportes-' . date('Y-m-d'));
     }
 }

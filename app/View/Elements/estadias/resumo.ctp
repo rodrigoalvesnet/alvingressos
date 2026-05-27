@@ -108,6 +108,14 @@
 
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Voltar</button>
 
+                <a id="btnImprimirComprovante"
+                   href="#"
+                   target="_blank"
+                   class="btn btn-outline-secondary"
+                   style="display:none;">
+                    <i class="mdi mdi-printer"></i> Comprovante
+                </a>
+
                 <?php
                 echo $this->Form->submit('Confirmar Encerramento', [
                     'class' => 'btn btn-success text-white',

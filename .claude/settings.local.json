@@ -24,7 +24,11 @@
       "Bash(Select-Object -ExpandProperty FullName)",
       "PowerShell(head *)",
       "Bash(mysql -u root -e \"DESCRIBE kinderpark.tickets; SELECT DISTINCT modalidade_nome FROM kinderpark.tickets LIMIT 30;\")",
-      "Bash(mysql -u root --password=\"\" -e \"DESCRIBE kinderpark.tickets; SELECT DISTINCT modalidade_nome FROM kinderpark.tickets LIMIT 30;\")"
+      "Bash(mysql -u root --password=\"\" -e \"DESCRIBE kinderpark.tickets; SELECT DISTINCT modalidade_nome FROM kinderpark.tickets LIMIT 30;\")",
+      "PowerShell(Get-ChildItem -Path \"D:\\\\PROJETOS\\\\PHP\\\\www\\\\_ingressos\" -Recurse -Directory | Where-Object {$_.Name -eq \"Controller\" -or $_.Name -eq \"Model\" -or $_.Name -eq \"View\"} | Select-Object FullName)",
+      "Bash(Get-ChildItem -Path \"D:\\\\PROJETOS\\\\PHP\\\\www\\\\_ingressos\\\\app\\\\tmp\\\\cache\" -Recurse -File)",
+      "Bash(Measure-Object)",
+      "Bash(Select-Object -ExpandProperty Count)"
     ]
   }
 }

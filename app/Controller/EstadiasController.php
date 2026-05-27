@@ -137,6 +137,10 @@ class EstadiasController extends AppController
             )
         );
         $this->set('registros', $this->paginate('Estadia'));
+
+        $novaEstadiaId = (int)$this->Session->read('Estadias.novaEstadiaId');
+        $this->Session->delete('Estadias.novaEstadiaId');
+        $this->set('novaEstadiaId', $novaEstadiaId);
     }
 
     /**
@@ -148,6 +152,7 @@ class EstadiasController extends AppController
             $data = $this->request->data('Estadia') ?: [];
             $res = $this->EstadiasCalculator->iniciar($data);
             if ($res['ok']) {
+                $this->Session->write('Estadias.novaEstadiaId', (int)$res['id']);
                 $this->Flash->success('Estadia ' . $res['id'] . ' iniciada com sucesso!');
                 $this->redirect('index');
             } else {
@@ -553,7 +558,7 @@ class EstadiasController extends AppController
         // -------------------------------------------------------
         $estadiasByUnidade = $this->Estadia->find('all', [
             'fields'     => ['id', 'pausado_segundos', 'duracao_segundos', 'valor_total', 'unidade_id'],
-            'conditions' => $condPeriodo,
+            'conditions' => array_merge($condPeriodo, ['Estadia.status' => 'encerrada']),
             'contain'    => ['Unidade' => ['name']],
         ]);
         if (!empty($estadiasByUnidade)) {
@@ -791,7 +796,7 @@ class EstadiasController extends AppController
                     'valor_total',
                     'unidade_id'
                 ],
-                'conditions' => $conditions,
+                'conditions' => array_merge($conditions, ['Estadia.status' => 'encerrada']),
                 'contain' => [
                     'Unidade' => [
                         'name'
@@ -935,6 +940,48 @@ class EstadiasController extends AppController
         return sprintf('%02d:%02d', $horas, $minutos); // 02:13
     }
 
+    public function admin_comprovante($id = null)
+    {
+        $this->layout = 'ajax';
+        $id = (int)$id;
+
+        $estadia = $this->Estadia->find('first', [
+            'conditions' => ['Estadia.id' => $id],
+            'contain'    => ['Tarifa', 'Atracao'],
+            'recursive'  => -1,
+        ]);
+
+        if (empty($estadia)) {
+            throw new NotFoundException('Estadia não encontrada');
+        }
+
+        $itens = $this->EstadiaItem->find('all', [
+            'conditions' => ['EstadiaItem.estadia_id' => $id],
+            'order'      => ['EstadiaItem.id' => 'ASC'],
+            'recursive'  => -1,
+        ]);
+
+        $this->loadModel('FormasPagamento');
+        $formaPagamento = '';
+        if (!empty($estadia['Estadia']['formadepagamento_id'])) {
+            $fp = $this->FormasPagamento->find('first', [
+                'conditions' => ['FormasPagamento.id' => (int)$estadia['Estadia']['formadepagamento_id']],
+                'recursive'  => -1,
+            ]);
+            if (!empty($fp)) {
+                $formaPagamento = $fp['FormasPagamento']['nome'];
+            }
+        }
+
+        $this->loadModel('Unidade');
+        $unidadeDados = $this->Unidade->find('first', [
+            'conditions' => ['Unidade.id' => (int)$estadia['Estadia']['unidade_id']],
+            'recursive'  => -1,
+        ]);
+
+        $this->set(compact('estadia', 'itens', 'formaPagamento', 'unidadeDados'));
+    }
+
     public function admin_print()
     {
 
@@ -975,4 +1022,5 @@ class EstadiasController extends AppController
         $this->set('registros', $registros);
         $this->set('fileName', 'estadias-' . date('Y-m-d-H-i-s'));
     }
+
 }

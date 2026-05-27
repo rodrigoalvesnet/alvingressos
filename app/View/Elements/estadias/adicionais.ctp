@@ -1,6 +1,6 @@
 <div class="col-md-12 mt-2">
 
-    <div class="d-flex gap-2 align-items-end">
+    <div class="d-flex gap-2 align-items-end" id="formAdicionarAdicional">
         <div class="flex-grow-1">
             <label><strong>Adicional</strong></label>
             <select class="form-control" id="adicional-id">
@@ -44,7 +44,7 @@
                     <th class="text-center">Qtd</th>
                     <th class="text-end">Unit.</th>
                     <th class="text-end">Total</th>
-                    <th class="text-center">Ação</th>
+                    <th class="text-center" id="thAcaoAdicional">Ação</th>
                 </tr>
             </thead>
             <tbody></tbody>

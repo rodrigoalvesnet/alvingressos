@@ -68,9 +68,8 @@ class EstadiaItensController extends AppController
                 return $this->response->body(json_encode(['ok' => false, 'error' => 'Estadia não encontrada.']));
             }
 
-            // ✅ permite adicionar no visualizar mesmo se encerrada; bloqueia só cancelada
-            if ($estadia['Estadia']['status'] === 'cancelada') {
-                return $this->response->body(json_encode(['ok' => false, 'error' => 'Estadia cancelada não permite alterações.']));
+            if (in_array($estadia['Estadia']['status'], ['encerrada', 'cancelada'])) {
+                return $this->response->body(json_encode(['ok' => false, 'error' => 'Estadia encerrada ou cancelada não permite alterações.']));
             }
 
             $adicional = $this->Adicional->find('first', [
@@ -139,11 +138,22 @@ class EstadiaItensController extends AppController
             return $this->response->body(json_encode(['ok' => false, 'error' => 'Item não encontrado.']));
         }
 
+        $estadiaId = (int)$item['EstadiaItem']['estadia_id'];
+
+        $estadia = $this->Estadia->find('first', [
+            'conditions' => ['Estadia.id' => $estadiaId],
+            'fields'     => ['id', 'status'],
+            'recursive'  => -1
+        ]);
+        if (!empty($estadia) && in_array($estadia['Estadia']['status'], ['encerrada', 'cancelada'])) {
+            return $this->response->body(json_encode(['ok' => false, 'error' => 'Não é possível remover itens de estadias encerradas ou canceladas.']));
+        }
+
         if (!$this->EstadiaItem->delete($id)) {
             return $this->response->body(json_encode(['ok' => false, 'error' => 'Falha ao remover item.']));
         }
 
-        $this->_atualizarTotalEstadia($id);
+        $this->_atualizarTotalEstadia($estadiaId);
 
         return $this->response->body(json_encode(['ok' => true]));
     }
