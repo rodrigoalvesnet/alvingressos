@@ -31,6 +31,19 @@
             <div class="col-lg-2">
                 <?php
                 echo $this->Form->input(
+                    'event_id',
+                    array(
+                        'label' => 'Evento',
+                        'options' => $events,
+                        'class' => 'form-control',
+                        'empty' => 'Qualquer'
+                    )
+                );
+                ?>
+            </div>
+            <div class="col-lg-2">
+                <?php
+                echo $this->Form->input(
                     'payment_type',
                     array(
                         'label' => 'Tipo de pagamento',
@@ -134,6 +147,7 @@
                         <th scope="col"><?php echo $this->Paginator->sort('Order.created', 'Data do Pedido'); ?></th>
                         <th scope="col"><?php echo $this->Paginator->sort('Order.name', 'Pessoa'); ?></th>
                         <th scope="col"><?php echo $this->Paginator->sort('Order.value', 'Valor'); ?></th>
+                        <th scope="col"><?php echo $this->Paginator->sort('Event.title', 'Evento'); ?></th>
                         <th scope="col"><?php echo $this->Paginator->sort('Unidade.name', 'Unidade'); ?></th>
                         <th scope="col"><?php echo $this->Paginator->sort('Order.payment_type', 'Pagamento'); ?></th>
                         <th scope="col"><?php echo $this->Paginator->sort('Order.status', 'Situação'); ?></th>
@@ -200,6 +214,7 @@
                             <td><?php echo date('d/m/Y H:i', strtotime($registro['Order']['created'])); ?></td>
                             <td><?php echo $registro['Order']['name']; ?></td>
                             <td><?php echo $this->Alv->tratarValor($registro['Order']['value'], 'pt'); ?></td>
+                            <td><?php echo $registro['Event']['title']; ?></td>
                             <td><?php echo $registro['Unidade']['name']; ?></td>
                             <td>
                                 <?php

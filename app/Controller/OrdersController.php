@@ -104,6 +104,9 @@ class OrdersController extends AppController
             if (isset($this->request->data['Filtro']['status']) && !empty($this->request->data['Filtro']['status'])) {
                 $arrayConditions['Order.status'] = $this->request->data['Filtro']['status'];
             }
+            if (isset($this->request->data['Filtro']['event_id']) && !empty($this->request->data['Filtro']['event_id'])) {
+                $arrayConditions['Order.event_id'] = $this->request->data['Filtro']['event_id'];
+            }
 
             //salva as condições na session            
             $this->Session->write('Filtros.Orders', $arrayConditions);
@@ -195,6 +198,22 @@ class OrdersController extends AppController
             )
         );
         $this->set('unidades', $unidades);
+
+        $this->loadModel('Event');
+        $events = $this->Event->find(
+            'list',
+            array(
+                'recursive' => -1,
+                'fields' => array(
+                    'id',
+                    'title'
+                ),
+                'order' => array(
+                    'title' => 'ASC'
+                )
+            )
+        );
+        $this->set('events', $events);
     }
 
 
