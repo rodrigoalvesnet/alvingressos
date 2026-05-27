@@ -616,11 +616,24 @@ class Order extends AppModel
             throw new NotFoundException(__('Pedido não encontrado'));
         }
 
+        // Variáveis auxiliares que a view ticket.ctp precisa
+        $hoje = date('Y-m-d');
+        $Checkin = ClassRegistry::init('Checkin');
+        $ticketsUsados = [];
+        foreach ($order['Ticket'] as $ticket) {
+            $usado = $Checkin->find('first', [
+                'conditions' => ['ticket_id' => $ticket['id']],
+                'fields'     => ['id'],
+                'recursive'  => -1,
+            ]);
+            $ticketsUsados[$ticket['id']] = !empty($usado);
+        }
+
         // Renderiza o HTML da view "ticket" usando o layout pdf_email
         App::uses('View', 'View');
         $View = new View(null);
         $View->viewPath = 'Orders';
-        $View->set(compact('order'));
+        $View->set(compact('order', 'hoje', 'ticketsUsados'));
         $html = $View->render('ticket', 'pdf_email');
 
         // Gera o PDF com dompdf
