@@ -67,23 +67,23 @@
     ?>
 
     <!-- Cabeçalho da unidade -->
-    <?php if (!empty($unidadeDados['Unidade'])): ?>
+    <?php if (!empty($unidadeEstadia['Unidade'])): ?>
     <div class="center bloco">
-        <div class="bold big"><?php echo h($unidadeDados['Unidade']['name']); ?></div>
-        <?php if (!empty($unidadeDados['Unidade']['cnpj'])): ?>
-        <div>CNPJ: <?php echo h($unidadeDados['Unidade']['cnpj']); ?></div>
+        <div class="bold big"><?php echo h($unidadeEstadia['Unidade']['name']); ?></div>
+        <?php if (!empty($unidadeEstadia['Unidade']['cnpj'])): ?>
+        <div>CNPJ: <?php echo h($unidadeEstadia['Unidade']['cnpj']); ?></div>
         <?php endif; ?>
-        <?php if (!empty($unidadeDados['Unidade']['street'])): ?>
+        <?php if (!empty($unidadeEstadia['Unidade']['street'])): ?>
         <div>
-            <?php echo h($unidadeDados['Unidade']['street']); ?>
-            <?php echo !empty($unidadeDados['Unidade']['number']) ? ', ' . h($unidadeDados['Unidade']['number']) : ''; ?>
+            <?php echo h($unidadeEstadia['Unidade']['street']); ?>
+            <?php echo !empty($unidadeEstadia['Unidade']['number']) ? ', ' . h($unidadeEstadia['Unidade']['number']) : ''; ?>
         </div>
         <?php endif; ?>
-        <?php if (!empty($unidadeDados['Unidade']['city'])): ?>
-        <div><?php echo h($unidadeDados['Unidade']['city']); ?> - <?php echo h($unidadeDados['Unidade']['state']); ?></div>
+        <?php if (!empty($unidadeEstadia['Unidade']['city'])): ?>
+        <div><?php echo h($unidadeEstadia['Unidade']['city']); ?> - <?php echo h($unidadeEstadia['Unidade']['state']); ?></div>
         <?php endif; ?>
-        <?php if (!empty($unidadeDados['Unidade']['phone'])): ?>
-        <div>Tel: <?php echo h($unidadeDados['Unidade']['phone']); ?></div>
+        <?php if (!empty($unidadeEstadia['Unidade']['phone'])): ?>
+        <div>Tel: <?php echo h($unidadeEstadia['Unidade']['phone']); ?></div>
         <?php endif; ?>
     </div>
     <?php endif; ?>
@@ -189,6 +189,13 @@
     <?php endforeach; ?>
     <?php endif; ?>
 
+    <?php if (!empty($e['desconto']) && (float)$e['desconto'] > 0): ?>
+    <div class="row bloco">
+        <span>Desconto concedido:</span>
+        <span>- R$ <?php echo number_format((float)$e['desconto'], 2, ',', '.'); ?></span>
+    </div>
+    <?php endif; ?>
+
     <div class="linha"></div>
 
     <!-- Total -->
@@ -217,6 +224,7 @@
         <button onclick="window.close()">Fechar</button>
     </div>
 
+    <?php if (Configure::read('Estadias.comprovante.autoprint')): ?>
     <script>
         window.addEventListener('load', function () {
             window.print();
@@ -225,6 +233,7 @@
             window.close();
         });
     </script>
+    <?php endif; ?>
 
 </body>
 </html>

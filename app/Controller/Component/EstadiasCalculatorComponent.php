@@ -244,9 +244,10 @@ class EstadiasCalculatorComponent extends Component
      * ENCERRAR: calcula cobrança (considerando pausas) e salva valores
      * - Se estiver "pausada", considera o tempo pausado até o momento do encerramento.
      */
-    public function encerrar($estadiaId, $fimEm = null)
+    public function encerrar($estadiaId, $fimEm = null, $desconto = 0.0, $formadepagamentoId = null)
     {
-        $fimEm = $fimEm ?: date('Y-m-d H:i:s');
+        $fimEm    = $fimEm ?: date('Y-m-d H:i:s');
+        $desconto = max(0.0, (float)$desconto);
 
         $e = $this->_getEstadiaOrErr($estadiaId, true); // com Tarifa
         if (!$e['ok']) return $e;
@@ -273,22 +274,29 @@ class EstadiasCalculatorComponent extends Component
 
         $subtotalProdutos = $this->_subtotalProdutos($estadiaId);
 
-        $valorTempo = (float)$calc['valor_total']; // tempo = base + adicional
-        $valorTotalFinal = $valorTempo + (float)$subtotalProdutos;
+        $valorTempo      = (float)$calc['valor_total']; // tempo = base + adicional
+        $valorTotalBruto = $valorTempo + (float)$subtotalProdutos;
 
+        if ($desconto > $valorTotalBruto) {
+            return $this->_err('Desconto não pode ser maior que o total (R$ ' . number_format($valorTotalBruto, 2, ',', '.') . ')');
+        }
+
+        $valorTotalFinal = $valorTotalBruto - $desconto;
 
         $data = [
             'Estadia' => [
-                'id' => (int)$estadiaId,
-                'fim_em' => $fimEm,
-                'pausado_em' => null,
+                'id'               => (int)$estadiaId,
+                'fim_em'           => $fimEm,
+                'pausado_em'       => null,
                 'pausado_segundos' => $pausadoSeg,
                 'duracao_segundos' => (int)$duracaoCobrada,
-                'faixa_id' => (int)$calc['faixa_id'],
-                'valor_base' => $calc['valor_base'],
-                'valor_adicional' => $calc['valor_adicional'],
-                'valor_total' => $valorTotalFinal,
-                'status' => 'encerrada',
+                'faixa_id'         => (int)$calc['faixa_id'],
+                'valor_base'       => $calc['valor_base'],
+                'valor_adicional'  => $calc['valor_adicional'],
+                'desconto'             => $desconto,
+                'valor_total'          => $valorTotalFinal,
+                'formadepagamento_id'  => $formadepagamentoId,
+                'status'               => 'encerrada',
             ]
         ];
 
@@ -298,18 +306,19 @@ class EstadiasCalculatorComponent extends Component
         }
 
         return [
-            'ok' => true,
-            'fim_em' => $fimEm,
-            'duracao_total_segundos' => (int)$duracaoTotal,
-            'pausado_segundos' => (int)$pausadoSeg,
+            'ok'                       => true,
+            'fim_em'                   => $fimEm,
+            'duracao_total_segundos'   => (int)$duracaoTotal,
+            'pausado_segundos'         => (int)$pausadoSeg,
             'duracao_cobrada_segundos' => (int)$duracaoCobrada,
-            'duracao_cobrada_hms' => $this->_secondsToTime($duracaoCobrada),
-            'faixa_id' => (int)$calc['faixa_id'],
-            'valor_base' => (float)$calc['valor_base'],
-            'valor_adicional' => (float)$calc['valor_adicional'],
-            'valor_tempo' => (float)$valorTempo,
-            'subtotal_produtos' => (float)$subtotalProdutos,
-            'valor_total' => (float)$valorTotalFinal,
+            'duracao_cobrada_hms'      => $this->_secondsToTime($duracaoCobrada),
+            'faixa_id'                 => (int)$calc['faixa_id'],
+            'valor_base'               => (float)$calc['valor_base'],
+            'valor_adicional'          => (float)$calc['valor_adicional'],
+            'valor_tempo'              => (float)$valorTempo,
+            'subtotal_produtos'        => (float)$subtotalProdutos,
+            'desconto'                 => $desconto,
+            'valor_total'              => (float)$valorTotalFinal,
         ];
     }
 

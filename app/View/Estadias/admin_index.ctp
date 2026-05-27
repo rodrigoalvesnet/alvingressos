@@ -312,6 +312,10 @@
         window.open('/admin/estadias/comprovante/<?php echo (int)$novaEstadiaId; ?>', '_blank');
         <?php endif; ?>
 
+        <?php if (!empty($encerradaComprovanteId)): ?>
+        window.open('/admin/estadias/comprovante/<?php echo (int)$encerradaComprovanteId; ?>', '_blank');
+        <?php endif; ?>
+
         $('#inputSearch').on('keyup', function() {
             var value = $(this).val().toLowerCase();
 
@@ -338,6 +342,34 @@
         var formAdicionarEl = document.getElementById('formAdicionarAdicional');
         var thAcaoEl = document.getElementById('thAcaoAdicional');
         var btnImprimirComprovante = document.getElementById('btnImprimirComprovante');
+        var inputDesconto        = document.getElementById('input-desconto');
+        var encerrarDesconto     = document.getElementById('encerrar-desconto');
+        var rowDesconto          = document.getElementById('row-desconto');
+        var descontoError        = document.getElementById('desconto-error');
+        var valorTotalBase       = 0;
+        var selectFormaPagamento  = document.getElementById('select-formapagamento');
+        var encerrarFormaPag      = document.getElementById('encerrar-formapagamento');
+        var rowFormaPagamento     = document.getElementById('row-formapagamento');
+        var btnAplicarDesconto    = document.getElementById('btn-aplicar-desconto');
+        var rowSubtotal           = document.getElementById('row-subtotal');
+        var prevSubtotalBruto     = document.getElementById('prev-subtotal-bruto');
+        var prevSubtotalDesconto  = document.getElementById('prev-subtotal-desconto');
+
+        // Máscara de dinheiro no campo desconto
+        if (typeof $.fn.maskMoney !== 'undefined' && inputDesconto) {
+            $(inputDesconto).maskMoney({ decimal: ',', thousands: '.' });
+        }
+
+        // Sincroniza select forma de pagamento → hidden do form
+        if (selectFormaPagamento) {
+            selectFormaPagamento.addEventListener('change', function() {
+                if (encerrarFormaPag) encerrarFormaPag.value = this.value;
+            });
+        }
+
+        function parseMoney(val) {
+            return parseFloat((val || '0').replace(/\./g, '').replace(',', '.')) || 0;
+        }
 
 
         var modalEl = document.getElementById('modalEncerrar');
@@ -399,6 +431,14 @@
             if (formAdicionarEl) formAdicionarEl.style.display = 'none';
             if (thAcaoEl) thAcaoEl.style.display = 'none';
             if (btnImprimirComprovante) { btnImprimirComprovante.style.display = 'none'; btnImprimirComprovante.href = '#'; }
+            valorTotalBase = 0;
+            if (inputDesconto) inputDesconto.value = '';
+            if (encerrarDesconto) encerrarDesconto.value = '0';
+            if (rowDesconto) rowDesconto.style.display = 'none';
+            if (descontoError) descontoError.style.display = 'none';
+            if (rowSubtotal) rowSubtotal.style.display = 'none';
+            if (selectFormaPagamento) selectFormaPagamento.value = '';
+            if (encerrarFormaPag) encerrarFormaPag.value = '';
             // prevBase.value = '';
             // prevAdd.value = '';
         }
@@ -501,7 +541,12 @@
                     prevTempo.value = res.duracao_cobrada_hms || '';
                     prevPausado.value = res.tempo_pausado_hms || '00:00:00';
                     prevStatus.value = ucfirst(res.status) || '';
-                    prevTotal.innerText = moneyBR(res.valor_total);
+                    valorTotalBase = res.valor_total || 0;
+                    prevTotal.innerText = moneyBR(valorTotalBase);
+                    if (inputDesconto) inputDesconto.value = '';
+                    if (encerrarDesconto) encerrarDesconto.value = '0';
+                    if (selectFormaPagamento) selectFormaPagamento.value = res.formadepagamento_id || '';
+                    if (encerrarFormaPag) encerrarFormaPag.value = res.formadepagamento_id || '';
                     prevCrianca.value = res.crianca_nome || '';
                     prevResponsavel.value = res.responsavel_nome || '';
                     prevEntrada.value = res.entrada || '';
@@ -536,6 +581,17 @@
                     if (adicionalIdEl) adicionalIdEl.disabled = !podeEditarAdicionals;
                     if (adicionalQtdEl) adicionalQtdEl.disabled = !podeEditarAdicionals;
                     if (btnAddAdicional) btnAddAdicional.disabled = !podeEditarAdicionals;
+                    if (rowDesconto) rowDesconto.style.display = podeEditarAdicionals ? '' : 'none';
+                    if (inputDesconto) inputDesconto.disabled = !podeEditarAdicionals;
+                    if (selectFormaPagamento) selectFormaPagamento.disabled = !podeEditarAdicionals;
+
+                    // Exibe subtotal de desconto ao visualizar estadia já encerrada
+                    if (!podeEditarAdicionals && res.desconto > 0) {
+                        var bruto = res.valor_total + res.desconto;
+                        if (prevSubtotalBruto) prevSubtotalBruto.textContent = moneyBR(bruto);
+                        if (prevSubtotalDesconto) prevSubtotalDesconto.textContent = '- ' + moneyBR(res.desconto);
+                        if (rowSubtotal) rowSubtotal.style.display = '';
+                    }
 
                     if (btnImprimirComprovante) {
                         if (res.status === 'encerrada') {
@@ -568,6 +624,45 @@
             contentEl.style.display = 'none';
         });
         /**
+         * Desconto — validação em tempo real; aplicação via botão "Aplicar"
+         */
+        if (inputDesconto) {
+            inputDesconto.addEventListener('input', function() {
+                var desconto = parseMoney(this.value);
+                if (rowSubtotal) rowSubtotal.style.display = 'none';
+                if (desconto > 0 && desconto > valorTotalBase) {
+                    descontoError.textContent = 'Desconto não pode ser maior que o total (' + moneyBR(valorTotalBase) + ')';
+                    descontoError.style.display = '';
+                } else {
+                    descontoError.style.display = 'none';
+                }
+            });
+        }
+
+        if (btnAplicarDesconto) {
+            btnAplicarDesconto.addEventListener('click', function() {
+                var desconto = parseMoney(inputDesconto ? inputDesconto.value : '0');
+                if (desconto < 0) desconto = 0;
+                if (desconto > valorTotalBase) {
+                    descontoError.textContent = 'Desconto não pode ser maior que o total (' + moneyBR(valorTotalBase) + ')';
+                    descontoError.style.display = '';
+                    return;
+                }
+                descontoError.style.display = 'none';
+                encerrarDesconto.value = desconto.toFixed(2);
+                var totalFinal = valorTotalBase - desconto;
+                prevTotal.innerText = moneyBR(totalFinal);
+                if (desconto > 0 && rowSubtotal) {
+                    if (prevSubtotalBruto) prevSubtotalBruto.textContent = moneyBR(valorTotalBase);
+                    if (prevSubtotalDesconto) prevSubtotalDesconto.textContent = '- ' + moneyBR(desconto);
+                    rowSubtotal.style.display = '';
+                } else {
+                    if (rowSubtotal) rowSubtotal.style.display = 'none';
+                }
+            });
+        }
+
+        /**
          * Encerra Estadia
          */
         if (formEncerrar) {
@@ -585,6 +680,22 @@
 
                 e.preventDefault();
 
+                // Auto-aplica desconto se o usuário digitou mas não clicou em "Aplicar"
+                if (inputDesconto && encerrarDesconto) {
+                    var digitado = parseMoney(inputDesconto.value);
+                    if (digitado > 0 && parseFloat(encerrarDesconto.value) === 0) {
+                        if (digitado <= valorTotalBase) {
+                            encerrarDesconto.value = digitado.toFixed(2);
+                        }
+                    }
+                }
+                var descontoVal = parseFloat(encerrarDesconto ? encerrarDesconto.value : 0) || 0;
+                if (descontoVal > valorTotalBase) {
+                    alert('Desconto inválido: valor maior que o total.');
+                    e.preventDefault();
+                    return;
+                }
+
                 var confirmou = confirm('Tem certeza que deseja encerrar esta estadia?');
 
                 if (!confirmou) {
@@ -592,12 +703,6 @@
                         $('#btnEncerrar').prop('disabled', false);
                     }, 1000);
                     return;
-                }
-
-                // Abre comprovante em nova aba antes de submeter
-                var idEncerrar = inputId.value;
-                if (idEncerrar) {
-                    window.open('/admin/estadias/comprovante/' + encodeURIComponent(idEncerrar), '_blank');
                 }
 
                 setTimeout(function() {
@@ -654,7 +759,11 @@
                             if (p && p.ok) {
                                 prevTotalTempo.value = moneyBR(p.valor_tempo || 0);
                                 prevTotalAdicionals.value = moneyBR(p.subtotal_adicionals || 0);
-                                prevTotal.innerText = moneyBR(p.valor_total || 0);
+                                valorTotalBase = p.valor_total || 0;
+                                prevTotal.innerText = moneyBR(valorTotalBase);
+                                if (inputDesconto) inputDesconto.value = '';
+                                if (encerrarDesconto) encerrarDesconto.value = '0';
+                                if (rowSubtotal) rowSubtotal.style.display = 'none';
                             }
                             return loadAdicionals(currentId);
                         });
@@ -699,7 +808,11 @@
                         if (p && p.ok) {
                             prevTotalTempo.value = moneyBR(p.valor_tempo || 0);
                             prevTotalAdicionals.value = moneyBR(p.subtotal_adicionals || 0);
-                            prevTotal.innerText = moneyBR(p.valor_total || 0);
+                            valorTotalBase = p.valor_total || 0;
+                            prevTotal.innerText = moneyBR(valorTotalBase);
+                            if (inputDesconto) inputDesconto.value = '';
+                            if (encerrarDesconto) encerrarDesconto.value = '0';
+                            if (rowSubtotal) rowSubtotal.style.display = 'none';
                         }
                         return loadAdicionals(currentId);
                     });

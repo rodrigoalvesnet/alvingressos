@@ -80,7 +80,47 @@
                         </div>
 
                         <?php echo $this->element('estadias/adicionais'); ?>
-                        
+
+                        <div class="col-md-4" id="row-formapagamento">
+                            <div class="form-group">
+                                <label><strong>Forma de Pagamento</strong></label>
+                                <?php echo $this->Form->select('_sel_formapagamento', $formasdepagamentos, [
+                                    'id'    => 'select-formapagamento',
+                                    'class' => 'form-control',
+                                    'empty' => '-- Selecione --',
+                                ]); ?>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4" id="row-desconto" style="display:none;">
+                            <div class="form-group">
+                                <label><strong>Desconto (R$)</strong></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend"><span class="input-group-text">R$</span></div>
+                                    <input type="text" class="form-control" id="input-desconto"
+                                           placeholder="0,00" value="" autocomplete="off">
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-outline-primary" id="btn-aplicar-desconto">Aplicar</button>
+                                    </div>
+                                </div>
+                                <div id="desconto-error" class="text-danger small mt-1" style="display:none;"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12" id="row-subtotal" style="display:none;">
+                            <div class="px-1 mb-1">
+                                <div class="d-flex justify-content-between text-muted small">
+                                    <span>Subtotal (tempo + adicionais):</span>
+                                    <span id="prev-subtotal-bruto"></span>
+                                </div>
+                                <div class="d-flex justify-content-between text-danger small">
+                                    <span>Desconto concedido:</span>
+                                    <span id="prev-subtotal-desconto"></span>
+                                </div>
+                                <hr class="my-1">
+                            </div>
+                        </div>
+
                         <div class="col-md-12">
                             <div id="containerTotal" class="alert alert-success mb-0">
                                 <div class="d-flex justify-content-between align-items-center">
@@ -104,6 +144,8 @@
                     'admin' => true
                 ]);
                 echo $this->Form->hidden('id', ['id' => 'encerrar-id']);
+                echo $this->Form->hidden('desconto', ['id' => 'encerrar-desconto', 'value' => '0']);
+                echo $this->Form->hidden('formadepagamento_id', ['id' => 'encerrar-formapagamento', 'value' => '']);
                 ?>
 
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Voltar</button>

@@ -141,6 +141,19 @@ class EstadiasController extends AppController
         $novaEstadiaId = (int)$this->Session->read('Estadias.novaEstadiaId');
         $this->Session->delete('Estadias.novaEstadiaId');
         $this->set('novaEstadiaId', $novaEstadiaId);
+
+        $encerradaComprovanteId = (int)$this->Session->read('Estadias.encerradaComprovanteId');
+        $this->Session->delete('Estadias.encerradaComprovanteId');
+        $this->set('encerradaComprovanteId', $encerradaComprovanteId);
+
+        $this->loadModel('FormasPagamento');
+        $formasdepagamentos = $this->FormasPagamento->find('list', array(
+            'conditions' => array('ativo' => 1),
+            'recursive'  => -1,
+            'fields'     => array('id', 'nome'),
+            'order'      => array('nome' => 'ASC'),
+        ));
+        $this->set('formasdepagamentos', $formasdepagamentos);
     }
 
     /**
@@ -380,12 +393,14 @@ class EstadiasController extends AppController
         $preview['tempo_pausado_hms'] = sprintf('%02d:%02d:%02d', $h, $m, $s);
 
         // Incluir nomes/dados
-        $preview['pulseira'] = $row['Estadia']['pulseira_numero'];
-        $preview['crianca_nome'] = $row['Estadia']['crianca_nome'];
-        $preview['responsavel_nome'] = $row['Estadia']['responsavel_nome'];
-        $preview['entrada'] = date('d/m/Y H:i', strtotime($row['Estadia']['created']));
-        $preview['status'] = $row['Estadia']['status'];
-        $preview['id'] = (int)$row['Estadia']['id'];
+        $preview['pulseira']            = $row['Estadia']['pulseira_numero'];
+        $preview['crianca_nome']        = $row['Estadia']['crianca_nome'];
+        $preview['responsavel_nome']    = $row['Estadia']['responsavel_nome'];
+        $preview['entrada']             = date('d/m/Y H:i', strtotime($row['Estadia']['created']));
+        $preview['status']              = $row['Estadia']['status'];
+        $preview['id']                  = (int)$row['Estadia']['id'];
+        $preview['formadepagamento_id'] = (int)$row['Estadia']['formadepagamento_id'];
+        $preview['desconto']           = (float)$row['Estadia']['desconto'];
 
         return $this->response->body(json_encode($preview));
     }
@@ -403,11 +418,19 @@ class EstadiasController extends AppController
             $this->Flash->error('ID inválido');
         }
 
-        $res = $this->EstadiasCalculator->encerrar($this->data['Estadia']['id']);
+        $desconto           = max(0.0, (float)$this->data['Estadia']['desconto']);
+        $formadepagamentoid = !empty($this->data['Estadia']['formadepagamento_id'])
+            ? (int)$this->data['Estadia']['formadepagamento_id']
+            : null;
+        $res = $this->EstadiasCalculator->encerrar($this->data['Estadia']['id'], null, $desconto, $formadepagamentoid);
 
         if ($res['ok']) {
             $message = 'Encerrada. Tempo cobrado: ' . $res['duracao_cobrada_hms'] .
                 ' | Total: R$ ' . number_format($res['valor_total'], 2, ',', '.');
+            if ($res['desconto'] > 0) {
+                $message .= ' (Desconto: R$ ' . number_format($res['desconto'], 2, ',', '.') . ')';
+            }
+            $this->Session->write('Estadias.encerradaComprovanteId', (int)$this->data['Estadia']['id']);
             $this->Flash->success($message);
         } else {
             $this->Flash->error($res['error']);
@@ -495,7 +518,7 @@ class EstadiasController extends AppController
         $results = [
             'valor_total' => 0,
             'abertas'    => ['quantidade' => 0, 'pausado_segundos' => 0, 'duracao_segundos' => 0],
-            'encerradas' => ['quantidade' => 0, 'pausado_segundos' => 0, 'duracao_segundos' => 0],
+            'encerradas' => ['quantidade' => 0, 'pausado_segundos' => 0, 'duracao_segundos' => 0, 'total_descontos' => 0, 'qtd_com_desconto' => 0],
             'canceladas' => ['quantidade' => 0, 'pausado_segundos' => 0, 'duracao_segundos' => 0],
             'unidades'   => [],
         ];
@@ -524,16 +547,19 @@ class EstadiasController extends AppController
         // 5. Estadias encerradas no período
         // -------------------------------------------------------
         $encerradas = $this->Estadia->find('all', [
-            'fields'     => ['id', 'pausado_segundos', 'duracao_segundos', 'valor_total'],
+            'fields'     => ['id', 'pausado_segundos', 'duracao_segundos', 'valor_total', 'desconto'],
             'conditions' => array_merge($condPeriodo, ['status' => 'encerrada']),
             'recursive'  => -1,
         ]);
         if (!empty($encerradas)) {
             foreach ($encerradas as $e) {
-                $results['valor_total']                   += $e['Estadia']['valor_total'];
-                $results['encerradas']['pausado_segundos'] += $e['Estadia']['pausado_segundos'];
-                $results['encerradas']['duracao_segundos'] += $e['Estadia']['duracao_segundos'];
-                $results['encerradas']['quantidade']       += 1;
+                $desc = (float)($e['Estadia']['desconto'] ?? 0);
+                $results['valor_total']                       += $e['Estadia']['valor_total'];
+                $results['encerradas']['pausado_segundos']    += $e['Estadia']['pausado_segundos'];
+                $results['encerradas']['duracao_segundos']    += $e['Estadia']['duracao_segundos'];
+                $results['encerradas']['quantidade']          += 1;
+                $results['encerradas']['total_descontos']     += $desc;
+                $results['encerradas']['qtd_com_desconto']    += ($desc > 0 ? 1 : 0);
             }
         }
 
@@ -557,7 +583,7 @@ class EstadiasController extends AppController
         // 7. Agrupamento por unidade (todas as estadias no período)
         // -------------------------------------------------------
         $estadiasByUnidade = $this->Estadia->find('all', [
-            'fields'     => ['id', 'pausado_segundos', 'duracao_segundos', 'valor_total', 'unidade_id'],
+            'fields'     => ['id', 'pausado_segundos', 'duracao_segundos', 'valor_total', 'desconto', 'unidade_id'],
             'conditions' => array_merge($condPeriodo, ['Estadia.status' => 'encerrada']),
             'contain'    => ['Unidade' => ['name']],
         ]);
@@ -566,16 +592,19 @@ class EstadiasController extends AppController
                 $uid = $row['Estadia']['unidade_id'];
                 if (!isset($results['unidades'][$uid])) {
                     $results['unidades'][$uid] = [
-                        'nome'           => $row['Unidade']['name'],
-                        'quantidade'     => 0,
-                        'faturado'       => 0,
-                        'tempo_segundos' => 0,
+                        'nome'            => $row['Unidade']['name'],
+                        'quantidade'      => 0,
+                        'faturado'        => 0,
+                        'desconto'        => 0,
+                        'tempo_segundos'  => 0,
                     ];
                 }
                 $pausado  = is_numeric($row['Estadia']['pausado_segundos']) ? (int)$row['Estadia']['pausado_segundos'] : 0;
                 $duracao  = is_numeric($row['Estadia']['duracao_segundos']) ? (int)$row['Estadia']['duracao_segundos'] : 0;
+                $desc     = (float)($row['Estadia']['desconto'] ?? 0);
                 $results['unidades'][$uid]['quantidade']     += 1;
                 $results['unidades'][$uid]['faturado']       += $row['Estadia']['valor_total'];
+                $results['unidades'][$uid]['desconto']       += $desc;
                 $results['unidades'][$uid]['tempo_segundos'] += max(0, $duracao - $pausado);
             }
             foreach ($results['unidades'] as $id => $u) {
@@ -974,12 +1003,12 @@ class EstadiasController extends AppController
         }
 
         $this->loadModel('Unidade');
-        $unidadeDados = $this->Unidade->find('first', [
+        $unidadeEstadia = $this->Unidade->find('first', [
             'conditions' => ['Unidade.id' => (int)$estadia['Estadia']['unidade_id']],
             'recursive'  => -1,
         ]);
 
-        $this->set(compact('estadia', 'itens', 'formaPagamento', 'unidadeDados'));
+        $this->set(compact('estadia', 'itens', 'formaPagamento', 'unidadeEstadia'));
     }
 
     public function admin_print()
