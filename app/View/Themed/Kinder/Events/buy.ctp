@@ -157,6 +157,13 @@
 
                                      </div>
                                  </div>
+                                 <div class="row mt-1 mb-2">
+                                     <div class="col-12 col-md-10 offset-md-2">
+                                         <button type="button" class="btn-adicionar-pessoa btn btn-primary btn-sm">
+                                             <i class="bi bi-person-plus"></i> + Adicionar Pessoa
+                                         </button>
+                                     </div>
+                                 </div>
                              </div>
                          <?php } ?>
                      <?php } ?>
@@ -259,7 +266,7 @@
                                             <div class="linha pt-2">
                                                 <div class="row">
                                                     <div class="col-md-5 ">
-                                                        <input type="text" name="cart[<?php echo $eventId; ?>][ingressos][${data}][][nome]" placeholder="Nome(s) da(s) criança(s)" class="form-control" required>
+                                                        <input type="text" name="cart[<?php echo $eventId; ?>][ingressos][${data}][0][nome]" placeholder="Nome(s) da(s) criança(s)" class="form-control" required>
                                                     </div>
                                                     <div class="col-md-4">
                                                         ${gerarSelectModalidade(data, 0)}
@@ -274,6 +281,13 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-1 mb-2">
+                                        <div class="col-12 col-md-10 offset-md-2">
+                                            <button type="button" class="btn-adicionar-pessoa btn btn-primary btn-sm">
+                                                <i class="bi bi-person-plus"></i> + Adicionar Pessoa
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -330,15 +344,44 @@
                              atualizarResumo(modalidades)
                          });
 
+                         // Adicionar nova pessoa ao grupo
+                         $(document).on("click", ".btn-adicionar-pessoa", function() {
+                             let bloco = $(this).closest(".grupo-data");
+                             let data = bloco.data("data");
+                             let i = bloco.find(".linha").length;
+                             bloco.find(".linhas").append(`
+                                <div class="linha border-top pt-2">
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <input type="text" name="cart[<?php echo $eventId; ?>][ingressos][${data}][${i}][nome]" placeholder="Nome(s) da(s) criança(s)" class="form-control" required>
+                                        </div>
+                                        <div class="col-md-4">
+                                            ${gerarSelectModalidade(data, i)}
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="input-group mb-3">
+                                                <input type="text" disabled value="0,00" class="total-pessoa form-control">
+                                                <div class="input-group-append">
+                                                    <button type="button" class="btn-remover-nome btn btn-danger">X <span class="d-inline d-sm-none">Remover</span></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                             `);
+                             bloco.find(".qtd").val(bloco.find(".linha").length);
+                             atualizarResumo(modalidades);
+                         });
+
                          // Remover linha individual
                          $(document).on("click", ".btn-remover-nome", function() {
                              let bloco = $(this).closest(".grupo-data");
                              $(this).closest(".linha").remove();
                              if (bloco.find(".linha").length === 0) {
                                  bloco.remove();
+                             } else {
+                                 bloco.find(".qtd").val(bloco.find(".linha").length);
                              }
-                             let _linhas = $('.linha').length;
-                             $('.qtd').val(_linhas);
                              atualizarResumo(modalidades);
                          });
 
