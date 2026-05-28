@@ -196,16 +196,61 @@ class Event extends AppModel
 
     function setSoldOut($eventId)
     {
-        //Atualiza o estaus para Esgotado
         $this->updateAll(
             array(
                 'Event.status' => "'soldoff'",
                 'Event.modified' => "'" . date('Y-m-d H:i:s') . "'"
             ),
-            array(
-                'Event.id' => $eventId
-            )
+            array('Event.id' => $eventId)
         );
+    }
+
+    function setScheduled($eventId)
+    {
+        $this->updateAll(
+            array(
+                'Event.status' => "'scheduled'",
+                'Event.modified' => "'" . date('Y-m-d H:i:s') . "'"
+            ),
+            array('Event.id' => $eventId)
+        );
+    }
+
+    function syncLotStatus($eventId)
+    {
+        $eventId = (int)$eventId;
+        if (!$eventId) return;
+
+        // Sem limite configurado nos lotes → não altera nada
+        $total = $this->getTotalTotalTicketsAvailable($eventId);
+        if ($total <= 0) return;
+
+        // Conta pedidos ativos (pending + approved)
+        $Order = ClassRegistry::init('Order');
+        $result = $Order->find('first', array(
+            'fields'     => array('COUNT(id) AS total'),
+            'conditions' => array(
+                'event_id' => $eventId,
+                'status'   => array('pending', 'approved')
+            ),
+            'recursive' => -1
+        ));
+        $count = isset($result[0]['total']) ? (int)$result[0]['total'] : 0;
+
+        $event = $this->find('first', array(
+            'conditions' => array('id' => $eventId),
+            'fields'     => array('id', 'status'),
+            'recursive'  => -1
+        ));
+        if (empty($event)) return;
+
+        $currentStatus = $event['Event']['status'];
+
+        if ($count >= $total && $currentStatus === 'scheduled') {
+            $this->setSoldOut($eventId);
+        } elseif ($count < $total && $currentStatus === 'soldoff') {
+            $this->setScheduled($eventId);
+        }
     }
 
     function getBlockedDates($id, $future = false, $json = true)

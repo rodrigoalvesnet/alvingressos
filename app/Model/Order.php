@@ -153,6 +153,14 @@ class Order extends AppModel
                 $result['success'] = true;
                 $result['Order'] = $orderSave;
                 $result['message'] = 'Pedido criado com sucesso!';
+                // Recalcula disponibilidade do evento após novo pedido
+                try {
+                    App::uses('Event', 'Model');
+                    $EventModel = new Event();
+                    $EventModel->syncLotStatus((int)$orderSave['event_id']);
+                } catch (Exception $e) {
+                    CakeLog::write('error', 'Falha ao sincronizar status do lote (novo pedido): ' . $e->getMessage());
+                }
             }
         } else {
             $result['success'] = $checkDuplicidade['message'];
@@ -226,14 +234,22 @@ class Order extends AppModel
             'status' => $status,
             'reason' => $reason
         );
-        //Alterar o status
         if ($this->save($arraySave)) {
-            //Tenta enviar o voucher, mas sem quebrar o webhook
             try {
                 $this->sendVoucher($orderId);
             } catch (Exception $e) {
-                //Registra log para investigar depois
                 CakeLog::write('error', 'Falha ao enviar voucher do pedido ' . $orderId . ': ' . $e->getMessage());
+            }
+            // Recalcula disponibilidade do evento após qualquer mudança de status
+            try {
+                $eventId = (int)$this->field('event_id', array('Order.id' => $orderId));
+                if ($eventId) {
+                    App::uses('Event', 'Model');
+                    $EventModel = new Event();
+                    $EventModel->syncLotStatus($eventId);
+                }
+            } catch (Exception $e) {
+                CakeLog::write('error', 'Falha ao sincronizar status do lote (pedido ' . $orderId . '): ' . $e->getMessage());
             }
             return true;
         } else {

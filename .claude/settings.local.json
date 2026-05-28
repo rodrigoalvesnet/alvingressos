@@ -28,7 +28,8 @@
       "PowerShell(Get-ChildItem -Path \"D:\\\\PROJETOS\\\\PHP\\\\www\\\\_ingressos\" -Recurse -Directory | Where-Object {$_.Name -eq \"Controller\" -or $_.Name -eq \"Model\" -or $_.Name -eq \"View\"} | Select-Object FullName)",
       "Bash(Get-ChildItem -Path \"D:\\\\PROJETOS\\\\PHP\\\\www\\\\_ingressos\\\\app\\\\tmp\\\\cache\" -Recurse -File)",
       "Bash(Measure-Object)",
-      "Bash(Select-Object -ExpandProperty Count)"
+      "Bash(Select-Object -ExpandProperty Count)",
+      "Bash(dir \"D:\\\\PROJETOS\\\\PHP\\\\www\\\\_ingressos\\\\app\\\\Config\")"
     ]
   }
 }
