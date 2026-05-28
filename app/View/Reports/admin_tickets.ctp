@@ -26,9 +26,21 @@
         <td><?php echo mb_convert_encoding($registro['Ticket']['modalidade_nome'], 'ISO-8859-1'); ?></td>
         <td><?php echo $this->Alv->tratarData($registro['Ticket']['modalidade_data'], 'pt'); ?></td>
         <td><?php
-            $statusLabels = array('pending' => 'Pendente', 'rejected' => 'Rejeitado', 'approved' => 'Aprovado', 'canceled' => 'Cancelado');
-            $st = isset($registro['Ticket']['status']) ? $registro['Ticket']['status'] : '';
-            echo mb_convert_encoding(isset($statusLabels[$st]) ? $statusLabels[$st] : $st, 'ISO-8859-1');
+            $orderStatus = isset($registro['Order']['status']) ? $registro['Order']['status'] : '';
+            if (!empty($registro['Checkin']['id'])) {
+                $situacao = 'Utilizado';
+            } elseif ($orderStatus === 'canceled') {
+                $situacao = 'Cancelado';
+            } elseif ($orderStatus === 'approved') {
+                $situacao = 'Agendado';
+            } elseif ($orderStatus === 'pending') {
+                $situacao = 'Pendente';
+            } elseif ($orderStatus === 'rejected') {
+                $situacao = 'Rejeitado';
+            } else {
+                $situacao = '';
+            }
+            echo mb_convert_encoding($situacao, 'ISO-8859-1');
         ?></td>
         <td><?php echo !empty($registro['Checkin']['created']) ? $registro['Checkin']['created'] : ''; ?></td>
     </tr>

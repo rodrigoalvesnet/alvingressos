@@ -81,7 +81,9 @@ class TicketsController extends AppController
             'limit'      => Configure::read('Sistema.limit'),
             'order'      => 'Ticket.created DESC',
             'contain'    => array(
-                'Event' => array('title')
+                'Event'   => array('title'),
+                'Order'   => array('fields' => array('id', 'status')),
+                'Checkin' => array('fields' => array('id', 'created')),
             )
         );
         $this->set('registros', $this->paginate('Ticket'));

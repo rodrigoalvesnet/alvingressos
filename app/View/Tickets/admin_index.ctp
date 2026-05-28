@@ -199,8 +199,20 @@
                             <td><?php echo $this->Alv->tratarData($registro['Ticket']['modalidade_data'], 'pt'); ?></td>
                             <td><?php echo !empty($registro['Event']['title']) ? $registro['Event']['title'] : '—'; ?></td>
                             <td><?php
-                                $st = isset($registro['Ticket']['status']) ? $registro['Ticket']['status'] : '';
-                                echo isset($statusLabels[$st]) ? $statusLabels[$st] : $st;
+                                $orderStatus = isset($registro['Order']['status']) ? $registro['Order']['status'] : '';
+                                if (!empty($registro['Checkin']['id'])) {
+                                    echo 'Utilizado';
+                                } elseif ($orderStatus === 'canceled') {
+                                    echo 'Cancelado';
+                                } elseif ($orderStatus === 'approved') {
+                                    echo 'Agendado';
+                                } elseif ($orderStatus === 'pending') {
+                                    echo 'Pendente';
+                                } elseif ($orderStatus === 'rejected') {
+                                    echo 'Rejeitado';
+                                } else {
+                                    echo '—';
+                                }
                             ?></td>
                         </tr>
                     <?php } ?>
