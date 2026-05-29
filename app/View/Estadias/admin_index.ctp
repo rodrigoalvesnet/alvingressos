@@ -5,7 +5,46 @@
         border-radius: 50%;
         margin-right: 10px;
     }
+    .toast-comprovante {
+        display: none;
+        align-items: center;
+        gap: 12px;
+        background: #d1e7dd;
+        border: 1px solid #a3cfbb;
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+        font-size: 14px;
+        color: #0a3622;
+    }
+    .toast-comprovante .toast-msg { flex: 1; }
+    .toast-comprovante .toast-close {
+        background: none;
+        border: none;
+        font-size: 18px;
+        line-height: 1;
+        cursor: pointer;
+        color: #0a3622;
+        padding: 0 4px;
+    }
 </style>
+
+<div id="toastComprovanteNova" class="toast-comprovante">
+    <span class="toast-msg"><strong>Estadia iniciada com sucesso!</strong> Clique para imprimir o comprovante.</span>
+    <button id="btnComprovanteNova" class="btn btn-success btn-sm">
+        <i class="mdi mdi-printer"></i> Imprimir comprovante
+    </button>
+    <button class="toast-close" onclick="this.parentElement.style.display='none'">&times;</button>
+</div>
+
+<div id="toastComprovanteEncerrada" class="toast-comprovante">
+    <span class="toast-msg"><strong>Estadia encerrada!</strong> Clique para imprimir o comprovante.</span>
+    <button id="btnComprovanteEncerrada" class="btn btn-success btn-sm">
+        <i class="mdi mdi-printer"></i> Imprimir comprovante
+    </button>
+    <button class="toast-close" onclick="this.parentElement.style.display='none'">&times;</button>
+</div>
+
 <div class="card">
     <?php
     echo $this->Form->create('Filtro');
@@ -309,11 +348,17 @@
     (function() {
 
         <?php if (!empty($novaEstadiaId)): ?>
-        window.open('/admin/estadias/comprovante/<?php echo (int)$novaEstadiaId; ?>', '_blank');
+        document.getElementById('btnComprovanteNova').addEventListener('click', function() {
+            window.open('/admin/estadias/comprovante/<?php echo (int)$novaEstadiaId; ?>', '_blank');
+        });
+        document.getElementById('toastComprovanteNova').style.display = 'flex';
         <?php endif; ?>
 
         <?php if (!empty($encerradaComprovanteId)): ?>
-        window.open('/admin/estadias/comprovante/<?php echo (int)$encerradaComprovanteId; ?>', '_blank');
+        document.getElementById('btnComprovanteEncerrada').addEventListener('click', function() {
+            window.open('/admin/estadias/comprovante/<?php echo (int)$encerradaComprovanteId; ?>', '_blank');
+        });
+        document.getElementById('toastComprovanteEncerrada').style.display = 'flex';
         <?php endif; ?>
 
         $('#inputSearch').on('keyup', function() {
