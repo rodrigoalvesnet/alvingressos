@@ -81,7 +81,8 @@ class DashController extends AppController
             'conditions' => array(
                 'Order.unidade_id'           => $unidadeId,
                 'Order.status'               => 'approved',
-                'Ticket.modalidade_nome LIKE' => '%adulto%',
+                'Ticket.modalidade_nome LIKE'  => '%adulto%',
+                'Ticket.modalidade_nome LIKE ' => '%excedente%',
                 'DATE(Ticket.modalidade_data)' => date('Y-m-d'),
             ),
             'fields'    => array('COUNT(Ticket.id) AS qtd'),
