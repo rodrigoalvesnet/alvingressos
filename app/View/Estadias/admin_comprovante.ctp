@@ -6,8 +6,8 @@
     <title>Comprovante #<?php echo $estadia['Estadia']['id']; ?></title>
     <style>
         * {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 11px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -22,12 +22,12 @@
         .center  { text-align: center; }
         .right   { text-align: right; }
         .bold    { font-weight: bold; }
-        .big     { font-size: 13px; }
+        .big     { font-size: 14px; }
         .linha   { border-top: 1px dashed #555; margin: 5px 0; }
         .row     { display: flex; justify-content: space-between; gap: 4px; }
         .row span:last-child { white-space: nowrap; }
         .bloco   { margin: 3px 0; }
-        .titulo  { font-size: 12px; font-weight: bold; text-align: center; letter-spacing: 1px; margin: 4px 0; }
+        .titulo  { font-size: 13px; font-weight: bold; text-align: center; letter-spacing: 1px; margin: 4px 0; }
 
         /* botões visíveis somente em tela */
         .acoes-tela {
