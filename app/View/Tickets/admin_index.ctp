@@ -75,6 +75,19 @@
                 );
                 ?>
             </div>
+            <div class="col-lg-3">
+                <?php
+                echo $this->Form->input(
+                    'unidade_id',
+                    array(
+                        'label'   => 'Unidade',
+                        'options' => $unidades,
+                        'class'   => 'form-control',
+                        'empty'   => 'Qualquer'
+                    )
+                );
+                ?>
+            </div>
         </div>
     </div>
     <div class="card-footer border-top">

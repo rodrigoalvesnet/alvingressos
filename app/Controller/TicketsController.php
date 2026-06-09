@@ -55,6 +55,9 @@ class TicketsController extends AppController
             if (isset($this->request->data['Filtro']['event_id']) && !empty($this->request->data['Filtro']['event_id'])) {
                 $arrayConditions['Ticket.event_id'] = $this->request->data['Filtro']['event_id'];
             }
+            if (isset($this->request->data['Filtro']['unidade_id']) && !empty($this->request->data['Filtro']['unidade_id'])) {
+                $arrayConditions[] = 'Ticket.order_id IN (SELECT id FROM `orders` WHERE unidade_id = ' . (int)$this->request->data['Filtro']['unidade_id'] . ')';
+            }
             //salva as condições na session
             $this->Session->write('Filtros.Tickets', $arrayConditions);
             $this->Session->write('Filtros.ThisData', $this->request->data);
@@ -96,6 +99,14 @@ class TicketsController extends AppController
             'order'  => array('title' => 'ASC')
         ));
         $this->set('events', $events);
+
+        $this->loadModel('Unidade');
+        $unidades = $this->Unidade->find('list', array(
+            'recursive' => -1,
+            'fields'    => array('id', 'name'),
+            'order'     => array('name' => 'ASC')
+        ));
+        $this->set('unidades', $unidades);
     }
 
     public function admin_edit($id)

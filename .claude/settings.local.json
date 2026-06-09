@@ -29,7 +29,10 @@
       "Bash(Get-ChildItem -Path \"D:\\\\PROJETOS\\\\PHP\\\\www\\\\_ingressos\\\\app\\\\tmp\\\\cache\" -Recurse -File)",
       "Bash(Measure-Object)",
       "Bash(Select-Object -ExpandProperty Count)",
-      "Bash(dir \"D:\\\\PROJETOS\\\\PHP\\\\www\\\\_ingressos\\\\app\\\\Config\")"
+      "Bash(dir \"D:\\\\PROJETOS\\\\PHP\\\\www\\\\_ingressos\\\\app\\\\Config\")",
+      "Bash(php -r ' *)",
+      "Bash(mysql -u root -e \"DESCRIBE ingressos.tickets;\")",
+      "Bash(php *)"
     ]
   }
 }

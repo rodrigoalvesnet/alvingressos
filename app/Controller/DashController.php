@@ -43,14 +43,18 @@ class DashController extends AppController
         $this->set('ordersTotalToday', $ordersTotalToday[0][0]['total']);
 
         $ticketsToday = $this->Ticket->find('count', array(
+            'joins' => array(array(
+                'table'      => 'orders',
+                'alias'      => 'Order',
+                'type'       => 'INNER',
+                'conditions' => array('Order.id = Ticket.order_id'),
+            )),
             'conditions' => array(
-                'Order.unidade_id' => $unidadeId,
-                'Order.status' => 'approved',
-                'DATE(Ticket.modalidade_data)' => date('Y-m-d')
+                'Order.unidade_id'             => $unidadeId,
+                'Order.status'                 => 'approved',
+                'DATE(Ticket.modalidade_data)' => date('Y-m-d'),
             ),
-            'contain' => array(
-                'Order' => array('fields' => array('id', 'status'))
-            )
+            'recursive' => -1,
         ));
         $this->set('ticketsToday', $ticketsToday);
 
@@ -77,7 +81,7 @@ class DashController extends AppController
             'conditions' => array(
                 'Order.unidade_id'           => $unidadeId,
                 'Order.status'               => 'approved',
-                'Ticket.modalidade_nome LIKE' => '%EXCEDENTE%',
+                'Ticket.modalidade_nome LIKE' => '%adulto%',
                 'DATE(Ticket.modalidade_data)' => date('Y-m-d'),
             ),
             'fields'    => array('COUNT(Ticket.id) AS qtd'),
