@@ -47,9 +47,10 @@
                 <?php
                 echo $this->Form->input('pulseira_numero', [
                     'label' => 'Nº Pulseira',
-                    'class' => 'form-control',
+                    'class' => 'form-control only-numbers',
                     'div' => 'form-group',
-                    'required' => true
+                    'required' => true,
+                    'inputmode' => 'numeric',
                 ]);
                 ?>
             </div>
@@ -58,7 +59,7 @@
                 <?php
                 echo $this->Form->input('crianca_nome', [
                     'label' => 'Nome da Criança',
-                    'class' => 'form-control',
+                    'class' => 'form-control only-letters',
                     'div' => 'form-group',
                     'required' => true
                 ]);
@@ -253,6 +254,42 @@
             atualizarIdade();
         }
     })();
+
+    // Pulseira: somente dígitos
+    document.querySelectorAll('.only-numbers').forEach(function (el) {
+        el.addEventListener('input', function () {
+            var pos = this.selectionStart;
+            var cleaned = this.value.replace(/[^0-9]/g, '');
+            if (this.value !== cleaned) {
+                this.value = cleaned;
+                try { this.setSelectionRange(pos - 1, pos - 1); } catch (e) {}
+            }
+        });
+        el.addEventListener('keydown', function (e) {
+            var allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Tab','Home','End'];
+            if (allowed.indexOf(e.key) === -1 && !/^\d$/.test(e.key) && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // Nome da criança: somente letras (incluindo acentuadas) e espaço
+    document.querySelectorAll('.only-letters').forEach(function (el) {
+        el.addEventListener('input', function () {
+            var pos = this.selectionStart;
+            var cleaned = this.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s]/g, '');
+            if (this.value !== cleaned) {
+                this.value = cleaned;
+                try { this.setSelectionRange(pos - 1, pos - 1); } catch (e) {}
+            }
+        });
+        el.addEventListener('keydown', function (e) {
+            var allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Tab','Home','End',' '];
+            if (allowed.indexOf(e.key) === -1 && !/^[A-Za-zÀ-ÖØ-öø-ÿ]$/.test(e.key) && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+            }
+        });
+    });
 
     // alv.js aplica reverse:true no .cpf e .datepicker (preenchimento direita→esquerda),
     // o que coloca o cursor no final e causa digitação incorreta.
