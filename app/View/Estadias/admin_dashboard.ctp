@@ -233,6 +233,66 @@ if (!empty($vendasPorAdicional)) {
 <?php } ?>
 
 <!-- ============================================================ -->
+<!-- FORMAS DE PAGAMENTO — ESTADIAS ENCERRADAS                     -->
+<!-- ============================================================ -->
+<hr class="my-4">
+<h5 class="text-uppercase text-muted mb-3">
+  <i class="fa fa-money-bill-wave"></i> Formas de Pagamento — Estadias Encerradas
+</h5>
+
+<?php
+$totalQtdForma = 0;
+$totalValForma = 0;
+if (!empty($formasPagamento)) {
+    foreach ($formasPagamento as $fp) {
+        $totalQtdForma += $fp['quantidade'];
+        $totalValForma += $fp['total'];
+    }
+}
+?>
+
+<?php if (!empty($formasPagamento)) { ?>
+<div class="card shadow mb-4">
+  <div class="card-body p-0">
+    <table class="table table-striped table-hover mb-0">
+      <thead class="thead-light">
+        <tr>
+          <th>Forma de Pagamento</th>
+          <th class="text-center" style="width:120px">Quantidade</th>
+          <th class="text-right" style="width:150px">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($formasPagamento as $fp) { ?>
+        <tr>
+          <td><?php echo h($fp['nome']); ?></td>
+          <td class="text-center">
+            <span class="badge badge-secondary"><?php echo $fp['quantidade']; ?></span>
+          </td>
+          <td class="text-right">
+            R$ <?php echo $this->Alv->tratarValor($fp['total'], 'pt'); ?>
+          </td>
+        </tr>
+        <?php } ?>
+      </tbody>
+      <tfoot>
+        <tr class="font-weight-bold table-light">
+          <td>TOTAL</td>
+          <td class="text-center"><?php echo $totalQtdForma; ?></td>
+          <td class="text-right">R$ <?php echo $this->Alv->tratarValor($totalValForma, 'pt'); ?></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+<?php } else { ?>
+<div class="alert alert-light border mb-4">
+  <i class="fa fa-info-circle text-muted"></i>
+  Nenhuma estadia encerrada com forma de pagamento no período selecionado.
+</div>
+<?php } ?>
+
+<!-- ============================================================ -->
 <!-- CONSOLIDADO TOTAL DO PERÍODO                                  -->
 <!-- ============================================================ -->
 <hr class="my-4">

@@ -613,6 +613,37 @@ class EstadiasController extends AppController
         }
 
         // -------------------------------------------------------
+        // 7b. Totais por forma de pagamento (estadias encerradas no período)
+        // -------------------------------------------------------
+        $this->loadModel('FormasPagamento');
+        $formasPgtoMap = [];
+        foreach ($this->FormasPagamento->find('all', ['fields' => ['id', 'nome'], 'recursive' => -1]) as $fp) {
+            $formasPgtoMap[$fp['FormasPagamento']['id']] = $fp['FormasPagamento']['nome'];
+        }
+
+        $estadiasPorForma = $this->Estadia->find('all', [
+            'conditions' => array_merge($condPeriodo, ['Estadia.status' => 'encerrada']),
+            'fields'     => [
+                'Estadia.formadepagamento_id',
+                'COUNT(Estadia.id) AS quantidade',
+                'COALESCE(SUM(Estadia.valor_total), 0) AS total_valor',
+            ],
+            'group'     => ['Estadia.formadepagamento_id'],
+            'recursive' => -1,
+        ]);
+
+        $formasPagamento = [];
+        foreach ($estadiasPorForma as $row) {
+            $fid  = (int)$row['Estadia']['formadepagamento_id'];
+            $nome = isset($formasPgtoMap[$fid]) ? $formasPgtoMap[$fid] : 'Não informado';
+            $formasPagamento[] = [
+                'nome'       => $nome,
+                'quantidade' => (int)$row[0]['quantidade'],
+                'total'      => (float)$row[0]['total_valor'],
+            ];
+        }
+
+        // -------------------------------------------------------
         // 8. Condições para itens de estadias encerradas
         // -------------------------------------------------------
         $condItens = [
@@ -679,7 +710,8 @@ class EstadiasController extends AppController
             'dataFinal',
             'vendasPorAdicional',
             'totalTempoEstadias',
-            'vendasPorTarifa'
+            'vendasPorTarifa',
+            'formasPagamento'
         ));
     }
 
