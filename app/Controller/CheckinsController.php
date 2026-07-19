@@ -322,6 +322,12 @@ class CheckinsController extends AppController
             )
         );
 
+        $ticketNotFound = empty($this->data);
+        $this->set('ticketNotFound', $ticketNotFound);
+        if ($ticketNotFound) {
+            return;
+        }
+
         $checkinExists = false;
         //Verifica se o checkin já foi feito
         if ($this->Checkin->checkinExists($ticketId)) {

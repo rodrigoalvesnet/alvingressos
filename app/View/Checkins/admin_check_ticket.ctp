@@ -1,3 +1,17 @@
+<?php if (!empty($ticketNotFound)): ?>
+<div class="modal-body checkin">
+    <div class="row">
+        <div class="col-lg-12 text-center">
+            <div class="checkin-icon text-center"><i class="fas fa-times-circle text-danger"></i></div>
+            <div class="checkin-title">Ingresso não encontrado</div>
+            <div class="checkin-reason">Verifique se o QR Code é válido.</div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeModal()">Fechar</button>
+</div>
+<?php else: ?>
 <?php
 echo $this->Form->create(
     'Checkin',
@@ -113,3 +127,4 @@ echo $this->Form->hidden('Checkin.ticket_id', array('value' => $this->data['Tick
     ?>
 </div>
 <?php echo $this->Form->end(); ?>
+<?php endif; ?>

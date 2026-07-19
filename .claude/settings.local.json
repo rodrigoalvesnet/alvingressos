@@ -32,7 +32,18 @@
       "Bash(dir \"D:\\\\PROJETOS\\\\PHP\\\\www\\\\_ingressos\\\\app\\\\Config\")",
       "Bash(php -r ' *)",
       "Bash(mysql -u root -e \"DESCRIBE ingressos.tickets;\")",
-      "Bash(php *)"
+      "Bash(php *)",
+      "Bash(php -l \"D:\\\\PROJETOS\\\\PHP\\\\www\\\\_ingressos\\\\app\\\\Controller\\\\EstadiasController.php\")",
+      "Bash(php -l \"D:\\\\PROJETOS\\\\PHP\\\\www\\\\_ingressos\\\\app\\\\View\\\\Estadias\\\\admin_dashboard.ctp\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git fetch *)",
+      "Bash(git pull *)",
+      "Bash(git stash *)",
+      "Bash(git restore *)",
+      "Bash(mysql --version)",
+      "Bash(/c/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe *)"
     ]
   }
 }
