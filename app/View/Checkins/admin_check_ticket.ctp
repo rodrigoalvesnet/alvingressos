@@ -23,9 +23,11 @@ echo $this->Form->create(
     )
 );
 // pr($this->data);
+// Cortesia não tem Order (não veio de compra) — trata como já aprovada
+$orderStatus = !empty($this->data['Order']['status']) ? $this->data['Order']['status'] : 'approved';
 echo $this->Form->hidden('Checkin.user_id', array('value' => AuthComponent::user('id')));
-echo $this->Form->hidden('Checkin.event_id', array('value' => $this->data['Order']['event_id']));
-echo $this->Form->hidden('Checkin.order_id', array('value' => $this->data['Order']['id']));
+echo $this->Form->hidden('Checkin.event_id', array('value' => isset($this->data['Order']['event_id']) ? $this->data['Order']['event_id'] : null));
+echo $this->Form->hidden('Checkin.order_id', array('value' => isset($this->data['Order']['id']) ? $this->data['Order']['id'] : null));
 echo $this->Form->hidden('Checkin.ticket_id', array('value' => $this->data['Ticket']['id']));
 ?>
 <div class="modal-body checkin">
@@ -39,38 +41,43 @@ echo $this->Form->hidden('Checkin.ticket_id', array('value' => $this->data['Tick
                 $icon = '<i class="fas fa-exclamation text-warning"></i>';
                 $title = 'Pendente';
                 $reason = '';
-                if ($this->data['Order']['status'] == 'approved') {
+                if ($orderStatus == 'approved') {
                     $icon = '<i class="fas fa-check text-success"></i>';
-                    $title = 'Aprovado';
+                    $title = !empty($isCortesia) ? 'Cortesia' : 'Aprovado';
                     $reason = '';
                 }
-                if ($this->data['Order']['status'] == 'rejected') {
+                if ($orderStatus == 'rejected') {
                     $icon = '<i class="fas fa-ban text-danger"></i>';
                     $title = 'Recusado';
                     $reason = $this->data['Order']['reason'];
                 }
-                if ($this->data['Order']['status'] == 'canceled') {
+                if ($orderStatus == 'canceled') {
                     $icon = '<i class="fas fa-exclamation text-danger"></i>';
                     $title = 'Cancelado';
                     $reason = '';
-                }                
+                }
                 //Se pertence a outra unidade
                 if ($bloqueiaUnidade) {
                     $icon = '<i class="fas fa-ban text-danger"></i>';
                     $title = 'Unidade Incorreta!';
                     $reason = 'Este ingresso pertence à unidade <strong>' . h($nomeUnidadeCorreta) . '</strong>. O check-in deve ser realizado nessa unidade.';
                 }
-                //Se está adiantado
+                //Se está adiantado (não se aplica a cortesia, que não tem data fixa)
                 if ($bloqueiaCheckinAdiantado) {
                     $icon = '<i class="fas fa-clock text-info"></i>';
                     $title = 'Data Incorreta!';
                     $reason = 'Passaporte agendado somente para <strong>' . date('d/m/Y', strtotime($this->data['Ticket']['modalidade_data'])) . '</strong>';
                 }
-                //Se está atrasado
+                //Se está atrasado / expirado
                 if ($bloqueiaCheckinAtrasado) {
                     $icon = '<i class="fas fa-exclamation text-danger"></i>';
-                    $title = 'Passaporte Vencido!';
-                    $reason = 'Passaporte vencido em <strong>' . date('d/m/Y', strtotime($this->data['Ticket']['modalidade_data'])) . '</strong>';
+                    if (!empty($isCortesia)) {
+                        $title = 'Cortesia Vencida!';
+                        $reason = 'Cortesia vencida em <strong>' . date('d/m/Y', strtotime($this->data['Ticket']['valido_ate'])) . '</strong>';
+                    } else {
+                        $title = 'Passaporte Vencido!';
+                        $reason = 'Passaporte vencido em <strong>' . date('d/m/Y', strtotime($this->data['Ticket']['modalidade_data'])) . '</strong>';
+                    }
                 }
                 //Se já foi feito
                 if ($checkinExists) {
@@ -83,11 +90,19 @@ echo $this->Form->hidden('Checkin.ticket_id', array('value' => $this->data['Tick
                 <div class="checkin-title"><?php echo $title; ?></div>
                 <div class="checkin-reason"><?php echo $reason; ?></div>
                 <hr />
-                <div class="checkin-name"><?php echo $this->data['Ticket']['nome']; ?></div>
-                <div class="checkin-cpf"><?php echo $this->data['Ticket']['cpf']; ?></div>
+                <?php if (!empty($this->data['Ticket']['nome'])) { ?>
+                    <div class="checkin-name"><?php echo $this->data['Ticket']['nome']; ?></div>
+                <?php } ?>
+                <?php if (!empty($this->data['Ticket']['cpf'])) { ?>
+                    <div class="checkin-cpf"><?php echo $this->data['Ticket']['cpf']; ?></div>
+                <?php } ?>
                 <div class="checkin-church"><?php echo $this->data['Ticket']['modalidade_nome']; ?></div>
                 <div class="checkin-church">Número: <?php echo $this->data['Ticket']['id']; ?></div>
-                <div class="checkin-church">Data: <?php echo $this->Alv->tratarData($this->data['Ticket']['modalidade_data'], 'pt'); ?></div>
+                <?php if (!empty($isCortesia)) { ?>
+                    <div class="checkin-church">Válida até: <?php echo $this->Alv->tratarData($this->data['Ticket']['valido_ate'], 'pt'); ?></div>
+                <?php } else { ?>
+                    <div class="checkin-church">Data: <?php echo $this->Alv->tratarData($this->data['Ticket']['modalidade_data'], 'pt'); ?></div>
+                <?php } ?>
                 <?php
                 if (!empty($this->data['Response'])) {
                     echo '<hr />';
@@ -106,10 +121,10 @@ echo $this->Form->hidden('Checkin.ticket_id', array('value' => $this->data['Tick
     <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeModal()">Fechar</button>
     <?php
     //se pode fazer o checkin
-    if ($this->data['Order']['status'] == 'approved') {
+    if ($orderStatus == 'approved') {
         //Se ainda não foi feito
         if (!$checkinExists && !$bloqueiaCheckinAdiantado && !$bloqueiaCheckinAtrasado && !$bloqueiaUnidade) {
-            $eventId = $this->data['Order']['event_id'];
+            $eventId = isset($this->data['Order']['event_id']) ? $this->data['Order']['event_id'] : 0;
             echo $this->Form->button(
                 'Confirmar Checkin',
                 array(

@@ -60,11 +60,15 @@ class DashController extends AppController
 
         $checkinsToday = $this->Checkin->find('count', array(
             'conditions' => array(
-                'Order.unidade_id' => $unidadeId,
+                'OR' => array(
+                    'Order.unidade_id' => $unidadeId,
+                    'Ticket.unidade_id' => $unidadeId
+                ),
                 'DATE(Checkin.created)' => date('Y-m-d')
             ),
             'contain' => [
-                'Order'
+                'Order',
+                'Ticket'
             ],
             // 'recursive' => -1
         ));
@@ -131,12 +135,16 @@ class DashController extends AppController
             // 2) Checkins realizados (QUANTIDADE) no mês/ano
             $checkinsCountMonth = $this->Checkin->find('count', array(
                 'conditions' => array(
-                    'Order.unidade_id' => $unidadeId,
+                    'OR' => array(
+                        'Order.unidade_id' => $unidadeId,
+                        'Ticket.unidade_id' => $unidadeId
+                    ),
                     'Checkin.created >=' => $start,
                     'Checkin.created <'  => $end,
                 ),
                 'contain' => [
-                    'Order'
+                    'Order',
+                    'Ticket'
                 ],
                 // 'recursive' => -1
             ));
@@ -290,14 +298,27 @@ class DashController extends AppController
         // =====================================================
         // CHECKINS
         // =====================================================
-        $checkinJoin = [[
-            'table'      => 'orders',
-            'alias'      => 'Order',
-            'type'       => 'INNER',
-            'conditions' => ['Order.id = Checkin.order_id'],
-        ]];
+        // LEFT JOIN em orders e tickets: cortesias não têm pedido, então a
+        // unidade e a validação de "aprovado" caem no fallback do Ticket
+        $checkinJoin = [
+            [
+                'table'      => 'orders',
+                'alias'      => 'Order',
+                'type'       => 'LEFT',
+                'conditions' => ['Order.id = Checkin.order_id'],
+            ],
+            [
+                'table'      => 'tickets',
+                'alias'      => 'Ticket',
+                'type'       => 'LEFT',
+                'conditions' => ['Ticket.id = Checkin.ticket_id'],
+            ],
+        ];
         $condCheckins = [
-            'Order.status'             => 'approved',
+            'OR' => [
+                'Order.status'         => 'approved',
+                'Ticket.origem'        => 'cortesia',
+            ],
             'DATE(Checkin.created) >=' => $dataInicial,
             'DATE(Checkin.created) <=' => $dataFinal,
         ];
@@ -312,10 +333,10 @@ class DashController extends AppController
             'joins'      => $checkinJoin,
             'conditions' => $condCheckins,
             'fields'     => [
-                'Order.unidade_id',
+                'COALESCE(Order.unidade_id, Ticket.unidade_id) AS unidade_id',
                 'COUNT(Checkin.id) AS total_checkins',
             ],
-            'group'     => ['Order.unidade_id'],
+            'group'     => ['COALESCE(Order.unidade_id, Ticket.unidade_id)'],
             'recursive' => -1,
         ]);
 
@@ -439,7 +460,7 @@ class DashController extends AppController
         }
 
         foreach ($checkinsUnidade as $row) {
-            $uid = (int)$row['Order']['unidade_id'];
+            $uid = (int)$row[0]['unidade_id'];
             if (!isset($dadosPorUnidade[$uid])) continue;
             $dadosPorUnidade[$uid]['checkins'] = (int)$row[0]['total_checkins'];
         }

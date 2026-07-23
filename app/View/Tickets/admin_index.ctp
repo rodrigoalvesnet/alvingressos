@@ -158,36 +158,55 @@
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                         <?php
-                                        echo $this->Html->link(
-                                            '<i class="fas fa-print"></i> Imprimir',
-                                            array(
-                                                'admin' => false,
-                                                'controller' => 'Orders',
-                                                'action' => 'ticket',
-                                                $registro['Ticket']['order_id']
-                                            ),
-                                            array(
-                                                'target' => '_blank',
-                                                'title' => 'Imprimir',
-                                                'class' => 'dropdown-item',
-                                                'escape' => false
-                                            )
-                                        );
-                                        echo $this->Html->link(
-                                            '<i class="fas fa-eye"></i> Ver Pedido',
-                                            array(
-                                                'admin' => false,
-                                                'controller' => 'Orders',
-                                                'action' => 'view',
-                                                $registro['Ticket']['order_id']
-                                            ),
-                                            array(
-                                                'target' => '_blank',
-                                                'title' => 'Ver Pedido',
-                                                'class' => 'dropdown-item',
-                                                'escape' => false
-                                            )
-                                        );
+                                        $ehCortesia = !empty($registro['Ticket']['origem']) && $registro['Ticket']['origem'] === 'cortesia';
+                                        if ($ehCortesia) {
+                                            echo $this->Html->link(
+                                                '<i class="fas fa-print"></i> Imprimir',
+                                                array(
+                                                    'admin' => true,
+                                                    'controller' => 'Cortesias',
+                                                    'action' => 'print',
+                                                    $registro['Ticket']['id']
+                                                ),
+                                                array(
+                                                    'target' => '_blank',
+                                                    'title' => 'Imprimir',
+                                                    'class' => 'dropdown-item',
+                                                    'escape' => false
+                                                )
+                                            );
+                                        } else {
+                                            echo $this->Html->link(
+                                                '<i class="fas fa-print"></i> Imprimir',
+                                                array(
+                                                    'admin' => false,
+                                                    'controller' => 'Orders',
+                                                    'action' => 'ticket',
+                                                    $registro['Ticket']['order_id']
+                                                ),
+                                                array(
+                                                    'target' => '_blank',
+                                                    'title' => 'Imprimir',
+                                                    'class' => 'dropdown-item',
+                                                    'escape' => false
+                                                )
+                                            );
+                                            echo $this->Html->link(
+                                                '<i class="fas fa-eye"></i> Ver Pedido',
+                                                array(
+                                                    'admin' => false,
+                                                    'controller' => 'Orders',
+                                                    'action' => 'view',
+                                                    $registro['Ticket']['order_id']
+                                                ),
+                                                array(
+                                                    'target' => '_blank',
+                                                    'title' => 'Ver Pedido',
+                                                    'class' => 'dropdown-item',
+                                                    'escape' => false
+                                                )
+                                            );
+                                        }
                                         echo $this->Html->link(
                                             '<i class="fas fa-edit"></i> Editar',
                                             array(
@@ -206,14 +225,22 @@
                                     </div>
                                 </div>
                             </th>
-                            <td><?php echo $registro['Ticket']['order_id']; ?></td>
+                            <td><?php echo !empty($ehCortesia) ? 'Cortesia' : $registro['Ticket']['order_id']; ?></td>
                             <td><?php echo $registro['Ticket']['nome']; ?></td>
                             <td><?php echo $registro['Ticket']['modalidade_nome']; ?></td>
-                            <td><?php echo $this->Alv->tratarData($registro['Ticket']['modalidade_data'], 'pt'); ?></td>
+                            <td><?php echo !empty($registro['Ticket']['modalidade_data']) ? $this->Alv->tratarData($registro['Ticket']['modalidade_data'], 'pt') : '—'; ?></td>
                             <td><?php echo !empty($registro['Event']['title']) ? $registro['Event']['title'] : '—'; ?></td>
                             <td><?php
                                 $orderStatus = isset($registro['Order']['status']) ? $registro['Order']['status'] : '';
-                                if (!empty($registro['Checkin']['id'])) {
+                                if ($ehCortesia) {
+                                    if (!empty($registro['Checkin']['id'])) {
+                                        echo 'Utilizada';
+                                    } elseif (!empty($registro['Ticket']['valido_ate']) && $registro['Ticket']['valido_ate'] < date('Y-m-d')) {
+                                        echo 'Expirada';
+                                    } else {
+                                        echo 'Válida';
+                                    }
+                                } elseif (!empty($registro['Checkin']['id'])) {
                                     echo 'Utilizado';
                                 } elseif ($orderStatus === 'canceled') {
                                     echo 'Cancelado';

@@ -24,6 +24,19 @@ $roleId = $_SESSION['Auth']['User']['role_id'];
                         </li>
                     </ul>
                 </li>
+                <?php if ($roleId == 1 || $roleId == 2) { ?>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="mdi mdi-gift"></i><span class="hide-menu">Cortesias </span></a>
+                        <ul aria-expanded="false" class="collapse first-level">
+                            <li class="sidebar-item">
+                                <a href="/admin/cortesias/index" class="sidebar-link"><i class="mdi mdi-format-align-justify"></i><span class="hide-menu"> Listar </span></a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="/admin/cortesias/add" class="sidebar-link"><i class="mdi mdi-plus"></i><span class="hide-menu"> Nova Cortesia </span></a>
+                            </li>
+                        </ul>
+                    </li>
+                <?php } ?>
                 <?php if ($roleId == 1 || $roleId == 2 || $roleId == 4) { ?>
                     <li class="sidebar-item">
                         <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="mdi mdi-cart"></i><span class="hide-menu">Pedidos </span></a>

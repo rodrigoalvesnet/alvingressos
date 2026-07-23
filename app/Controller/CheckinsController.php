@@ -138,10 +138,13 @@ class CheckinsController extends AppController
                                 'fields' => array('unidade_id')
                             )
                         ),
-                        'fields' => array('id')
+                        'fields' => array('id', 'unidade_id')
                     ));
                     if (!empty($ticketData)) {
-                        $eventUnidadeId = $ticketData['Event']['unidade_id'];
+                        // Cortesia (sem event_id) usa a unidade gravada direto no ticket
+                        $eventUnidadeId = !empty($ticketData['Event']['unidade_id'])
+                            ? $ticketData['Event']['unidade_id']
+                            : $ticketData['Ticket']['unidade_id'];
                     }
                 } elseif (!empty($orderId)) {
                     $this->loadModel('Order');
@@ -312,6 +315,7 @@ class CheckinsController extends AppController
                         'fields'  => array('id', 'title', 'status', 'unidade_id'),
                         'Unidade' => array('id', 'name')
                     ),
+                    'Unidade' => array('id', 'name'),
                     'Checkin' => array(
                         'created',
                         'User' => array(
@@ -328,6 +332,9 @@ class CheckinsController extends AppController
             return;
         }
 
+        $isCortesia = ($this->data['Ticket']['origem'] === 'cortesia');
+        $this->set('isCortesia', $isCortesia);
+
         $checkinExists = false;
         //Verifica se o checkin já foi feito
         if ($this->Checkin->checkinExists($ticketId)) {
@@ -336,39 +343,53 @@ class CheckinsController extends AppController
         $this->set('checkinExists', $checkinExists);
 
         // Validação de unidade: usuário com unidade_id só pode validar
-        // tickets do evento que pertença à mesma unidade
+        // tickets do evento (ou, no caso de cortesia, da unidade gravada
+        // direto no ticket) que pertença à mesma unidade
         $bloqueiaUnidade    = false;
         $nomeUnidadeCorreta = '';
         $userUnidadeId = AuthComponent::user('unidade_id');
-        if (!empty($userUnidadeId) && !empty($this->data['Event']['unidade_id'])) {
-            if ($this->data['Event']['unidade_id'] != $userUnidadeId) {
+        $ticketUnidadeId = !empty($this->data['Event']['unidade_id'])
+            ? $this->data['Event']['unidade_id']
+            : (!empty($this->data['Ticket']['unidade_id']) ? $this->data['Ticket']['unidade_id'] : null);
+        $ticketUnidadeNome = !empty($this->data['Event']['unidade_id'])
+            ? $this->data['Event']['Unidade']['name']
+            : (!empty($this->data['Unidade']['name']) ? $this->data['Unidade']['name'] : '');
+        if (!empty($userUnidadeId) && !empty($ticketUnidadeId)) {
+            if ($ticketUnidadeId != $userUnidadeId) {
                 $bloqueiaUnidade    = true;
-                $nomeUnidadeCorreta = $this->data['Event']['Unidade']['name'];
+                $nomeUnidadeCorreta = $ticketUnidadeNome;
             }
         }
         $this->set('bloqueiaUnidade', $bloqueiaUnidade);
         $this->set('nomeUnidadeCorreta', $nomeUnidadeCorreta);
 
         $bloqueiaCheckinAdiantado = false;
-        //Verifica se a data do ticket é MAIOR a hoje
-        if ($this->data['Ticket']['modalidade_data'] > date('Y-m-d')) {
-            $permiteCheckinAdiantado = Configure::read('Checkin.permitir_adiantado');
-            //Se NÃO permite checkin adiantado
-            if (!$permiteCheckinAdiantado) {
-                $bloqueiaCheckinAdiantado = true;
+        $bloqueiaCheckinAtrasado  = false;
+
+        if ($isCortesia) {
+            // Cortesia: válida em qualquer dia entre a criação e a data de validade
+            if (!empty($this->data['Ticket']['valido_ate']) && $this->data['Ticket']['valido_ate'] < date('Y-m-d')) {
+                $bloqueiaCheckinAtrasado = true;
+            }
+        } else {
+            //Verifica se a data do ticket é MAIOR a hoje
+            if ($this->data['Ticket']['modalidade_data'] > date('Y-m-d')) {
+                $permiteCheckinAdiantado = Configure::read('Checkin.permitir_adiantado');
+                //Se NÃO permite checkin adiantado
+                if (!$permiteCheckinAdiantado) {
+                    $bloqueiaCheckinAdiantado = true;
+                }
+            }
+            //Verifica se a data do ticket é MENOR que hoje
+            if ($this->data['Ticket']['modalidade_data'] < date('Y-m-d')) {
+                $permiteCheckinAtrasado = Configure::read('Checkin.permitir_atrasado');
+                //Se NÃO permite checkin atrasado
+                if (!$permiteCheckinAtrasado) {
+                    $bloqueiaCheckinAtrasado = true;
+                }
             }
         }
         $this->set('bloqueiaCheckinAdiantado', $bloqueiaCheckinAdiantado);
-
-        $bloqueiaCheckinAtrasado = false;
-        //Verifica se a data do ticket é MENOR que hoje
-        if ($this->data['Ticket']['modalidade_data'] < date('Y-m-d')) {
-            $permiteCheckinAtrasado = Configure::read('Checkin.permitir_atrasado');
-            //Se NÃO permite checkin atrasado
-            if (!$permiteCheckinAtrasado) {
-                $bloqueiaCheckinAtrasado = true;
-            }
-        }
         $this->set('bloqueiaCheckinAtrasado', $bloqueiaCheckinAtrasado);
     }
 

@@ -56,7 +56,9 @@ class TicketsController extends AppController
                 $arrayConditions['Ticket.event_id'] = $this->request->data['Filtro']['event_id'];
             }
             if (isset($this->request->data['Filtro']['unidade_id']) && !empty($this->request->data['Filtro']['unidade_id'])) {
-                $arrayConditions[] = 'Ticket.order_id IN (SELECT id FROM `orders` WHERE unidade_id = ' . (int)$this->request->data['Filtro']['unidade_id'] . ')';
+                $unidadeIdFiltro = (int)$this->request->data['Filtro']['unidade_id'];
+                //Tickets normais pegam a unidade via order; cortesias já têm unidade_id direto
+                $arrayConditions[] = '(Ticket.order_id IN (SELECT id FROM `orders` WHERE unidade_id = ' . $unidadeIdFiltro . ') OR Ticket.unidade_id = ' . $unidadeIdFiltro . ')';
             }
             //salva as condições na session
             $this->Session->write('Filtros.Tickets', $arrayConditions);
