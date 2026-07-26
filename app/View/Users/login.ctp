@@ -30,6 +30,11 @@ echo $this->Form->input(
     )
 );
 
+if (Configure::read('Recaptcha.site_key')) {
+    echo $this->Html->script('https://www.google.com/recaptcha/api.js', array('async' => true, 'defer' => true));
+    echo '<div class="g-recaptcha mb-2" data-sitekey="' . h(Configure::read('Recaptcha.site_key')) . '"></div>';
+}
+
 echo $this->Form->input(
     'Entrar',
     array(

@@ -2,7 +2,7 @@
 class UsersController extends AppController
 {
 
-    public $components = array('Alv', 'RequestHandler');
+    public $components = array('Alv', 'RequestHandler', 'Recaptcha');
 
     public function beforeFilter()
     {
@@ -17,6 +17,10 @@ class UsersController extends AppController
         $this->layout = 'site';
 
         if ($this->request->is('post')) {
+            if (!$this->Recaptcha->verify($this->request->data('g-recaptcha-response'), $this->request->clientIp())) {
+                $this->Flash->error('Não foi possível validar o captcha. Tente novamente.');
+                return;
+            }
             $this->User->create();
             //tratar os dados
             $roleId = 3; //Comprador
@@ -69,6 +73,10 @@ class UsersController extends AppController
 
         //se foi enviado o form
         if (!empty($this->request->data)) {
+            if (!$this->Recaptcha->verify($this->request->data('g-recaptcha-response'), $this->request->clientIp())) {
+                $this->Flash->error('Não foi possível validar o captcha. Tente novamente.');
+                return;
+            }
             if ($this->Auth->login()) {
                 if ($this->Session->check('Cart.url_referer')) {
                     $urlReferer = $this->Session->read('Cart.url_referer');
@@ -378,6 +386,10 @@ class UsersController extends AppController
 
         //se foi enviada a solicitação de login:
         if ($this->request->data) {
+            if (!$this->Recaptcha->verify($this->request->data('g-recaptcha-response'), $this->request->clientIp())) {
+                $this->Flash->error('Não foi possível validar o captcha. Tente novamente.');
+                return;
+            }
             //procura o email
             $User = $this->User->find(
                 'first',
