@@ -2,6 +2,8 @@
 $this->start('scriptBottom');
 ?>
 <script>
-    toastr.success("<?php echo $message; ?>");
+    document.addEventListener('DOMContentLoaded', function () {
+        toastr.success("<?php echo $message; ?>");
+    });
 </script>
 <?php $this->end(); ?>

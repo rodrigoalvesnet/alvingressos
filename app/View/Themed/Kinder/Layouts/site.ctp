@@ -90,16 +90,18 @@
         </div>
     </div>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" defer></script>
     <script>
-        toastr.options = {
-            "closeButton": true,
-            "progressBar": true,
-            "positionClass": "toast-top-right",
-            "timeOut": "4000"
-        };
+        document.addEventListener('DOMContentLoaded', function () {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "4000"
+            };
+        });
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js" defer></script>
     <?php
     echo $this->Html->script(array(
         'popper.min',
@@ -122,7 +124,7 @@
         'admin/jquery.maskedinput.min',
         '/vendors/whatsapp-floatbox/js/wafloatbox-0.2.js',
         '/theme/Kinder/js/site.js'
-    ));
+    ), array('defer' => true));
 
 
     echo $this->fetch('scriptBottom');
