@@ -377,6 +377,7 @@
                                     <th scope="col">Tipo</th>
                                     <th scope="col">Valor</th>
                                     <th scope="col">Descrição</th>
+                                    <th scope="col">Validade</th>
                                     <th scope="col">Por usuário</th>
                                     <th scope="col">Ativo</th>
                                     <th scope="col" class="sorter-false">Ações</th>
@@ -397,6 +398,21 @@
                                             ?>
                                         </td>
                                         <td><?php echo $coupon['description']; ?></td>
+                                        <td>
+                                            <?php
+                                            $inicio = !empty($coupon['start_date']) ? date('d/m/Y', strtotime($coupon['start_date'])) : null;
+                                            $fim = !empty($coupon['end_date']) ? date('d/m/Y', strtotime($coupon['end_date'])) : null;
+                                            if ($inicio && $fim) {
+                                                echo $inicio . ' a ' . $fim;
+                                            } elseif ($fim) {
+                                                echo 'Até ' . $fim;
+                                            } elseif ($inicio) {
+                                                echo 'A partir de ' . $inicio;
+                                            } else {
+                                                echo 'Sem limite';
+                                            }
+                                            ?>
+                                        </td>
                                         <td><?php echo $coupon['unique_by_user'] ? 'Sim' : 'Não'; ?></td>
                                         <td><?php echo $coupon['active'] ? 'Sim' : 'Não' ?></td>
                                         <td>

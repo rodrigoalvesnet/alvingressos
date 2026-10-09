@@ -168,6 +168,10 @@ class CheckoutController extends AppController
 
         //Cria o pedido
         $createNewOrder = $this->Order->newOrder($dados, true);
+        if (!$createNewOrder['success']) {
+            $result['message'] = !empty($createNewOrder['message']) ? $createNewOrder['message'] : 'Não foi possível gerar o pedido.';
+            return $result;
+        }
         //Gerar Descrição para o Asaas
         $description = $this->_gerarAsaasDescription($createNewOrder['Order']['id'], $this->data);
 
@@ -206,8 +210,7 @@ class CheckoutController extends AppController
                 $result['message'] = $invoiceCreated['message'];
             }
         } else {
-            $this->Flash->error($dados['message']);
-            $result['message'] = 'Não foi possível gerar o pedido.';
+            $result['message'] = !empty($createNewOrder['message']) ? $createNewOrder['message'] : 'Não foi possível gerar o pedido.';
         }
         return $result;
     }
@@ -269,53 +272,19 @@ class CheckoutController extends AppController
         if (!empty($this->data['Order']['coupon'])) {
             $code = trim($this->data['Order']['coupon']);
             $this->loadModel('Coupon');
-            //Procura pelo cupom
-            $coupon = $this->Coupon->find(
-                'first',
-                array(
-                    'conditions' => array(
-                        'Coupon.code' => $code,
-                        'Coupon.event_id' => $this->data['Order']['event_id']
-                    ),
-                    'fields' => array(
-                        'id',
-                        'code'
-                    ),
-                    'recursive' => -1
-                )
+            $validacao = $this->Coupon->validateUse(
+                array('Coupon.code' => $code),
+                $this->data['Order']['event_id'],
+                AuthComponent::user('id'),
+                AuthComponent::user('cpf')
             );
-            //Se NÃO encontoru o cupom
-            if (empty($coupon)) {
+            if (!$validacao['success']) {
                 $arrayResult['success'] = false;
-                $arrayResult['message'] = 'Cupom não localizado.';
+                $arrayResult['message'] = $validacao['message'];
             } else {
-                //Se foi preenchido o CPF
-                if (!empty($this->data['Order']['cpf'])) {
-                    $cpf = $this->data['Order']['cpf'];
-                } else {
-                    $cpf = AuthComponent::user('cpf');
-                }
-                $this->loadModel('Order');
-                //Verifica se já foi usado por este usuário
-                $orderUsed = $this->Order->find(
-                    'first',
-                    array(
-                        'conditions' => array(
-                            'coupon_id' => $coupon['Coupon']['id'],
-                            'cpf' => $cpf,
-                            'status !=' => 'canceled'
-                        ),
-                        'recursive' => -1
-                    )
-                );
-                //Se já foi usado
-                if (!empty($orderUsed)) {
-                    $arrayResult['success'] = false;
-                    $arrayResult['message'] = 'O cupom informado já foi utilizado para o CPF informado.';
-                } else {
-                    $arrayResult['coupon_id'] = $coupon['Coupon']['id'];
-                    $arrayResult['message'] = 'Cupom <strong>' . $coupon['Coupon']['code'] . '</strong> aplicado com sucesso!';
-                }
+                $coupon = $validacao['coupon'];
+                $arrayResult['coupon_id'] = $coupon['Coupon']['id'];
+                $arrayResult['message'] = 'Cupom <strong>' . $coupon['Coupon']['code'] . '</strong> aplicado com sucesso!';
             }
         }
         $this->set('result', $arrayResult);

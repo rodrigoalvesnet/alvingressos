@@ -71,6 +71,23 @@ class Order extends AppModel
         $orderSave['lot_id']   = isset($dados['Order']['lot_id']) && $dados['Order']['lot_id'] ? (int)$dados['Order']['lot_id'] : null;
         $orderSave['coupon_id'] = isset($dados['Order']['coupon_id']) ? $dados['Order']['coupon_id'] : null;
 
+        //Revalida o cupom no servidor: o coupon_id vem do formulário e pode ter sido
+        //aplicado em outra aba/antes de outra compra ser concluída
+        if (!empty($orderSave['coupon_id'])) {
+            App::uses('Coupon', 'Model');
+            $Coupon = new Coupon();
+            $validacao = $Coupon->validateUse(
+                array('Coupon.id' => $orderSave['coupon_id']),
+                $dados['Order']['event_id'],
+                $orderSave['user_id'],
+                isset($orderSave['cpf']) ? $orderSave['cpf'] : (isset($dados['Order']['cpf']) ? $dados['Order']['cpf'] : null)
+            );
+            if (!$validacao['success']) {
+                $result['message'] = strip_tags($validacao['message']);
+                return $result;
+            }
+        }
+
         //Se foi informado o aniversário nos campos adicionais
         if (isset($orderSave['birthday']) && !empty($orderSave['birthday'])) {
             // $orderSave['birthday'] = $this->Alv->tratarData($dados['birthday']);

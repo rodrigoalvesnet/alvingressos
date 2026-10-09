@@ -672,52 +672,25 @@ class OrdersController extends AppController
         if (!empty($this->data['Order']['coupon'])) {
             $code = trim($this->data['Order']['coupon']);
             $this->loadModel('Coupon');
-            //Procura pelo cupom
-            $coupon = $this->Coupon->find(
-                'first',
-                array(
-                    'conditions' => array(
-                        'Coupon.code' => $code,
-                        'Coupon.event_id' => $this->data['Order']['event_id']
-                    ),
-                    'fields' => array(
-                        'id',
-                        'code'
-                    ),
-                    'recursive' => -1
-                )
-            );
-            //Se NÃO encontoru o cupom
-            if (empty($coupon)) {
-                $arrayResult['success'] = false;
-                $arrayResult['message'] = 'Cupom não localizado.';
+            //Se foi preenchido o CPF (compra para outra pessoa)
+            if (!empty($this->data['Order']['cpf'])) {
+                $cpf = $this->data['Order']['cpf'];
             } else {
-                //Se foi preenchido o CPF
-                if (!empty($this->data['Order']['cpf'])) {
-                    $cpf = $this->data['Order']['cpf'];
-                } else {
-                    $cpf = AuthComponent::user('cpf');
-                }
-                //Verifica se já foi usado por este usuário
-                $orderUsed = $this->Order->find(
-                    'first',
-                    array(
-                        'conditions' => array(
-                            'coupon_id' => $coupon['Coupon']['id'],
-                            'cpf' => $cpf,
-                            'status !=' => 'canceled'
-                        ),
-                        'recursive' => -1
-                    )
-                );
-                //Se já foi usado
-                if (!empty($orderUsed)) {
-                    $arrayResult['success'] = false;
-                    $arrayResult['message'] = 'O cupom informado já foi utilizado para o CPF informado.';
-                } else {
-                    $arrayResult['coupon_id'] = $coupon['Coupon']['id'];
-                    $arrayResult['message'] = 'Cupom <strong>' . $coupon['Coupon']['code'] . '</strong> aplicado com sucesso!';
-                }
+                $cpf = AuthComponent::user('cpf');
+            }
+            $validacao = $this->Coupon->validateUse(
+                array('Coupon.code' => $code),
+                $this->data['Order']['event_id'],
+                AuthComponent::user('id'),
+                $cpf
+            );
+            if (!$validacao['success']) {
+                $arrayResult['success'] = false;
+                $arrayResult['message'] = $validacao['message'];
+            } else {
+                $coupon = $validacao['coupon'];
+                $arrayResult['coupon_id'] = $coupon['Coupon']['id'];
+                $arrayResult['message'] = 'Cupom <strong>' . $coupon['Coupon']['code'] . '</strong> aplicado com sucesso!';
             }
         }
         $this->set('result', $arrayResult);

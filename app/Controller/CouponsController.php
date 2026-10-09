@@ -18,6 +18,7 @@ class CouponsController extends AppController
             //Vincular o Evento
             $this->request->data['Coupon']['event_id'] = $eventId;
             $this->request->data['Coupon']['value'] = $this->Alv->tratarValor($this->request->data['Coupon']['value']);
+            $this->_tratarDatas();
             //Se salvar corretamente
             if ($this->Coupon->save($this->request->data)) {
                 $this->Flash->success('Registro salvo com sucesso');
@@ -54,6 +55,7 @@ class CouponsController extends AppController
         }
         if ($this->request->is('post') || $this->request->is('put')) {
             $this->request->data['Coupon']['value'] = $this->Alv->tratarValor($this->request->data['Coupon']['value']);
+            $this->_tratarDatas();
             if ($this->Coupon->save($this->request->data)) {
                 $this->Flash->success('Registro salvo com sucesso');
                 $this->redirect('/admin/events/edit/' . $eventId . '#coupons');
@@ -63,6 +65,11 @@ class CouponsController extends AppController
         } else {
             $this->request->data = $this->Coupon->findById($id);
             $this->request->data['Coupon']['value'] = $this->Alv->tratarValor($this->request->data['Coupon']['value'], 'pt');
+            foreach (array('start_date', 'end_date') as $campo) {
+                if (!empty($this->request->data['Coupon'][$campo])) {
+                    $this->request->data['Coupon'][$campo] = $this->Alv->tratarData($this->request->data['Coupon'][$campo], 'pt');
+                }
+            }
         }
         //Pega o titulo do evento
         $this->loadModel('Event');
@@ -82,6 +89,20 @@ class CouponsController extends AppController
         ));
         $this->set('title_for_layout', 'Editar Cupom');
         $this->render('admin_add');
+    }
+
+    /**
+     * Converte as datas de validade (dd/mm/aaaa) para o banco; vazio vira NULL (sem limite)
+     */
+    function _tratarDatas()
+    {
+        foreach (array('start_date', 'end_date') as $campo) {
+            if (empty($this->request->data['Coupon'][$campo])) {
+                $this->request->data['Coupon'][$campo] = null;
+            } else {
+                $this->request->data['Coupon'][$campo] = $this->Alv->tratarData($this->request->data['Coupon'][$campo]);
+            }
+        }
     }
 
     function admin_delete($id)

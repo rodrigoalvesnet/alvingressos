@@ -79,6 +79,40 @@
             </div>
         </div>
         <div class="row">
+            <div class="col-lg-3">
+                <?php
+                echo $this->Form->input(
+                    'start_date',
+                    array(
+                        'type' => 'text',
+                        'label' => 'Válido a partir de',
+                        'class' => 'form-control datepicker',
+                        'div' => 'form-group',
+                    )
+                );
+                ?>
+            </div>
+            <div class="col-lg-3">
+                <?php
+                echo $this->Form->input(
+                    'end_date',
+                    array(
+                        'type' => 'text',
+                        'label' => 'Válido até',
+                        'class' => 'form-control datepicker',
+                        'div' => 'form-group',
+                    )
+                );
+                ?>
+            </div>
+            <div class="col-lg-6">
+                <small class="form-text text-muted d-block mt-lg-4">
+                    Deixe em branco para não limitar. Informando só "Válido até", vale como data de validade;
+                    informando as duas datas, o cupom só pode ser usado dentro do intervalo.
+                </small>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-lg-12">
                 <?php
                 echo $this->Form->input(
